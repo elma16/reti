@@ -1,6 +1,6 @@
 ;; King and pawn vs. King
 
-cql(input hhdbvi.pgn)
+cql()
 
 (P == 1 or p == 1)
 

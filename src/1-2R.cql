@@ -1,6 +1,6 @@
 ;; rook vs king
 
-cql(input hhdbvi.pgn)
+cql()
 
 (R==1 and r==0) or (r==1 and R==0)
 

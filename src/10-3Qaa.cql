@@ -1,6 +1,6 @@
 ;; Queen vs. two minor pieces
 
-cql(input hhdbvi.pgn)
+cql()
 
 (Q == 1 and B == 0 and N == 0 and q == 0 and b == 2 and n == 0) or
 (Q == 1 and B == 0 and N == 0 and q == 0 and b == 1 and n == 1) or

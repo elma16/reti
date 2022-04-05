@@ -1,6 +1,6 @@
 ;; Rook and pawns vs rook and pawns
 
-cql(input hhdbvi.pgn)
+cql()
 
 R == 1
 r == 1

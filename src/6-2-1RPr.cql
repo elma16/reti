@@ -1,6 +1,6 @@
 ;; rook and pawn vs rook
 
-cql(input hhdbvi.pgn)
+cql()
 
 
 (R==1 and P==1 and r==1 and p==0) or 

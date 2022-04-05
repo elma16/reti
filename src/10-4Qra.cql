@@ -1,6 +1,6 @@
 ;; Queen vs. Rook and minor piece
 
-cql(input hhdbvi.pgn)
+cql()
 
 (Q == 1 and R == 0 and B == 0 and N == 0 and q == 0 and r == 1 and b == 1 and n == 0) or
 (Q == 1 and R == 0 and B == 0 and N == 0 and q == 0 and r == 1 and b == 0 and n == 1) or

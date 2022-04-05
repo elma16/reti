@@ -1,6 +1,6 @@
 ;; Queen vs. Queen (and pawns)
 
-cql(input hhdbvi.pgn)
+cql()
 
 Q == 1
 q == 1

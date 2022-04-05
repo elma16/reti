@@ -1,6 +1,6 @@
 ;; Knight vs. Knight with pawns
 
-cql(input hhdbvi.pgn)
+cql()
 
 N == 1
 p >= 1

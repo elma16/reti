@@ -1,6 +1,6 @@
 ;; Rook and knight vs rook.
 
-cql(input hhdbvi.pgn)
+cql()
 
 (R == 1 and N == 1 and r == 1 and n == 0) or 
 (R == 1 and N == 0 and r == 1 and n == 1)
