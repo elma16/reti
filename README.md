@@ -22,5 +22,5 @@ you will also need cql.
 ## Usage 
 
 ``` shell
-source FCE-table.sh path/to/cql/executable path/to/database.pgn path/to/output/folder
+source FCE-table.sh path/to/cql/executable path/to/database.pgn path/to/output/folder halfmoves
 ```
