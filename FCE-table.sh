@@ -1,31 +1,31 @@
 #!/usr/bin/env bash
 
-$1 -i $2 src/1-4BN.cql
-$1 -i $2 src/2-0Pp.cql
-$1 -i $2 src/2-1KPk.cql
-$1 -i $2 src/3-1Np.cql
-$1 -i $2 src/3-2NN.cql
-$1 -i $2 src/4-1Bp.cql
-$1 -i $2 src/4-2scBB.cql
-$1 -i $2 src/4-3ocBB.cql
-$1 -i $2 src/5-0BvsN.cql
-$1 -i $2 src/6-1-0RP.cql
-$1 -i $2 src/6-2-1RPr.cql
-$1 -i $2 src/6-2-2RPPr.cql
-$1 -i $2 src/6-2Rr.cql
-$1 -i $2 src/6-3RRrr.cql
-$1 -i $2 src/7-1RN.cql
-$1 -i $2 src/7-2RB.cql
-$1 -i $2 src/8-1RNr.cql
-$1 -i $2 src/8-2RBr.cql
-$1 -i $2 src/8-3RAra.cql
-$1 -i $2 src/9-1Qp.cql
-$1 -i $2 src/9-2Qq.cql
-$1 -i $2 src/9-3QPq.cql
-$1 -i $2 src/10-1Qa.cql
-$1 -i $2 src/10-2Qr.cql
-$1 -i $2 src/10-3Qaa.cql
-$1 -i $2 src/10-4Qra.cql
-$1 -i $2 src/10-5Qrr.cql
-$1 -i $2 src/10-6Qaaa.cql
-$1 -i $2 src/10-7QAq.cql
+$1 -i $2 -o output/1-4BN.pgn src/1-4BN.cql
+$1 -i $2 -o output/2-0Pp.pgn src/2-0Pp.cql
+$1 -i $2 -o output/2-1KPk.pgn src/2-1KPk.cql
+$1 -i $2 -o output/3-1Np.pgn src/3-1Np.cql
+$1 -i $2 -o output/3-2NN.pgn src/3-2NN.cql
+$1 -i $2 -o output/4-1Bp.pgn src/4-1Bp.cql
+$1 -i $2 -o output/4-2scBB.pgn src/4-2scBB.cql
+$1 -i $2 -o output/4-3ocBB.pgn src/4-3ocBB.cql
+$1 -i $2 -o output/5-0BvsN.pgn src/5-0BvsN.cql
+$1 -i $2 -o output/6-1-0Rp.pgn src/6-1-0RP.cql
+$1 -i $2 -o output/6-2-1RPr.pgn src/6-2-1RPr.cql
+$1 -i $2 -o output/6-2-2RPPr.pgn src/6-2-2RPPr.cql
+$1 -i $2 -o output/6-2Rr.pgn src/6-2Rr.cql
+$1 -i $2 -o output/6-3RRrr.pgn src/6-3RRrr.cql
+$1 -i $2 -o output/7-1RN.pgn src/7-1RN.cql
+$1 -i $2 -o output/7-2RB.pgn src/7-2RB.cql
+$1 -i $2 -o output/8-1RNr.pgn src/8-1RNr.cql
+$1 -i $2 -o output/8-2RBr.pgn src/8-2RBr.cql
+$1 -i $2 -o output/8-3RAra.pgn src/8-3RAra.cql
+$1 -i $2 -o output/9-1Qp.pgn src/9-1Qp.cql
+$1 -i $2 -o output/9-2Qq.pgn src/9-2Qq.cql
+$1 -i $2 -o output/9-3QPq.pgn src/9-3QPq.cql
+$1 -i $2 -o output/10-1Qa.pgn src/10-1Qa.cql
+$1 -i $2 -o output/10-2Qr.pgn src/10-2Qr.cql
+$1 -i $2 -o output/10-3Qaa.pgn src/10-3Qaa.cql
+$1 -i $2 -o output/10-4Qra.pgn src/10-4Qra.cql
+$1 -i $2 -o output/10-5Qrr.pgn src/10-5Qrr.cql
+$1 -i $2 -o output/10-6Qaaa.pgn src/10-6Qaaa.cql
+$1 -i $2 -o output/10-7QAq.pgn src/10-7QAq.cql
