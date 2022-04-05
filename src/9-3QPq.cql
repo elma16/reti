@@ -1,6 +1,6 @@
 ;; Queen and pawn vs. Queen
 
-cql(input hhdbvi.pgn)
+cql()
 
 (Q == 1 and P == 1 and q == 1 and p == 0) or 
 (Q == 1 and P == 0 and q == 1 and p == 1)

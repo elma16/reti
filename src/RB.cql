@@ -1,6 +1,6 @@
 ;; Rook vs Bishop Endgame (with and without pawns)
 
-cql(input hhdbvi.pgn)
+cql()
 
 (R==1 and b==1) or (r==1 and B==1)
 

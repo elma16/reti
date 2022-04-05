@@ -1,6 +1,6 @@
 ;; Two rooks vs. Two rooks (and pawns)
 
-cql(input hhdbvi.pgn)
+cql()
 
 R == 2
 r == 2

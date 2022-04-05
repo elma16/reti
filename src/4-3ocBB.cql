@@ -1,6 +1,6 @@
 ;; Opposite colour bishops
 
-cql(input hhdbvi.pgn)
+cql()
 
 ;; white light squared bishop and black dark squared bishop
 

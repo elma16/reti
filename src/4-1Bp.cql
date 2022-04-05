@@ -1,6 +1,6 @@
 ;; Bishop vs. Pawns
 
-cql(input hhdbvi.pgn)
+cql()
 
 (B == 1 and P == 0 and b == 0 and p >= 1) or 
 (B == 0 and P >= 1 and b == 1 and p == 0)

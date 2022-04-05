@@ -1,6 +1,6 @@
 ;; queen vs. King 
 
-cql(input hhdbvi.pgn)
+cql()
 
 (Q==1 and q == 0) or (q==1 and Q == 0)
 

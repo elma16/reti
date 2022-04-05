@@ -1,6 +1,6 @@
 ;; pure pawn endings
 
-cql(input hhdbvi.pgn)
+cql()
 
 P >= 0
 p >= 0

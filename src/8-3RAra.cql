@@ -1,6 +1,6 @@
 ;; Rook and minor piece vs. Rook and minor piece
 
-cql(input hhdbvi.pgn)
+cql()
 
 (R == 1 and B == 1 and N == 0 and r == 1 and b == 1 and n == 0) or
 (R == 1 and B == 1 and N == 0 and r == 1 and b == 0 and n == 1) or

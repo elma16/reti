@@ -1,6 +1,6 @@
 ;; two bishops vs. King
 
-cql(input hhdbvi.pgn)
+cql()
 
 (B==2 and b==0) or (b==2 and B==0)
 

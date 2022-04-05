@@ -1,6 +1,6 @@
 ;; Two knights vs. one pawn
 
-cql(input hhdbvi.pgn)
+cql()
 
 (N == 2 and P == 0 and n == 0 and p == 1) or 
 (N == 0 and P == 1 and n == 2 and p == 0)
