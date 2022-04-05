@@ -9,9 +9,18 @@ In Müller and Lamprecht's celebrated work "Fundamental Chess Endgames", [they s
 
 This analysis is not limited to just some big database, this can be done on _any_ pgn file you have available to you!
 
+## Installation
+
+To install, simply clone the repository
+
+``` shell
+gh repo clone elma16/reti
+```
+
+you will also need cql.
 
 ## Usage 
 
 ``` shell
-source FCE-table.sh path/to/cql/executable path/to/database.pgn 
+source FCE-table.sh path/to/cql/executable path/to/database.pgn path/to/output/folder
 ```
