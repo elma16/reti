@@ -11,8 +11,5 @@ cql()
 (q == 1 and n == 0 and b == 0 and Q == 0 and B == 2 and N == 1) or 
 (q == 1 and n == 0 and b == 0 and Q == 0 and B == 3 and N == 0)
 
-p >= 0
-P >= 0
-
 R == 0
 r == 0

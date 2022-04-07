@@ -2,8 +2,9 @@
 
 cql()
 
-P >= 0
-p >= 0
+(P >= 1 and p == 0) or
+(P == 0 and p >= 1) or
+(P >= 1 and p >= 1)
 
 Q == 0
 q == 0
