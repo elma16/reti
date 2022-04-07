@@ -10,6 +10,8 @@ output_dir="${3}"
 
 rm -rf "${output_dir}"
 mkdir -p "${output_dir}"
+rm -rf examples
+mkdir examples
 
 for pgnpath in "${db_dir}"/*.pgn; do
     total_games=$(grep -o 'Result' "$pgnpath" | wc -l)
@@ -23,13 +25,23 @@ for pgnpath in "${db_dir}"/*.pgn; do
         "${cql_dir}" -i "$pgnpath" -o "${output_dir}"/"$pgnname_noext"/"$filename_noext".pgn \
             -matchcount 2 100  "$filepath"
         grep -o 'Result' "${output_dir}"/"$pgnname_noext"/"$filename_noext".pgn |
-            wc -l >> "${output_dir}"/"$pgnname_noext"/number_of_games.txt
+            wc -l >> "${output_dir}"/"$pgnname_noext"/number_of_games.csv
     done
+
 # calculate statistics
 awk -v c=${total_games} '{for (i = 1; i <= NF; ++i) $i /= (c / 100); print }' OFS='\t' \
-    ${output_dir}/"$pgnname_noext"/number_of_games.txt > ${output_dir}/"$pgnname_noext"/stats.txt
+    ${output_dir}/"$pgnname_noext"/number_of_games.csv > ${output_dir}/"$pgnname_noext"/stats1.csv
 
-# append text as a column to examples/FCE.csv
-awk -F "," 'BEGIN { OFS = "," } {$3= ${output_dir}/"$pgnname_noext"/stats.txt ; print}' examples/FCE.csv > examples/FCE-new.csv
+#add pgn name to top of file
+cat <(echo "$pgnname_noext") "${output_dir}"/"$pgnname_noext"/stats1.csv >>  "${output_dir}"/"$pgnname_noext"/stats.csv
+echo "$total_games" >> "${output_dir}"/"$pgnname_noext"/stats.csv
 done
 
+# concatenate csv files vertically
+i=1
+for stat_file in $(find . -name 'stats.csv'); do
+    i=$((i+1))
+    cp ${stat_file} examples/stats_"$i".csv
+done
+
+paste -d, examples/*.csv > examples/total.csv
