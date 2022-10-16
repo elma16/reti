@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-
 '''
 Overlay all the images representing games from a given pgn.
 

@@ -9,6 +9,7 @@ import sys
 import numpy as np
 from scipy.interpolate import interp1d
 from datetime import datetime
+
 '''
 Check to make sure this is a collection of games by a single player.
 '''
