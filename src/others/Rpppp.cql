@@ -1,13 +1,15 @@
-;; silly thought 
 
 cql()
 
-(R == 1 and P == 0 and r == 0 and p == 4 and connectedpawns == 4) or 
-(R == 0 and P == 4 and r == 1 and p == 0 and connectedpawns == 4)
+(R == 1 and p[a-d2-7] == 4) or 
+(R == 1 and p[b-e2-7] == 4) or 
+(R == 1 and p[c-f2-7] == 4) or 
+(R == 1 and p[d-g2-7] == 4) or 
+(R == 1 and p[e-h2-7] == 4) or 
+(r == 1 and P[a-d2-7] == 4) or 
+(r == 1 and P[b-e2-7] == 4) or 
+(r == 1 and P[c-f2-7] == 4) or 
+(r == 1 and P[d-g2-7] == 4) or 
+(r == 1 and P[e-h2-7] == 4) 
 
-B == 0
-b == 0
-N == 0
-n == 0
-Q == 0
-q == 0
+[Aa] == 7
