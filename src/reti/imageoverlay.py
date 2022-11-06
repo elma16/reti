@@ -2,7 +2,6 @@
 
 '''
 Overlay all the images representing games from a given pgn.
-
 '''
 import chess.pgn
 import chess.svg
