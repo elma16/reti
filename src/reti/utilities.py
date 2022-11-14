@@ -1,7 +1,15 @@
 #!/usr/bin/env python3
 
 import re
+import subprocess
 import glob
+import requests
+import chess
+import webbrowser
+import os
+import sys
+import chess
+import chess.pgn
 
 def game_length_array(content):
   game_array = re.findall(r'\d{1,3}\.\s',content)
@@ -36,7 +44,6 @@ def merge_pgns(path):
         for f in read_files:
             with open(f, "rb") as infile:
                 outfile.write(infile.read())
-    return 0
 
 def fen2tex(tex_file_name, img_dir):
     # write tex file
@@ -69,11 +76,41 @@ def fen2tex(tex_file_name, img_dir):
     elif os.name == 'posix':
         subprocess.call(('xdg-open', 'test.pdf'))
 
-    def fen2png(fen,img):
-        '''
-        Given a fen string, use the website fen2png to output a png of that fen string.
-        '''
-        fen = fen.replace(' ', '%20')
-        img_url = 'https://fen2png.com/api/?fen={}&raw=true'.format(fen)
-        with open(img, 'wb') as f:
-            f.write(requests.get(img_url).content)
+def fen2png(fen,img):
+    '''
+    Given a fen string, use the website fen2png to output a png of that fen string.
+    '''
+    fen = fen.replace(' ', '%20')
+    img_url = 'https://fen2png.com/api/?fen={}&raw=true'.format(fen)
+    with open(img, 'wb') as f:
+        f.write(requests.get(img_url).content)
+
+def print_relevant_positions(path):
+    '''
+    Given a path to a pgn file already processed by CQL6, print the relevant positions in the pgn file.
+    '''
+    fen_list = []
+    white_player = []
+    black_player = []
+    pgn = open(path, encoding='utf-8', errors='replace')
+    with open(path, encoding="utf-8",errors='replace') as file:
+        content = file.read()
+    num_games = game_length_array(content)[0]
+    print('number of games:',num_games)
+    for igame in range(num_games):
+        game = chess.pgn.read_game(pgn)
+        board = game.board()
+        for node in game.mainline():
+            move = node.move
+            comment = node.comment 
+            board.push(move)
+            if comment == 'CQL':
+                fen_list.append(board.fen())
+                white_player.append(game.headers['White'])
+                black_player.append(game.headers['Black'])
+                break
+        else:
+            continue
+    return fen_list, white_player, black_player
+
+
