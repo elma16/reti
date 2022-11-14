@@ -3,3 +3,5 @@ fortresses.cql
 output
 src/reti.egg-info
 src/build
+data
+build 
