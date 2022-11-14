@@ -1,3 +1,5 @@
 *.DS_Store
 fortresses.cql
 output
+src/reti.egg-info
+src/build

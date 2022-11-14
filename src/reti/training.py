@@ -10,23 +10,17 @@ class EndgameTraining:
         '''
         Generate a training game by randomly making a position
         '''
-        board = chess.Board()
-        pieces = self.white + self.black
+        pieces = self.white.upper() + self.black.lower()
         pieces = [chess.Piece.from_symbol(x) for x in pieces]
-        print(pieces)
         isvalid = False
         while isvalid == False:
+            board = chess.Board(fen=None)
             squares = np.random.choice(64, len(pieces), replace=False)
             for idx in range(len(pieces)):
                 board.set_piece_at(squares[idx], pieces[idx])
             if board.is_valid():
                 isvalid = True
-                return board
-
-        # fen of the board
-        fen = board.fen()
-        print(fen)
-        webbrowser.open('https://lichess.org/editor/'+fen.replace(' ','_'))
+        webbrowser.open('https://lichess.org/editor/'+board.fen().replace(' ','_'))
     def game_generate(self):
         '''
         Generate a training game by cql
@@ -37,9 +31,3 @@ class EndgameTraining:
         Generate a training game by randomly making a position from logical rules
         '''
         pass
-    def tablebase_generate(self):
-        '''
-        Generate a training game by randomly making a position from tablebase
-        '''
-        pass
-
