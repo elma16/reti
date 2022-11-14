@@ -1,11 +1,16 @@
 import webbrowser
 import chess
 import numpy as np
+import requests
+
 
 class EndgameTraining:
-    def __init__(self, white, black):
+    def __init__(self, white, black, training_side='white',required_result='win'):
         self.white = white
         self.black = black
+        self.training_side = training_side
+        self.required_result = required_result
+
     def random_generate(self):
         '''
         Generate a training game by randomly making a position
@@ -19,7 +24,9 @@ class EndgameTraining:
             for idx in range(len(pieces)):
                 board.set_piece_at(squares[idx], pieces[idx])
             if board.is_valid():
-                isvalid = True
+                r = requests.get('http://tablebase.lichess.ovh/standard?fen={}'.format(board.fen()))
+                if r.json()['category'] == self.required_result:
+                    isvalid = True
         webbrowser.open('https://lichess.org/editor/'+board.fen().replace(' ','_'))
     def game_generate(self):
         '''
@@ -31,3 +38,4 @@ class EndgameTraining:
         Generate a training game by randomly making a position from logical rules
         '''
         pass
+
