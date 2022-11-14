@@ -23,10 +23,6 @@ cql_bin_dir = args.cql_bin_dir
 db_dir = args.db_dir
 output_dir = args.output_dir
 
-print(cql_bin_dir)
-print(db_dir)
-print(output_dir)
-
 if os.path.exists(output_dir) and os.path.isdir(output_dir):
     shutil.rmtree(output_dir)
 

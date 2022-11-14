@@ -1,3 +1,4 @@
+;; just 4 pawns (not necessarily connected, but hopefully on different files) vs a rook
 
 cql()
 
