@@ -30,11 +30,7 @@ if os.path.exists(output_dir) and os.path.isdir(output_dir):
 
 os.mkdir(output_dir)
 
-#content = load_pgn(db_dir)
-#games = game_length_array(content)
-#num_games = len(games)
-
-def run_cql_scripts(cql_scripts_dir,db,count):
+def run_cql_scripts(cql_scripts_dir,db,count,matchlow):
     subgame_len = []
     all_scripts = []
     for file in os.listdir(cql_scripts_dir):
@@ -42,10 +38,9 @@ def run_cql_scripts(cql_scripts_dir,db,count):
         file_noext = os.path.splitext(file)[0]
         dir_noext = os.path.join(output_dir,file_noext)
         pgn_file = dir_noext+str(count)+'.pgn'
-        cql_command = cql_bin_dir+' -i '+db+' -o '+pgn_file+' -matchcount 2 100 '+file_dir
+        cql_command = '{} -i {} - o {} -matchcount {} 100 {}'.format(cql_bin_dir,db,pgn_file,matchlow,file_dir)
         subprocess.run(cql_command,shell=True)
-        #pgn = load_pgn(pgn_file)
-        #subgame_len.append(alt_num_games(pgn))
+
         all_scripts.append(file_noext)
         count += 1
     return subgame_len, all_scripts
@@ -61,11 +56,6 @@ if iterated:
             db = db_dir + '/' + filename
             subgame_len, all_scripts = run_cql_scripts(cql_scripts_dir,db,count)
             count += 1
-        #stats = calculate_statistics(num_games, subgame_len)
-        #df = pd.DataFrame({'ending-type': all_scripts,'len':subgame_len,'stats':stats})
-        #df.to_csv('{}-games.csv'.format(db_dir))
 else:
     subgame_len, all_scripts = run_cql_scripts(cql_scripts_dir,db_dir)
-    #stats = calculate_statistics(num_games, subgame_len)
-    #df = pd.DataFrame({'ending-type': all_scripts,'len':subgame_len,'stats':stats})
-    #df.to_csv('{}-games.csv'.format(db_dir))
+

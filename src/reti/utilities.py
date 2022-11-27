@@ -5,10 +5,8 @@ import subprocess
 import glob
 import requests
 import chess
-import webbrowser
 import os
 import sys
-import chess
 import chess.pgn
 
 def game_length_array(content):
