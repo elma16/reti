@@ -3,34 +3,30 @@
 import re
 import subprocess
 import glob
-import requests
 import chess
-import webbrowser
 import os
 import sys
-import chess
 import chess.pgn
+import io
+from cairosvg import svg2png
+from PIL import Image, ImageDraw
 
 def game_length_array(content):
-  game_array = re.findall(r'\d{1,3}\.\s',content)
-  game_array = [int(x[:-2]) for x in game_array]
-  begin_indices = [i for i, x in enumerate(game_array) if x == 1]
-  end_indices = [x-1 for x in begin_indices]
-  end_indices = end_indices[1::]
-  end_move = [game_array[x] for x in end_indices]
-  if len(game_array) > 0:
-      end_move.append(game_array[-1])
-  else:
-      return []
-  return end_move
+    game_array = [int(x[:-2]) for x in re.findall(r'\d{1,3}\.\s', content)]
+    end_move = []
+    for i in range(len(game_array)):
+        if game_array[i] == 1:
+            end_move.append(game_array[i-1])
+    if len(game_array) > 0:
+        end_move.append(game_array[-1])
+    return end_move
 
 def alt_num_games(content):
     results = re.findall(r'Result\s"',content)
     return len(results)
 
 def load_pgn(path):
-    enc = 'iso-8859-15'
-    with open(path, 'r', encoding=enc) as file:
+    with open(path, 'r', encoding='iso-8859-15') as file:
         content = file.read()
     return content
 
@@ -50,11 +46,18 @@ def fen2tex(tex_file_name, img_dir):
     with open(tex_file_name, 'w') as f:
         f.write(r'''\documentclass{article}
     \usepackage{graphicx}
+    \usepackage[absolute,overlay]{textpos}
+    \setlength{\TPHorizModule}{1mm}
+    \setlength{\TPVertModule}{1mm}
     \date{}
     \title{Elliott's Games!}
     \begin{document}
     \maketitle
     \centering
+    \begin{document}
+    \begin{textblock}{50}(-5,0)
+    \includegraphics[width=25mm]{/Users/elliottmacneil/python/reti/data/animals/stoat1.jpg}
+    \end{textblock}
     Today's set of puzzles are mostly taken from the 2021 Online London Chess League, and a couple from the 2000 Bundesliga in Germany.
     Once again, if you get stuck, ask one of the coaches to come and help! Write your solutions \textbf{in notation}. \n''')
         for img in os.listdir(img_dir):
@@ -62,6 +65,9 @@ def fen2tex(tex_file_name, img_dir):
             img_path = os.path.join(img_dir, img)
             f.write(r'\includegraphics[width=6cm, height=6cm]{'+img_path+'}\n')
         f.write(r'''\end{document}''')
+
+
+
 
     print('tex file written!')
 
@@ -76,14 +82,28 @@ def fen2tex(tex_file_name, img_dir):
     elif os.name == 'posix':
         subprocess.call(('xdg-open', 'test.pdf'))
 
-def fen2png(fen,img):
-    '''
-    Given a fen string, use the website fen2png to output a png of that fen string.
-    '''
-    fen = fen.replace(' ', '%20')
-    img_url = 'https://fen2png.com/api/?fen={}&raw=true'.format(fen)
-    with open(img, 'wb') as f:
-        f.write(requests.get(img_url).content)
+def fen2png(fen_string,img_name):
+    """
+    Convert FEN string to PNG image
+    E.g: rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1
+    """
+    board = chess.Board(fen=fen_string)
+    svg_board = chess.svg.board(board=board,
+                                orientation=board.turn,
+                                colors={'inner border': '#15781B80'}).encode("UTF-8")
+
+    png_image = svg2png(bytestring=svg_board)
+    pil_image = Image.open(io.BytesIO(png_image))
+
+    if board.turn == chess.WHITE:
+        color = (255, 255, 255)
+    else:
+        color = (0, 0, 0)
+    draw = ImageDraw.Draw(pil_image)
+    coords = [(383, 0), (378, 13), (388, 13)]
+    draw.polygon(coords, fill=color, outline=(128, 128, 128))
+
+    pil_image.save(img_name)
 
 def print_relevant_positions(path):
     '''
