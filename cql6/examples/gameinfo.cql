@@ -11,10 +11,10 @@ cql (input hhdbvi.pgn)
 site "Skopje"
 event "Open" 
 initial
-flipcolor
+⬓
   {player  white "Ivanchuk"
-   sort "Opponent ELO" elo black >= 2000
+   sort "Opponent ELO" elo black ≥ 2000
    result 1-0}
-   sort "Year" year >= 1900
+   sort "Year" year ≥ 1900
 
 

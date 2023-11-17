@@ -3,15 +3,15 @@
 */
 
 cql(input hhdbvi.pgn quiet)
-piece Pinner in (pin from [Aa])&~pin
-sort "Chain Length" {
- piece CurrentPinner=Pinner
- Length=1
- comment ("Pin chain: " CurrentPinner)
- loop{
-   piece CurrentPinner= pin through . from CurrentPinner
-   comment("pins " CurrentPinner)
+◭Pinner∊(pin from ◭)∩~pin
+ sort "Chain Length" {
+  ◭CurrentPinner=Pinner
+  Length=1
+  ///"Pin chain: " CurrentPinner
+  loop{
+   ◭CurrentPinner= pin through ◭ from CurrentPinner
+   ///"pins " CurrentPinner
    Length+=1
    }
- Length>=4
+ Length≥4
 }

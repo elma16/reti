@@ -1,6 +1,6 @@
 /*Indian theme:
- White moves a line piece over a critical square
- Then white moves another piece to the critical square without checking, preventing
+ White moves a line piece C over a critical square S
+ Then white moves another piece I to the critical square without checking, preventing
  what would be a stalemate without the interference
  Later white moves the interfering piece away
 */
@@ -16,34 +16,38 @@ function virtualstalemate(rear critical){
  btm
  not check
  not stalemate
- kingfield= .attackedby k
- square all x in kingfield{
-   a & x
-   or A attacks x
-   or xray (rear critical x)
+ kingfield= ▦←♚
+ ∀x∊kingfield{
+   ▲ ∩ x
+   or △→x
+   or rear→critical→x
  }
- not xray(rear critical k)
- square all x in a & ~k{
-   not move legal from x
+ not rear→critical→♚
+ ∀x∊▲ ∩ ~♚{
+   not legal x――
    or
-   xray (rear critical x k)
+   rear→critical→x→♚
    }
- {square x in [_A]&kingfield
-    xray (rear critical x)}
+ {x∊□△∩kingfield
+    rear→critical→x}
  or
-  square x in a
-    xray (rear critical x k)
+  x∊▲
+    rear→critical→x→♚
 }
+/* C is the critical piece, that traverses
+   S,   the critical square.
+   I is the interfering piece, which
+         moves to S, blocking C and preventing stalemate
+*/
 
-piece criticalpiece=move from [RBQ]
-dest=move to .
-square criticalsquare in between(criticalpiece dest)
- piece interferer in [RBNP]&~criticalpiece
-  line-->move from criticalpiece to dest comment ("CQL critical move by " criticalpiece " over " criticalsquare)
-      -->not move from criticalpiece*
-      -->move from interferer to criticalsquare comment ("interfering move to " criticalsquare)
-      -->virtualstalemate(criticalpiece criticalsquare) 
-      -->not move from (interferer | criticalpiece)*
-      -->move from interferer comment ("interferer moves away")
-      -->criticalpiece attacks criticalsquare
+◭C = ♖♗♕――(from)
+S ∊ □←C
+ ◭I ∊ ♖♗♘♙∩~C
+  ⊢◎ I∪C
+   C―― C→S→from ///"critical move over " S
+   I――*
+   I――S ///"interfering move to " S
+      virtualstalemate(C S)
+   I――  ///"interferer moves away"
+      C→S
       

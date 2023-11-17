@@ -9,9 +9,8 @@ wtm
 sort "Fata Morgana theme length"
  echo (source target){
    btm
-   source&target==.
-   L=lca(source target)
-   distance(target L) >=10
+   source∩target==▦
+   ply-source:ply≥10
  }
 
 

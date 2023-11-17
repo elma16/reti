@@ -12,22 +12,17 @@ included).
 *************/
 
 cql(input hhdbvi.pgn quiet)
- Start=currentposition
- piece Front in [QRB]
-  piece Back in [QRB]{
-   comment ("Bristol with Front: " Front " and Back: " Back)
-   line
-     -->  move from Front comment ("Front moves to " Front)
-     -->  not check
-     -->  not move from Front*
-     -->  {xray (Back
-                  between (Start:Front
-                           Front)
-		  Front)
-           move from Back to
-                      anydirection 1 Front
-                 comment ("Thematic Bristol move from " parent:Back)
-           sort "length of Bristol move"
-	         between (Back Front) >= 3
-            } 
+ ◭Front∊♕♖♗ ◭Back∊♕♖♗{
+   FrontStart=Front
+   ///"Bristol with Front: " Front " and Back: " Back
+   ⊢◎Front∪Back
+     Front――  ///"Front moves to " Front
+               not check
+     Back―― +
+            Front→Back→FrontStart→from or
+	    from==FrontStart and Front→Back→from
+            not Front→□→Back
+            ///"Thematic Bristol move from " from
+            sort "length of Bristol move"
+	         between(from Front) ≥ 3
    }

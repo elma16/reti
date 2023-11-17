@@ -1,28 +1,21 @@
-/************
-delayed white clearance:
- (1) White moves a piece, the "vacater" to an empty square.
- (2) Black immediately captures that piece
- (3) Later another white piece, the exploiter, crosses the square
-     that the vacater had vacated by moving. But the exploiter
-     did not move between (1) and (3).
-The output is sorted by the length of the delay between (2) and (3)
-Note that the reported length by sort is actually 4 positions LONGER
-than the delay between (2) and (3), due to the other positions in the
-sequence.
-***********/
+/* Delayed clearance theme.
+A white vacating piece (V) moves to an empty square.
+Later, V is captured. A white exploiting piece E moves
+so as to cross the square V was on originally.
+
+There can be any number of moves by pieces other than V and E
+intervening above.
+
+The result is sorted by the number of moves by pieces other than
+V and E. 
+*/
 
 cql(input hhdbvi.pgn)
-wtm
-Start=currentposition
-piece Vacater in [RBNQ]
- piece Exploiter in [RBQ] attacks Vacater
-   sort "theme length"
-     line 10 1000
-      --> move from Vacater to _
-      --> move from a to Vacater
-      --> not move from Exploiter+
-      --> move from Exploiter
-      --> ray (Start:Exploiter
-               Start:Vacater
-	       Exploiter)
-      
+◭V∊♖♗♘♕    // the Vacating piece
+ ◭E∊♖♗♕→V  // the Exploiting piece
+   sort "theme length" 
+     ⊢◎capture V∪E max pathcountunfocused≥5
+      V――□  ///"vacater moves"
+      ▲×V   ///"vacater captured"
+      E―― to→pathstart:V→from
+            ///"exploiter moves, crossing the original location of V" pathstart:V

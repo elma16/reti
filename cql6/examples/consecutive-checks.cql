@@ -5,5 +5,5 @@ sorted by the number of consecutive checks
 
 cql(input hhdbvi.pgn)
 sort "number of consecutive checks"
-  line 5 100 nestban
-    -->check+
+  ⊢ nestban
+    ―― check{5,}

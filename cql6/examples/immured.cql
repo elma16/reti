@@ -7,11 +7,10 @@ An immured piece is a piece that is not pinned and has no legal moves
 **********/
 
 cql(input hhdbvi.pgn)
-flipcolor
-{wtm not check
- 3<=sort "Number of immured pieces"
-     square Immured in [RNBQ]& ~pin
-      not move legal from Immured
+⬓{wtm not check
+ 3≤sort "Number of immured pieces"
+     I∊♖♘♗♕∩~pin
+      not legal I――
 }    
      
  

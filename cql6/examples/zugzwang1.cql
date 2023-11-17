@@ -1,6 +1,7 @@
 /*********
 This simple example just illustrates how to find a zugzwang: the same position occurs with black to move in the
 mainline, but white to move in the variation, in a win study
+The wtm position must arise from a white try from the mainline
 **********/
 
 cql(input hhdbvi.pgn variations)
@@ -12,8 +13,7 @@ btm      // black to move
   old current position, and we continually reset target
   to each other position in the game*/
 echo(source target){ 
- wtm //white to move
- variation   //in a variation
- source&target==. //source and target have the same board position
+ wtm try
+ source∩target==▦ //source and target have the same board position
  }
  

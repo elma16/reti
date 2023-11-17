@@ -13,21 +13,21 @@ if initial
  persistent NumberGames += 1
 if stalemate 
   persistent NumberStalemates += 1
-if move previous promote [RBNrbn] 
+if ――=♖♗♘
   persistent NumberUnderpromotions += 1
-if move previous promote R 
+if ――=♖ 
   persistent NumberRookPromotions += 1
-if move previous promote B
+if ――=♗
   persistent NumberBishopPromotions += 1
-if move previous promote N
+if ――=♘
   persistent NumberKnightPromotions += 1
-if move previous promote Q
+if ――=♕
   persistent NumberQueenPromotions += 1
-if move previous promote [Aa]
+if ――=△
   persistent NumberPromotions += 1
-if move enpassant
+if ――(enpassant)
    persistent NumberEnpassants += 1
-if move castle
+if ――(castle)
    persistent NumberCastles += 1
 if mate
   persistent NumberMates+= 1

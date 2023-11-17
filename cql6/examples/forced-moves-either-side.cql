@@ -1,11 +1,9 @@
-/********
-most consecutive forced moves by one side
-***********/
+/*********
+Find games with the longest sequence of consecutive forced moves
+*********/
 
 cql(input hhdbvi.pgn)
-sort "most forced moves by either side"
-  line singlecolor 10 100 nestban --> move legal count == 1 *
-
-
-
-  
+sort "most forced moves"
+ ⊢ ◎ if wtm A else a nestban
+   -- {parent:countmoves legal -- == 1}
+      {10,}

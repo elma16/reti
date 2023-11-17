@@ -14,10 +14,10 @@ for most applications
 See the puremate.cql example for more detailed documentation on pure mates*/
 
 cql (input hhdbvi.pgn)
-flipcolor{
- btm mate
- square all x in [_A] attackedby k
-  A attacks x <=1
- square all x in (a&~pin) attackedby k
-  not A attacks x
+ ⬓{
+  btm mate
+  ∀x∊ □△←♚
+   △→x ≤ 1
+  ∀x∊ (▲∩~pin)←♚
+   not △→x
  }

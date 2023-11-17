@@ -14,15 +14,16 @@ cql(input hhdbvi.pgn variations)
   echo (source target){
    variation
    sidetomove==source:sidetomove
-   mismatches= ~(source&target)
+   try
+   mismatches= ~(source∩target)
    #mismatches==2
-   piece Mover=a&mismatches
-   square all x in mismatches
-     x==Mover and source:(x&_)
+   ◭Mover=▲∩mismatches
+   ∀x∊mismatches
+     x==Mover and source:(x∩□)
          or
-     x&_ and source:(x==Mover)
-   comment(Mover " moved from " source:Mover)
-   consecutivemoves (source target)>=15
+     x∩□ and source:(x==Mover)
+   ///Mover " moved from " source:Mover
+   consecutivemoves (source target)≥15
  }
 
  

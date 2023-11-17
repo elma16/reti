@@ -5,9 +5,9 @@ by the number of times visited.
 
 cql(input hhdbvi.pgn)
 initial
-square VisitedSquare in .
+V∊▦
  sort "max number of visits to a single square"
    find 15 1000
-      move to VisitedSquare
+      V――
       
 
