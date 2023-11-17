@@ -8,13 +8,13 @@ To understand this, suppose there is a Q on d4. Then
      right 1 Q
 is
 the square e4, and [
-      [Aa] & right 1 Q
+      [Aa] ∩ right 1 Q
 will match a position with the Q on d4, and a piece on e4.
 
 Then
-     right 1 ([Aa] & right 1 Q)
+     right 1 ([Aa] ∩ right 1 Q)
 will be the square f4, and so
-        q & right 1 ([Aa] & right 1 Q)
+        q ∩ right 1 ([Aa] ∩ right 1 Q)
 
 will match a position with
      the Q on d4,
@@ -30,7 +30,7 @@ cql(input hhdbvi.pgn variations)
 initial
  sort "Number of theme occurrences"
   {rotate45 count
-   find q
-       & right 1
-            ([Aa] & right 1 Q)}
-    >=5
+   find ♛
+       ∩ right 1
+            (◭ ∩ right 1 ♕)}
+    ≥5

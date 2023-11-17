@@ -4,9 +4,9 @@ the square filter
 **********/
 
 cql(input hhdbvi.pgn)
- square s in a-h1
-  flipcolor
-    P&vertical s
-      >=4
+ s∊a-h1
+  ⬓
+    ♙∩vertical s
+      ≥4
 
 

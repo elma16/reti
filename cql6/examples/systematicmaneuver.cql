@@ -2,7 +2,7 @@
  1. At a position X,
  2. there is a set M of at least 4 pieces in X
  3. a pair (r, f) of rank/file offsets, not both 0,
- 4. a positive ply increment inc such that and
+ 4. a positive ply increment inc 
  5. a number of repetitions k>=3 such that
 
  for each i between 1 and k, the position X' that is i*inc plies
@@ -15,15 +15,15 @@
 
 cql (input hhdbvi.pgn quiet)
 function checkmaneuver(inc){
- start=currentposition
+ start=∙
  firstmaneuver=position positionid+inc
   movers=
-       piece x in [Aa]{
+       ◭x∊◭{
          firstmaneuver:x
-         x!=firstmaneuver:x}
- movers>=4 //change this line to get different numbers of movers
+         x≠firstmaneuver:x}
+ movers≥4 //change this line to get different numbers of movers
  seen=0
- piece all x in movers
+ ∀◭x∊movers
    if seen==0{
      deltarank=firstmaneuver:rank x - rank x
      deltafile=firstmaneuver:file x - file x
@@ -35,17 +35,17 @@ function checkmaneuver(inc){
  find 3 100 {
     (positionid - start:positionid)%inc==0
     maneuvernumber=(positionid-start:positionid)/inc
-    piece all x in [Aa]{
+    ∀◭x∊◭{
       if start:x in movers
            {rank x - start:rank x == maneuvernumber * deltarank
 	    file x -start:file x == maneuvernumber * deltafile}
       else
           x==start:x}
     if maneuvernumber>0
-     comment("Maneuver repeat: " maneuvernumber " starting from: " start)
+     ///"Maneuver repeat: " maneuvernumber " starting from: " start
    }//find all
  sort "number of participants" movers
- comment ("CQL maneuver found with movers: " movers " and ply increment: " inc)
+ ///"CQL maneuver found with movers: " movers " and ply increment: " inc
 }//checkmaneuver
 
 currinc=2
@@ -53,6 +53,6 @@ success=0
 loop{
  if checkmaneuver(currinc) success=1
  currinc+=2
- currinc<=20}
+ currinc≤20}
 success==1
 

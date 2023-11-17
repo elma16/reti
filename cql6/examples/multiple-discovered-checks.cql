@@ -7,8 +7,7 @@ cql(input hhdbvi.pgn
     sort matchcount 5 100
     )
 not initial
-flipcolor
-  (A&~move to . previous) attacks k
+⬓(△∩~to)→♚
 
 
   

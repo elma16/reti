@@ -6,7 +6,6 @@ It illustrates that the ID of a piece does not change after promotion
 
 cql(input hhdbvi.pgn )
 
-initial
-piece Pawn in Pa-h2
-  find move from Pawn promote A 
+◭E∊♙a-h2
+  find E――=△
   

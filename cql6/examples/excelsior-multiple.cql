@@ -8,6 +8,5 @@ cql(input hhdbvi.pgn)
 
 initial
  1<sort "Number of excelsiors"
-        piece Excelsior in flipcolor Pa-h2
-          find
-	     move from Excelsior promote A
+        ◭E ∊ ⬓♙a-h2
+          find E――=△

@@ -1,12 +1,12 @@
 /* Similar to most-visited-square-1, except comments the
-  actual most visited square.
+  actual most visited square
 */
 
 cql(input hhdbvi.pgn)
 initial
-square VisitedSquare in .
+V ∊ ▦
  sort "max number of visits to a single square"{
-   comment ("The most visited square is: " VisitedSquare)
+   ///"The most visited square is: " V
    find all
-      move to VisitedSquare
-  }>=15
+      ――V
+  }≥15

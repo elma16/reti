@@ -4,15 +4,12 @@
 */
 
 cql(input hhdbvi.pgn sort matchcount 2 1000 quiet)
-flipcolor{
+⬓{
  result 1-0
- source=currentposition
+ source=∙
  wtm
- line --> (move from Q-->.)+
-      --> move from Q 
-      --> {move from p
-	   source&currentposition==.
-           comment ("Match to: " source
-	            " pawn to move from: " move from p)
-           } 
-  }
+ ⊢ nestban
+    (♕―― ――)+
+     ♕―― source∩∙==▦
+     ♟―― ///"thematic pawn move"
+}

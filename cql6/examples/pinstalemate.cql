@@ -5,12 +5,12 @@ pieces in ascending order
 ************/
 
 cql(input hhdbvi.pgn)
-flipcolor{
+⬓{
  btm
  stalemate
  sort "number of pins"
-     pin through a to k
+     pin through ▲
        >1
- sort min "material" power .
+ sort min "material" power ◭
  }
  

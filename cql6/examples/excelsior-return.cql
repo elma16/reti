@@ -6,9 +6,9 @@ returns to its original square
 cql(input hhdbvi.pgn )
 
 initial
-Start=currentposition
- piece Excelsior in Pa-h2 | pa-h7
-   find move from Excelsior
-              to Start:Excelsior
+S=∙
+ ◭E∊♙a-h2 ∪ ♟a-h7
+   find E――S:E
+
    
   

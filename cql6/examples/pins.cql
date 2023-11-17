@@ -4,10 +4,10 @@ are pinned, sorted by the number of such pinned pieces
 *********/
 
 cql(input hhdbvi.pgn quiet)
- flipcolor {
+ ⬓{
    sort "number of pinned pieces"{
-	comment ("Pinned pieces: " pin through A)
-	pin through A >= 3
+	///"Pinned pieces: " pin through △
+	pin through △ ≥ 3
      } 
-  } // end flipcolor
+  } // end ⬓
  

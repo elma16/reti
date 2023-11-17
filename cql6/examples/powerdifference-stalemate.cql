@@ -6,11 +6,10 @@ at least 10, sorted by that difference
 
 cql(input hhdbvi.pgn)
 
- flipcolor
- { wtm
+ ⬓{ wtm
    stalemate
    sort "difference in power between stalemated and stalemating sides"
-     power A-power a >=10
+     power△ - power▲ ≥ 10
  }
 
 

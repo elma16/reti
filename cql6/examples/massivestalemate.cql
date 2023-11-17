@@ -3,11 +3,10 @@ Stalemates where stalemated side has power at least 15, sorted by the power
 ********/
 
 cql(input hhdbvi.pgn)
-flipcolor 
-{wtm
+⬓{wtm
  stalemate
- sort "Material value of stalemated side" power A
-     >=15
+ sort "Material value of stalemated side" power △
+     ≥15
 }
 
 

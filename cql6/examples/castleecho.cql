@@ -4,19 +4,21 @@ and in the other that kind of castling is not allowed.
 *******/
 
 cql(input hhdbvi.pgn variations )
-move legal castle
+ legal ――(castle)
 echo(source target){
   sidetomove==source:sidetomove
-  source&target==.
-  {source:move legal o-o
-    and not move legal o-o
-   comment "o-o is not legal"
-   source:comment "o-o is legal"}
+  source∩target==▦
+  {source:legal ――(o-o)
+   not legal ――(o-o)
+   /// "o-o is not legal"
+   source:/// "o-o is legal"
+  }
   or
-  {source:move legal o-o-o
-   and not move legal o-o-o
-   comment "o-o-o is not legal"
-   source:comment "o-o-o is legal"}
+  {source:legal ――(o-o-o)
+   not legal ――(o-o-o)
+   /// "o-o-o is not legal"
+   source:/// "o-o-o is legal"
+  }
 }   
 
   

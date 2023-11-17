@@ -1,36 +1,33 @@
 /*********
 Find all queen staircases of either color of length
-at least 8 and sort the output by the length of the staircase
+at least 8 and sort the output by the length of the staircase.
 
-     matchstring ""
+No gaps in the staircase are allowed. See staircase-sort-annotated.cql
+for a version that allows gaps (and has better annotations).
 
-removes the default 'CQL' added comments, which we don't need, since
-'line' adds its own comments.
-
-The "flip" makes the staircase go in any direction The "flipcolor"
+The ✵ makes the staircase go in any direction The ✵
 looks for both black and white queen staircases
 
    sort "staircase size""
 
-just sorts the following line filter, and in the output it makes sure
+just sorts the following path filter, and in the output it makes sure
 that the annotations say the words "staircase size"
 
- 'line singlecolor'
+◎△
+or focus A
+means that only white moves are considered.
 
-means only consider positions in which the same side is to move.
- 
 See the documentation for 'up' and 'right' for more discussion.
-
 
 ***********/
 
 cql(input hhdbvi.pgn matchstring "")
-flipcolor flip
-  sort "staircase size"
-   line singlecolor 8 100 nestban
-   -->   (move from Q to up 1 Q
-          --> move from Q to right 1 Q) +
-   --> move from Q to up 1 Q ? 
-
+✵⬓{
+  8≤sort "staircase length"
+   ⊢◎△ nestban
+   (♕――up 1 ♕ 
+    ♕――right 1 ♕)+
+    ♕――up 1 ♕ ? 
+}
 
 

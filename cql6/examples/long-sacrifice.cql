@@ -7,11 +7,11 @@ sorted by the length of time he was down the material
 
 cql(input hhdbvi.pgn)
 
-flipcolor
+⬓
  {result 1-0
-  sort "Number of consecutive ply winner is down at least 9"
-     line 5 1000 nestban
-       -->power a - power A >= 9 +
+  sort "#ply winner is down at least 9"
+     ⊢ nestban
+       ―― power▲ - power△ ≥ 9 {5,}
  }
 		       
 

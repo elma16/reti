@@ -10,14 +10,15 @@ cql(input hhdbvi.pgn
 echo(s t){
  s<t
  sidetomove==s:sidetomove
- square all sq in .
-  colortype sq == s:colortype
+ ∀sq∊▦
+  piecename sq == 
+   s:piecename
     makesquare (8 - file sq + 1
                 rank sq)
  }
-sort "Number pieces" [Aa]>=4
-sort "Number white pieces" A
-sort "Number black pieces" a
+sort "Number pieces" ◭≥4
+sort "Number white pieces" △
+sort "Number black pieces" ▲
 
 
 

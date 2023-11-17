@@ -1,13 +1,9 @@
-/**********
-Longest sequence of forced moves by white in a game where White wins
-**********/
+/*********
+Find games with at least 4 consecutive forced white moves
+*********/
 
-cql(input hhdbvi.pgn result 1-0)
-wtm
-sort "most forced moves by white"
-  line singlecolor 4 100 nestban
-    --> {move legal count == 1} *
+cql(input hhdbvi.pgn)
+4≤sort "most forced moves by white"
+ ⊢◎△
+   ―― {parent:countmoves legal ―― == 1} +
 
-
-
-  
