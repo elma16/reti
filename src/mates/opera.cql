@@ -8,10 +8,10 @@ King attacks rook
 */
 
 cql()
-btm mate
+⬓{btm mate
 R->k
 k->R
-B->R
+B->R}
 
 /*
 square all x in _ <- k

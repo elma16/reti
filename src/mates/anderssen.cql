@@ -3,6 +3,6 @@
 
 
 cql()
-btm mate
+⬓{btm mate
 R -> k
-k -> R
+k -> R}
