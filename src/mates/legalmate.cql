@@ -1,7 +1,7 @@
 
 
 cql()
-btm mate
+⬓{btm mate
 N -> k
 N -> B
-_ <- k == 4
+_ <- k == 4}

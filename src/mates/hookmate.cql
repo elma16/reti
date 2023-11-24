@@ -2,9 +2,9 @@
 
 
 cql()
-btm mate
+⬓ {btm mate
 R -> k
 k -> R
 N -> R
 k -> N
-P -> N
+P -> N}
