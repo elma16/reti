@@ -1,5 +1,5 @@
 
 
 cql()
-btm mate
-P -> k
+⬓{btm mate
+P -> k}

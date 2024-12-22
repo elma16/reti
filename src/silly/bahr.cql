@@ -1,8 +1,7 @@
 
 cql()
 
-(P == 2 and p == 1) or
-(P == 1 and p == 2)
+reversecolor{ P == 2 and p == 1 }
 
 Q == 0
 q == 0

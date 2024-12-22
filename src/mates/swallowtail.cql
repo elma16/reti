@@ -2,7 +2,7 @@
 
 
 cql()
-btm mate
+⬓{btm mate
 Q -> k
 k -> Q
-_ <- k == 5
+_ <- k == 5}

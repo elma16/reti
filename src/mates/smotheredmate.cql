@@ -3,5 +3,5 @@
   an empty square nor a white piece
 */
 cql()
-btm mate
-not k -> [A_]
+⬓{btm mate
+not k -> [A_]}

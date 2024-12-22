@@ -2,6 +2,6 @@
 
 
 cql()
-btm mate
+⬓{btm mate
 [Aa] == 4
-B == 2
+B == 2}
