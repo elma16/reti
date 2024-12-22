@@ -1,6 +1,6 @@
 
 
 cql()
-btm mate
+⬓{btm mate
 N -> k
-N == 2
+N == 2}

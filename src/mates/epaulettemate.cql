@@ -1,5 +1,5 @@
 
 
 cql()
-btm mate
-[R]
+⬓{btm mate
+[R]}

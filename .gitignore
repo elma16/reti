@@ -1,7 +1,12 @@
 *.DS_Store
-fortresses.cql
+*.cql
+*.pgn
+
+
 output
 src/reti.egg-info
 src/build
 data
 build 
+cql6-1
+cql6-2

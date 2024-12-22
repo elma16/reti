@@ -8,12 +8,18 @@ King attacks rook
 */
 
 cql()
-btm mate
+⬓{btm mate
 R->k
 k->R
-B->R
+B->R}
 
 /*
 square all x in _ <- k
        (B -> x) or (R -> x)
+*/
+
+*/
+cql() mate flipcolor shift flip {
+    Rd8 Bg5 ke8
+}
 */

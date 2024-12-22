@@ -1,9 +1,6 @@
-
-
-
 cql()
-btm mate
+⬓{btm mate
 R -> k
 k -> R
 N -> R
-_ <- k == 2
+_ <- k == 2}
