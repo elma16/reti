@@ -2,7 +2,6 @@
 
 cql()
 
-(P == 2 and p == 1) or
-(P == 1 and p == 2)
+flipcolor (P == 2 and p == 1) 
 
 [Aa] == 5

@@ -1,6 +1,5 @@
-
+;; 7th rank rooks pawn
 
 cql()
 
-(N == 1 and P[a7,h7] == 1) or 
-(n == 1 and p[a2,h2] == 1)
+flipcolor flip (N == 1 and p[a7,h7] == 1)
