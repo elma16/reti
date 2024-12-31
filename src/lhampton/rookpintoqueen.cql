@@ -1,0 +1,1 @@
+cql() flipcolor ray diagonal (Q B r q)

@@ -1,7 +1,5 @@
 *.DS_Store
-*.cql
 *.pgn
-
 
 output
 src/reti.egg-info

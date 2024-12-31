@@ -1,0 +1,1 @@
+cql() flipcolor line --> move capture a --> [BN] attacks k == 2
