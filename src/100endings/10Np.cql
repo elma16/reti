@@ -1,6 +1,7 @@
+;; knight vs 7-th rank pawn
+
 cql()
 
-(N == 1 and p[a-h2] == 1) or 
-(n == 1 and P[a-h7] == 1)
+flipcolor flip (N == 1 and p[a2] == 1) 
 
 [Aa] == 4
