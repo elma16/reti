@@ -1,0 +1,1 @@
+cql() flipcolor shift {ra8 rc8 Pb7}

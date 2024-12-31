@@ -1,0 +1,1 @@
+cql() line --> {wtm  move o-o} --> .* --> move o-o-o
