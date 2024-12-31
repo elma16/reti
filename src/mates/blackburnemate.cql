@@ -1,8 +1,8 @@
 
 
 cql()
-btm mate
+⬓{btm mate
 B -> k
 
 square all x in _ <- k
-       (B -> x) or (N -> x)
+       (B -> x) or (N -> x)}

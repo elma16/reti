@@ -1,5 +1,3 @@
-
-
 cql()
 ⬓{btm mate
 Q -> k

@@ -1,3 +1,6 @@
+cql() mate flipcolor shift flip {
+    kg8 rf8 Qh7 pg7 Pg6
+}
 // Damiano's mate.
 // Mate or resignation with imminent mate.
 cql() terminal flipcolor { result 1-0

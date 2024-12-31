@@ -3,5 +3,5 @@
   an empty square nor a white piece
 */
 cql()
-flipcolor {btm mate
+⬓{btm mate
 not k -> [A_]}

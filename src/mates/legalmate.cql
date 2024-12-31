@@ -1,7 +1,3 @@
-
-
-cql()
-⬓{btm mate
-N -> k
-N -> B
-_ <- k == 4}
+cql() mate flipcolor shift flip {
+    Nd5 Ne5 Bf7 ke7
+}
