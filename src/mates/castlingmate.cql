@@ -1,4 +1,4 @@
 
 
 cql()
-o-o mate or o-o-o mate
+⬓{o-o mate or o-o-o mate}

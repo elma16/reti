@@ -1,6 +1,6 @@
 
 
 cql()
-btm mate
+⬓{btm mate
 N == 2
-[Aa] == 4
+[Aa] == 4}
