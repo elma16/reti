@@ -1,8 +1,12 @@
+;; R and 4 vs R and 3 with outside passed pawn
+
+
 cql()
 
 R == 1
 r == 1
 [Aa] == 11
+
 flipcolor shift flip {
 P[a2-7]
 P[f2-7]

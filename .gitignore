@@ -8,3 +8,9 @@ data
 build 
 cql6-1
 cql6-2
+
+/training/env.py
+
+.venv/
+
+*.cql

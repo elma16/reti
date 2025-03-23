@@ -2,11 +2,6 @@
 
 cql()
 
-(R==1 and b==1) or (r==1 and B==1)
+flipcolor (R==1 and b==1) 
 
-
-
-Q == 0
-q == 0
-N == 0
-n == 0
+[Aa] == 4

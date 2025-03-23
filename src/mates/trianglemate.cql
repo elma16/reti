@@ -9,5 +9,5 @@
 ;;Q -> R}
 
 cql() mate flipcolor shift flip {
-    Qd6 Rd8 ke7 pf7
+    Qd6 Rd8 ke7 af7
 }

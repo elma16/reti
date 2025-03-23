@@ -2,6 +2,6 @@
 
 cql()
 
-flipcolor flip (Q == 1 and r == 1 and p[b2-7] == 1)
+flipcolor flip (Q == 1 and r == 1 and p[b2] == 1)
 
 [Aa] == 5
