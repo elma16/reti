@@ -11,5 +11,5 @@
 ;;       (B -> x) or (R -> x)}
 
 cql() mate flipcolor shift flip {
-    Bd8 Rd1-5 kc7
+    Bd8 Rd1-7 kc7
 }

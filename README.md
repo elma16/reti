@@ -24,3 +24,13 @@ you will also need cql.
 ``` shell
 source FCE-table.sh path/to/cql/executable path/to/database.pgn path/to/output/folder halfmoves
 ```
+
+TODOs
+
+- [ ] use cql to make a collection of endings, create a pgn with a bunch of them
+  - [ ] randomly select a game from the pgn without replacement. 
+  - [ ] if the ending is a theoretical win, play against the computer with the winning side
+  - [ ] if the ending is a theoretical draw, you need to work out with which side you're defending.
+
+
+python chess_practice.py --pgn your_endgames.pgn --mode endgame --num 5

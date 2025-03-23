@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "reti"
+description = "reti"
+version = "0.0.1"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{name = "Elliott Macneil", email = "ucabem1@ucl.ac.uk"}]
+dependencies = [
+    "python-chess",
+    ]
+
+
+[tool.ruff]
+select = ["E", "F", "W", "C"]
+ignore = ["E501"]
+extend-include = ["*.ipynb"]
+
+[tool.pytest.ini_options]
+filterwarnings = "ignore"

@@ -1,5 +1,5 @@
-;; would this give me all the tripled pawns in the position? i don't think this is specific enough
+;; tripled pawns
 
 cql()
 
-doubledpawns == 3
+flipcolor shift (P[a2-7] == 3)

@@ -2,6 +2,6 @@
 
 cql()
 
-flipcolor flip (N == 1 and p[a2] == 1) 
+flipcolor flipvertical (N == 1 and p[a2] == 1) 
 
 [Aa] == 4
