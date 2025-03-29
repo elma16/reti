@@ -11,13 +11,17 @@ requires-python = ">=3.10"
 authors = [{name = "Elliott Macneil", email = "ucabem1@ucl.ac.uk"}]
 dependencies = [
     "python-chess",
+    "ruff", 
+    "pre-commit",
     ]
 
 
 [tool.ruff]
+extend-include = ["*.ipynb"]
+
+[tool.ruff.lint]
 select = ["E", "F", "W", "C"]
 ignore = ["E501"]
-extend-include = ["*.ipynb"]
 
 [tool.pytest.ini_options]
 filterwarnings = "ignore"

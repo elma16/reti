@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 import time
 import webbrowser
 
+
 class TablebasePositionChecker:
     def __init__(self):
         pass
@@ -26,18 +27,18 @@ class TablebasePositionChecker:
 
         # Add headers to mimic a browser
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
         }
 
         try:
             response = requests.get(url, headers=headers)
             response.raise_for_status()
 
-            soup = BeautifulSoup(response.text, 'html.parser')
+            soup = BeautifulSoup(response.text, "html.parser")
 
             time.sleep(1)  # Add a delay to avoid overloading the server
 
-            status_badge = soup.find('h2', {'id': 'status'})
+            status_badge = soup.find("h2", {"id": "status"})
 
             if status_badge:
                 text = status_badge.text.lower()
@@ -63,7 +64,7 @@ class TablebasePositionChecker:
             while game:
                 node = game
                 while node:
-                    if node.comment and 'CQL' in node.comment:
+                    if node.comment and "CQL" in node.comment:
                         board = node.board()
                         tablebase_result = self.check_tablebase_result(board)
                         if tablebase_result == target_result:
@@ -81,10 +82,17 @@ class TablebasePositionChecker:
                     node = node.variations[0] if node.variations else None
                 game = chess.pgn.read_game(f)
 
+
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Check CQL positions in a PGN file against Syzygy tablebases.")
+    parser = argparse.ArgumentParser(
+        description="Check CQL positions in a PGN file against Syzygy tablebases."
+    )
     parser.add_argument("pgn_file", help="Path to the PGN file")
-    parser.add_argument("target_result", choices=["win", "loss", "draw"], help="Desired result (win, loss, or draw)")
+    parser.add_argument(
+        "target_result",
+        choices=["win", "loss", "draw"],
+        help="Desired result (win, loss, or draw)",
+    )
     args = parser.parse_args()
 
     checker = TablebasePositionChecker()
