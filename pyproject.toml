@@ -21,7 +21,7 @@ extend-include = ["*.ipynb"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "C"]
-ignore = ["E501"]
+ignore = ["E501", "C901"]
 
 [tool.pytest.ini_options]
 filterwarnings = "ignore"
