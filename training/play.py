@@ -4,7 +4,7 @@ import chess.pgn
 import chess
 import argparse
 import random
-from env import api_key  # Make sure you have an env.py file with your Lichess API key
+from training.env import api_key  # Make sure you have an env.py file with your Lichess API key
 import time
 
 """

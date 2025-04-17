@@ -1,1 +1,0 @@
-cql() piece Knight in N  [qr] attackedby Knight > 2 and not move capture Knight

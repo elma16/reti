@@ -1,1 +1,0 @@
-cql() line --> check --> mate

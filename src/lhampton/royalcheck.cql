@@ -1,1 +1,0 @@
-cql() line --> flipcolor {check  move from k} --> check
