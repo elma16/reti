@@ -1,1 +1,0 @@
-cql() flipcolor xray ([BR] k q)

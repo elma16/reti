@@ -1,1 +1,0 @@
-cql() flipcolor ray up (Q R R)
