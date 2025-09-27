@@ -5,6 +5,7 @@ import chess
 import argparse
 import random
 import time
+import os
 
 """
 Chess Practice Tool
@@ -21,7 +22,7 @@ Features:
 - Results tracking using Lichess tablebase API and AI challenges.
 """
 
-api_key =  "REDACTED_LICHESS_TOKEN"
+api_key =  os.environ["LICHESS_TOKEN"]
 MAX_TABLEBASE_PIECES = 7  # Define the maximum number of pieces for tablebase lookup
 MAX_GENERATION_ATTEMPTS = 1000  # Limit attempts for random generation
 
