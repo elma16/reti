@@ -5,6 +5,7 @@ import chess
 import argparse
 import random
 import time
+import os
 
 """
 Chess Practice Tool
