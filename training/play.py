@@ -4,7 +4,6 @@ import chess.pgn
 import chess
 import argparse
 import random
-from training.env import api_key  # Make sure you have an env.py file with your Lichess API key
 import time
 
 """
@@ -21,8 +20,7 @@ Features:
 - Multiple practice modes.
 - Results tracking using Lichess tablebase API and AI challenges.
 """
-
-
+LICHESS_TOKEN = os.environ.get('LICHESS_API_KEY')
 MAX_TABLEBASE_PIECES = 7  # Define the maximum number of pieces for tablebase lookup
 MAX_GENERATION_ATTEMPTS = 1000  # Limit attempts for random generation
 

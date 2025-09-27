@@ -1,0 +1,2699 @@
+Directory tree:
+/Users/elliottmacneil/python/chess-stuff/reti/cql-files/
+├── 100endings
+│   ├── 1_5KP.cql
+│   ├── 100Qrp.cql
+│   ├── 10Np.cql
+│   ├── 11Np.cql
+│   ├── 12Np.cql
+│   ├── 13_15Np.cql
+│   ├── 16_20Qp.cql
+│   ├── 21_29Rvsp.cql
+│   ├── 30_32Rvspp.cql
+│   ├── 33_36BPb.cql
+│   ├── 37_40BNP.cql
+│   ├── 41ocBPPb.cql
+│   ├── 42_43ocBPPb.cql
+│   ├── 44_51ocBPPb.cql
+│   ├── 52_68RPr.cql
+│   ├── 55RPr.cql
+│   ├── 56RPr.cql
+│   ├── 57_58RPr.cql
+│   ├── 6_7RB.cql
+│   ├── 69_76RPPr.cql
+│   ├── 77KPP.cql
+│   ├── 78KPP.cql
+│   ├── 79_82KPp.cql
+│   ├── 8_9Rn.cql
+│   ├── 83_87KPPp.cql
+│   ├── 93BN.cql
+│   ├── 94_96RBr.cql
+│   ├── 97RPb.cql
+│   ├── 98RPb.cql
+│   └── 99Qrp.cql
+├── A2IM
+│   └── R4r3.cql
+├── attack
+│   └── greekgift.cql
+├── FCE
+│   ├── 1-4BN.cql
+│   ├── 2-0Pp.cql
+│   ├── 2-1KPk.cql
+│   ├── 3-1Np.cql
+│   ├── 3-2NN.cql
+│   ├── 4-1Bp.cql
+│   ├── 4-2scBB.cql
+│   ├── 4-3ocBB.cql
+│   ├── 5-0BvsN.cql
+│   ├── 6-1-0RP.cql
+│   ├── 6-2-0Rr.cql
+│   ├── 6-2-1RPr.cql
+│   ├── 6-2-2RPPr.cql
+│   ├── 6-3RRrr.cql
+│   ├── 7-1RN.cql
+│   ├── 7-2RB.cql
+│   ├── 8-1RNr.cql
+│   ├── 8-2RBr.cql
+│   ├── 8-3RAra.cql
+│   ├── 9-1Qp.cql
+│   ├── 9-2Qq.cql
+│   ├── 9-3QPq.cql
+│   ├── 90-1Qa.cql
+│   ├── 90-2Qr.cql
+│   ├── 90-3Qaa.cql
+│   ├── 90-4Qra.cql
+│   ├── 90-5Qrr.cql
+│   ├── 90-6Qaaa.cql
+│   ├── 90-7QAq.cql
+│   └── 99Qbrr.cql
+├── lhampton
+│   ├── alekhinegun.cql
+│   ├── answercheckwithmate.cql
+│   ├── castleoppside.cql
+│   ├── doublecheckcapture.cql
+│   ├── dovetail.cql
+│   ├── epaulette.cql
+│   ├── kinghunt.cql
+│   ├── pawnchain.cql
+│   ├── pawnforkrook.cql
+│   ├── railroad.cql
+│   ├── rookpintoqueen.cql
+│   ├── royalcheck.cql
+│   ├── skeweredking.cql
+│   ├── threewayknightfork.cql
+│   ├── windmill.cql
+│   └── zwischenzug.cql
+├── mates
+│   ├── 0PropMates.cql
+│   ├── anastasia.cql
+│   ├── anastasiamate.cql
+│   ├── anderssen.cql
+│   ├── anderssen2.cql
+│   ├── arabian2.cql
+│   ├── arabianmate.cql
+│   ├── backrank.cql
+│   ├── balestramate.cql
+│   ├── blackburnemate.cql
+│   ├── blindswine2.cql
+│   ├── blindswinemate.cql
+│   ├── BN.cql
+│   ├── boden2.cql
+│   ├── bodenmate.cql
+│   ├── castlingmate.cql
+│   ├── corner.cql
+│   ├── damiano.cql
+│   ├── damianobishopmate.cql
+│   ├── davidandgoliath.cql
+│   ├── doubleknight.cql
+│   ├── dovetailmate1.cql
+│   ├── dovetailmate2.cql
+│   ├── epaulettemate.cql
+│   ├── greco.cql
+│   ├── hookmate.cql
+│   ├── ismate.cql
+│   ├── KBB.cql
+│   ├── killbox.cql
+│   ├── KNN.cql
+│   ├── laddermate.cql
+│   ├── legalmate.cql
+│   ├── lolli.cql
+│   ├── maxlangemate.cql
+│   ├── mayet.cql
+│   ├── morphymate.cql
+│   ├── opera.cql
+│   ├── pillsbury.cql
+│   ├── queen.cql
+│   ├── retimate.cql
+│   ├── rookmate.cql
+│   ├── smotheredmate.cql
+│   ├── suffocation2.cql
+│   ├── suffocationmate.cql
+│   ├── swallowtail.cql
+│   ├── trianglemate.cql
+│   ├── twobishopmate.cql
+│   ├── twoknightmate.cql
+│   └── vukovicmate.cql
+├── opening
+│   └── halloween.cql
+├── others
+│   ├── 1-1Q.cql
+│   ├── 1-2R.cql
+│   ├── 1-3BB.cql
+│   ├── 1-5NNp.cql
+│   ├── absolutepinmate.cql
+│   ├── evals.cql
+│   ├── filterlosses.cql
+│   ├── miniature.cql
+│   ├── quadrupled-pawns.cql
+│   ├── RB.cql
+│   ├── Rpppp.cql
+│   └── tripled-pawns.cql
+├── rook-endings
+│   ├── lucena.cql
+│   ├── philidor.cql
+│   └── vancura.cql
+├── rosen
+│   ├── 12pawnmoves.cql
+│   ├── blockcheckwithmate.cql
+│   ├── castleaftermove40.cql
+│   ├── g5mate.cql
+│   ├── kingsidecastlemate.cql
+│   ├── matewithking.cql
+│   ├── matewithpawn.cql
+│   ├── nocapturebeforemove30.cql
+│   └── queensidecastlemate.cql
+├── SergeiTkachenko
+│   ├── bishop.cql
+│   ├── bishopbishop.cql
+│   ├── bishopknight.cql
+│   ├── king.cql
+│   ├── knight.cql
+│   ├── knightknight.cql
+│   ├── pawn.cql
+│   ├── queen.cql
+│   └── rook.cql
+├── silly
+│   ├── 4v3.pgn
+│   ├── 4vs3.cql
+│   ├── bahr-out.pgn
+│   ├── bahr.cql
+│   ├── crosspin.cql
+│   ├── doublecheck.cql
+│   ├── doublecheckANDmate.cql
+│   ├── freespace.cql
+│   ├── greekgift.cql
+│   ├── imbalance.cql
+│   ├── legal.cql
+│   ├── octopus.cql
+│   ├── onelymovemate.cql
+│   ├── onlymoveep.cql
+│   ├── rookhomerun.cql
+│   └── troitsky.cql
+└── structures
+    ├── 33-42.cql
+    ├── ACK.cql
+    ├── AsymmetricBenoni.cql
+    ├── Carlsbad.cql
+    ├── CaroKann.cql
+    ├── FrenchI.cql
+    ├── FrenchII.cql
+    ├── FrenchIII.cql
+    ├── GrunfeldCentre.cql
+    ├── HangingPawns.cql
+    ├── Hedgehog.cql
+    ├── IQP.cql
+    ├── KIDComplex.cql
+    ├── KIDI.cql
+    ├── KIDII.cql
+    ├── KIDIII.cql
+    ├── Maroczy.cql
+    ├── NajdorfI.cql
+    ├── NajdorfII.cql
+    ├── OpenKID.cql
+    ├── Slav.cql
+    ├── stonewall.cql
+    └── symben.cql
+
+14 directories, 200 files
+
+==================================================
+
+** SergeiTkachenko/king.cql
+cql()
+
+;; Tkachenko 6
+;; A position where the side which wins or draws has just a king and a pawn
+
+((result 1/2-1/2) and
+(P == 0 and Q == 0 and R == 0 and N == 0 and B == 0)
+)
+or
+((result 1/2-1/2) and
+(p == 0 and q == 0 and r == 0 and n == 0 and b == 0)
+ )
+
+
+** SergeiTkachenko/queen.cql
+cql()
+
+;; Tkachenko 5
+;; A position where the side which wins or draws has just a king and a pawn
+
+((result 1-0 or result 1/2-1/2) and
+(Q == 1
+ P == 0
+ R == 0
+ N == 0
+ B == 0)
+)
+or
+((result 0-1 or result 1/2-1/2) and
+(q == 1
+ p == 0
+ r == 0
+ n == 0
+ b == 0)
+ )
+
+
+** SergeiTkachenko/bishopbishop.cql
+cql()
+
+;; Tkachenko 1
+;; A position where the side which wins or draws has just a king and a pawn
+
+((result 1-0 or result 1/2-1/2) and
+(P == 0
+ Q == 0
+ R == 0
+ N == 0
+ B == 2)
+)
+or
+((result 0-1 or result 1/2-1/2) and
+(p == 0
+ q == 0
+ r == 0
+ n == 0
+ b == 2)
+ )
+
+
+** SergeiTkachenko/knight.cql
+cql()
+
+;; Tkachenko 2
+;; A position where the side which wins or draws has just a king and a knight
+
+((result 1-0 or result 1/2-1/2) and
+(N == 1
+ Q == 0
+ R == 0
+ P == 0
+ B == 0)
+)
+or
+((result 0-1 or result 1/2-1/2) and
+(n == 1
+ q == 0
+ r == 0
+ p == 0
+ b == 0)
+ )
+
+
+** SergeiTkachenko/rook.cql
+cql()
+
+;; Tkachenko 1
+;; A position where the side which wins or draws has just a king and a pawn
+
+((result 1-0 or result 1/2-1/2) and
+(R == 1
+ Q == 0
+ P == 0
+ N == 0
+ B == 0)
+)
+or
+((result 0-1 or result 1/2-1/2) and
+(r == 1
+ q == 0
+ p == 0
+ n == 0
+ b == 0)
+ )
+
+
+** SergeiTkachenko/pawn.cql
+cql()
+
+;; Tkachenko 1
+;; A position where the side which wins or draws has just a king and a pawn
+
+x = 7
+
+((result 1-0 or result 1/2-1/2) and
+(P == 1 and Q == 0 and R == 0 and N == 0 and B == 0 and max("movenumber" "x"))
+)
+or
+((result 0-1 or result 1/2-1/2) and
+(p == 1 and q == 0 and r == 0 and n == 0 and b == 0 and max("movenumber" "x"))
+ )
+
+
+** SergeiTkachenko/bishopknight.cql
+cql()
+
+;; Tkachenko 7
+;; A position where the side which wins or draws has just a king and a pawn
+
+((result 1-0 or result 1/2-1/2) and
+(B == 1
+ Q == 0
+ R == 0
+ N == 1
+ P == 0)
+)
+or
+((result 0-1 or result 1/2-1/2) and
+(b == 1
+ q == 0
+ r == 0
+ n == 1
+ p == 0)
+ )
+
+
+** SergeiTkachenko/bishop.cql
+cql()
+
+;; Tkachenko 3
+;; A position where the side which wins or draws has just a king and a pawn
+
+((result 1-0 or result 1/2-1/2) and
+(B == 1
+ Q == 0
+ R == 0
+ N == 0
+ P == 0)
+)
+or
+((result 0-1 or result 1/2-1/2) and
+(b == 1
+ q == 0
+ r == 0
+ n == 0
+ p == 0)
+ )
+
+
+** SergeiTkachenko/knightknight.cql
+cql()
+
+;; Tkachenko 1
+;; A position where the side which wins or draws has just a king and a pawn
+
+((result 1-0 or result 1/2-1/2) and
+(P == 0
+ Q == 0
+ R == 0
+ N == 2
+ B == 0)
+)
+or
+((result 0-1 or result 1/2-1/2) and
+(p == 0
+ q == 0
+ r == 0
+ n == 2
+ b == 0)
+ )
+
+
+** rosen/kingsidecastlemate.cql
+cql()
+
+line --> move o-o
+     --> mate 
+
+
+** rosen/matewithking.cql
+cql()
+
+line --> move from K to _
+     --> mate
+
+** rosen/12pawnmoves.cql
+cql()
+
+line --> move to _ from [Pp]
+     --> move to _ from _
+     --> move to _ from [Pp]
+     --> move to _ from _
+     --> move to _ from [Pp]
+     --> move to _ from _
+     --> move to _ from [Pp]
+     --> move to _ from _
+     --> move to _ from [Pp]
+     --> move to _ from _
+     --> move to _ from [Pp]
+     --> move to _ from _
+     --> move to _ from [Pp]
+     --> move to _ from _
+     --> move to _ from [Pp]
+     --> move to _ from _
+     --> move to _ from [Pp]
+     --> move to _ from _
+     --> move to _ from [Pp]
+     --> move to _ from _
+     --> move to _ from [Pp]
+     --> move to _ from _
+     --> move to _ from [Pp]
+     
+
+** rosen/nocapturebeforemove30.cql
+cql()
+
+(move capture [Aa] and movenumber>30) and (not move capture [Aa] and movenumber<30)
+
+** rosen/g5mate.cql
+cql()
+
+line --> move from [Pp] to g5
+     --> mate
+
+** rosen/matewithpawn.cql
+cql()
+
+line --> move to _ from [Pp]
+     --> mate
+
+** rosen/castleaftermove40.cql
+cql() 
+
+(move castle) and (movenumber>40)
+
+;;line --> movenumber > 40
+;;     --> move castle
+
+** rosen/queensidecastlemate.cql
+cql()
+
+line --> move o-o-o
+     --> mate
+
+** rosen/blockcheckwithmate.cql
+cql()
+
+line --> (move to _ from [Aa]) attacks [Kk]
+     --> move to _ from [Kk]
+     --> mate
+
+** attack/greekgift.cql
+cql()
+
+flipcolor flip
+
+line --> move to h7 from B capture p 
+     --> move capture B
+     --> move to g5 from N
+
+
+
+
+** structures/NajdorfII.cql
+cql()
+
+Pa2 Pb2 Pc2 Pe4 Pf7 Pg7 Ph7
+
+pa7 pb7 pd6 pe5 pf7 pg7 ph7
+
+
+** structures/Maroczy.cql
+cql()
+
+Pa2 Pb2 Pc4 Pe4 Pf2 Pg2 Ph2
+
+pa7 pb7 pd6 pe7 pf7 pg6 ph7
+
+
+** structures/AsymmetricBenoni.cql
+cql()
+
+Pa2 Pb2 Pd5 Pe4 Pf2 Pg2 Ph2
+
+pa7 pb7 pc5 pd6 pf7 pg7 ph7
+
+
+** structures/GrunfeldCentre.cql
+cql()
+
+Pc3 Pd4 Pe4
+
+pc5 pg6
+
+
+** structures/CaroKann.cql
+cql()
+
+Pa2 Pb2 Pc3 Pd4 Pf2 Pg2 Ph2
+
+pa7 pb7 pc6 pe6 pf7 pg7 ph7
+
+
+** structures/FrenchII.cql
+cql()
+
+Pa2 Pb2 Pc3 Pe5 Pf2 Pg2 Ph2
+
+pa7 pb7 pd5 pe6 pf7 pg7 ph7
+
+
+** structures/KIDIII.cql
+cql()
+
+Pa2 Pb2 Pc4 Pd5 Pe4 Pf2 Pg2 Ph2
+
+pa7 pb7 pc7 pd6 pe5 pf7 pg7 ph7
+
+
+** structures/KIDComplex.cql
+cql()
+
+Pa2 Pb2 Pc4 Pd4 Pe4 Pf2 Pg2 Ph2
+
+pa7 pb7 pc6 pd6 pe5 pf7 pg7 ph7
+
+
+** structures/FrenchIII.cql
+cql()
+
+Pa2 Pb2 Pc2 Pd4 Pe5 Pf2 Pg2 Ph2
+
+pa7 pb7 pc7 pd5 pe6 pf7 pg7 ph7
+
+
+** structures/NajdorfI.cql
+cql()
+
+Pa2 Pb2 Pc2 Pd5 Pf2 Pg2 Ph2
+
+pa7 pb7 pd6 pe5 pf7 pg7 ph7
+
+
+** structures/Carlsbad.cql
+cql()
+
+Pa2 Pb2 Pd4 Pe3 Pf2 Pg2 Ph2
+
+pa7 pb7 pc7 pd5 pf7 pg7 ph7
+
+
+** structures/Slav.cql
+cql()
+
+Pa2 Pb2 Pd4 Pe3 Pf2 Pg2 Ph2
+
+pa7 pb7 pc6 pe6 pf7 pg7 ph7
+
+
+** structures/KIDI.cql
+cql()
+
+Pa2 Pb2 Pd5 Pe4 Pf2 Pg2 Ph2
+
+pa7 pb7 pd6 pe5 pf7 pg7 ph7
+
+
+** structures/KIDII.cql
+cql()
+
+Pa2 Pb2 Pc4 Pd5 Pe4 Pf2 Pg2 Ph2
+
+pa7 pb7 pc5 pd6 pe5 pf7 pg7 ph7
+
+
+** structures/ACK.cql
+cql()
+
+Pa2 Pb2 Pc2 Pd4 Pe5 Pf2 Pg2 Ph2
+pa7 pb7 pc6 pd5 pe7 pf7 pg7 ph7
+
+
+** structures/stonewall.cql
+cql()
+
+Pa2 Pb2 Pc2 Pd4 Pe2 Pf2 Pg2 Ph2
+
+pa7 pb7 pc7 pd5 pe6 pf5 pg7 ph7
+
+
+** structures/symben.cql
+cql()
+
+Pa2 Pb2 Pc4 Pd5 Pf2 Pg2 Ph2
+
+pa7 pb7 pc5 pd6 pf7 pg7 ph7
+
+
+** structures/HangingPawns.cql
+cql()
+
+Pa2 Pc4 Pd4 Pf2 Pg2 Ph2
+
+pa7 pb7 pe6 pf7 pg7 ph7
+
+
+** structures/33-42.cql
+cql()
+
+Pa2 Pb2 Pc3 Pf2 Pg2 Ph2
+
+pa7 pb7 pe6 pf7 pg7 ph7
+
+
+** structures/OpenKID.cql
+cql()
+
+Pa2 Pb2 Pc4 Pe4 Pf2 Pg2 Ph2
+
+pa7 pb7 pc7 pd6 pf7 pg7 ph7
+
+
+** structures/FrenchI.cql
+cql()
+
+Pa2 Pb2 Pc2 Pd4 Pf2 Pg2 Ph2
+
+pa7 pb7 pc7 pd5 pe6 pg7 ph7
+
+
+** structures/Hedgehog.cql
+cql()
+
+Pa2 Pb2 Pc4 Pe4 Pf2 Pg2 Ph2
+
+pa6 pb6 pd6 pe6 pf7 pg7 ph7
+
+
+** structures/IQP.cql
+cql()
+
+Pa2 Pb2 Pd4 Pf2 Pg2 Ph2
+
+pa7 pb7 pe6 pf7 pg7 ph7
+
+
+** silly/4vs3.cql
+;; R and 4 vs R and 3 with outside passed pawn
+
+
+cql()
+
+R == 1
+r == 1
+[Aa] == 11
+
+flipcolor shift flip {
+P[a2-7]
+P[f2-7]
+P[g2-7]
+P[h2-7]
+p[f2-7]
+p[g2-7]
+p[h2-7]
+}
+
+
+** silly/onlymoveep.cql
+cql()
+;; this behaves in a way i wasn't expecting 
+
+move enpassant
+parent : move legal count == 1
+
+** silly/troitsky.cql
+
+/*
+Troitsky line - identifies positions where black pawns are behind the winning line
+for two minor pieces versus pawn endgames, as defined by Troitsky.
+
+TODO add the condition that the knight blockades the square in front of the pawn.
+*/
+cql()
+
+; Ensure exactly 5 pieces on board
+[Aa] == 5
+
+
+; Check for pawns behind the line using alternating ranks
+reversecolor {
+    wtm
+    N == 2 and (
+    p[a4-7] or
+    p[h4-7] or
+    p[b6-7] or
+    p[g6-7] or
+    p[c5-7] or
+    p[f5-7] or
+    p[d4-7] or
+    p[e4-7])
+}
+
+
+** silly/doublecheck.cql
+
+
+cql()
+(R attacks k) and (B attacks k)
+
+
+** silly/rookhomerun.cql
+cql()
+
+;; equiv to rookleapcorners.cql in the examples file
+
+T∊♖
+ ✵⊢◎T
+    a1――h1
+      ――h8
+      ――a8
+
+
+
+** silly/greekgift.cql
+// Greek gift.
+
+cql() result 1-0  ply < 40
+pg7  killzone = f-h6-8
+line quiet
+  --> move from B capture ph7
+  --> move from k capture h7
+  --> .{2 12}
+  --> terminal and
+      (Ne-h5-8 == 2 or (R attacks killzone == 2 and not Q attacks killzone))
+
+
+** silly/crosspin.cql
+cql()
+;; Crosspin : A piece is pinned in two ways simultaneously: relative and absolute.
+;; TODO loop over all pieces q,r,n,b,p 
+
+flipcolor flip{
+    piece zz = p
+    (pin from [A] through zz to k) and (pin from [A] through zz to [qrnb])
+    }
+
+** silly/bahr.cql
+
+cql()
+
+reversecolor{ P == 2 and p == 1 }
+
+Q == 0
+q == 0
+B == 0
+b == 0
+N == 0
+n == 0
+R == 0
+r == 0
+
+passedpawns == 1
+
+;; condition 1. the rook's pawn is not past the halfway line.
+
+flipvertical (Pa2-7 and pa2-7) 
+
+;; condition 2. the attacking king is adjacent to the pawn.
+
+flipcolor (K->P and ray right (K P)) 
+
+;; condition 3. the defending king is either in front of the pawn or in front of the king
+;;((ray vertical (K k) or (ray vertical (K p) or (ray vertical (k P))
+
+ray vertical (K k) or ray vertical (K p) or ray vertical (k P)
+
+
+** silly/octopus.cql
+cql()
+
+Na-h6
+
+** silly/imbalance.cql
+cql()
+
+power A == 10
+power a == 12
+[Aa] == 
+
+** silly/doublecheckANDmate.cql
+;; what proportion of double checks are also checkmates?
+
+cql()
+
+flipcolor {
+    if #(A → k) >= 2 {
+        persistent double_check += 1
+        if mate {
+            persistent double_check_mate += 1
+        }
+    }
+}
+
+false
+
+
+** silly/freespace.cql
+/*********************
+print the amount of freespace around the king at each turn.
+**********************/
+
+
+cql()
+
+freespaceWhite = {#_ attackedby K}
+freespaceBlack = {#_ attackedby k}
+
+comment ("w:" freespaceWhite "b:" freespaceBlack)
+ 
+
+
+** silly/onelymovemate.cql
+cql()
+
+mate
+parent : move count legal == 1
+
+
+** silly/legal.cql
+cql()
+flipcolor flip{
+line quiet
+  --> move from n capture [A]d5
+  --> move from B capture qd8
+  --> move bb4}
+
+** opening/halloween.cql
+
+
+cql()
+
+fen move Nxe5 move nxe5
+
+** others/1-2R.cql
+;; rook vs king
+
+cql()
+
+flipcolor (R==1) 
+
+[Aa] = 3
+
+
+** others/RB.cql
+;; Rook vs Bishop Endgame (with and without pawns)
+
+cql()
+
+flipcolor (R==1 and b==1) 
+
+[Aa] == 4
+
+** others/quadrupled-pawns.cql
+;; tripled pawns
+
+cql()
+
+flipcolor shift (P[a2-7] == 4)
+
+** others/1-3BB.cql
+;; two bishops vs. King
+
+cql()
+
+flipcolor (B==2)
+
+[Aa = 3]
+
+
+** others/Rpppp.cql
+;; rook vs 4 pawns
+
+cql()
+
+flipcolor (R == 1 and P == 0 and connectedpawns == 4)
+
+[Aa] == 7
+
+** others/filterlosses.cql
+cql()
+
+Termination ~~ "\x22Normal\x22"
+
+
+** others/miniature.cql
+cql()
+mate and movenumber <= 25
+
+** others/absolutepinmate.cql
+cql()
+
+flipcolor {
+    pinningPieces = pin from A
+    pinnedPieces = pin through a
+
+    line --> pin from A
+         --> {
+                 wtm
+                 mate
+                 pin from A == pinningPieces
+                 pin through a != pinnedPieces
+             }
+}
+
+
+** others/1-1Q.cql
+;; queen vs. King 
+
+cql()
+
+flipcolor (Q==1)
+
+[Aa] = 3
+
+
+** others/tripled-pawns.cql
+;; tripled pawns
+
+cql()
+
+flipcolor shift (P[a2-7] == 3)
+
+** others/1-5NNp.cql
+;; Two knights vs. one pawn
+
+cql()
+
+flipcolor (N == 2 and p == 1)
+
+[Aa = 5]
+
+** others/evals.cql
+;; finding the evaluations
+
+cql()
+
+originalcomment "eval"
+
+
+** rook-endings/vancura.cql
+
+cql()
+
+** rook-endings/lucena.cql
+;; lucena position: pawn on b-g files, black rook cuts white king, white king on queening square, and black king is cut off along a file
+;; use a variable for cutting the king?
+
+cql()
+
+flipcolor flipvertical (R == 1 and P[b-d7] and r == 1 and K == up P[b-d7])
+
+[Aa] == 5
+
+** rook-endings/philidor.cql
+;; philidor position
+
+cql()
+
+
+
+** 100endings/99Qrp.cql
+;; ending 99 : Q vs R and b-g pawn
+
+cql()
+
+flipcolor flip (Q == 1 and r == 1 and p[b2] == 1)
+
+[Aa] == 5
+
+** 100endings/77KPP.cql
+;; ending 77 : doubled pawns
+
+cql()
+
+flipcolor (P == 2 and p == 0 and doubledpawns == 2 ) 
+
+[Aa] == 4
+
+** 100endings/11Np.cql
+;; knight vs knights pawn
+
+cql()
+
+flipcolor flipvertical (N == 1 and p[b2] == 1) 
+
+[Aa] == 4
+
+** 100endings/52_68RPr.cql
+cql()
+
+flipcolor (R == 1 and P == 1 and r == 1)
+
+[Aa] == 5
+
+** 100endings/98RPb.cql
+
+
+cql()
+
+flipcolor flip (R == 1 and P[a3] == 1 and b == 1) 
+
+[Aa] == 5
+
+** 100endings/69_76RPPr.cql
+cql()
+
+flipcolor (R == 1 and P == 2 and r == 1)
+
+[Aa] == 6
+
+** 100endings/13_15Np.cql
+;; 7th rank rooks pawn
+
+cql()
+
+flipcolor flip (N == 1 and p[a7,h7] == 1)
+
+** 100endings/21_29Rvsp.cql
+;; R vs p
+
+cql()
+
+flipcolor (R == 1 and p == 1) 
+
+[Aa] == 4
+
+** 100endings/41ocBPPb.cql
+;; Opposite colour bishops
+
+cql()
+
+;; white light squared bishop and black dark squared bishop
+
+(light B == 1 and
+ dark B == 0 and
+ dark b == 1 and
+ light b == 0 and
+ P[a-h6] == 2 and
+ connectedpawns == 2 and 
+ p == 0)
+
+or
+
+;; white dark squared bishop and black light squared bishop
+
+(dark B == 1 and
+ light B == 0 and
+ light b == 1 and
+ dark b == 0 and
+ P == 0 and
+ connectedpawns == 2 and 
+ p[a-h3] == 2)
+
+[Aa] == 6
+
+** 100endings/1_5KP.cql
+cql()
+
+flipcolor (P == 1)
+
+[Aa] == 3
+
+** 100endings/94_96RBr.cql
+;;
+
+cql()
+
+flipcolor (R == 1 and B == 1 and r == 1) 
+
+[Aa] == 5
+
+** 100endings/8_9Rn.cql
+cql()
+
+flipcolor (R == 1 and n == 1) 
+
+[Aa] == 4
+
+** 100endings/16_20Qp.cql
+;; endings 16-19 Queen vs 7th rank pawn
+
+cql()
+
+flipcolor (Q == 1 and p[a-h2] == 1) 
+
+[Aa] == 4
+
+** 100endings/12Np.cql
+;; knight 6th rank rook's pawn
+
+cql()
+
+flipcolor flipvertical (N == 1 and p[a6] == 1)
+
+[Aa] == 4
+
+** 100endings/55RPr.cql
+;; ending 55 R and b/g pawn (5th rank or further)
+
+cql()
+
+flipcolor flip (R == 1 and P[b5-7] == 1 and r == 1) 
+
+[Aa] == 5
+
+
+** 100endings/10Np.cql
+;; knight vs 7-th rank pawn
+
+cql()
+
+flipcolor flipvertical (N == 1 and p[a2] == 1) 
+
+[Aa] == 4
+
+** 100endings/30_32Rvspp.cql
+;; Rook vs. two connected pawns.
+;; is the fact that the pawns are connected important?
+
+cql()
+
+flipcolor (R == 1 and  p == 2 and connectedpawns == 2) 
+
+[Aa] == 5
+
+
+** 100endings/93BN.cql
+;; ending 93 : bishop and knight mate
+
+cql()
+
+flipcolor (B == 1 and N == 1)
+
+[Aa] == 4
+
+** 100endings/97RPb.cql
+
+
+cql()
+
+flipcolor flip (R == 1 and P[a-h6] == 1 and b == 1)
+
+[Aa] == 5
+
+** 100endings/78KPP.cql
+;;
+
+cql()
+
+flipcolor (P == 2 and isolatedpawns == 2)
+
+[Aa] == 4
+
+** 100endings/79_82KPp.cql
+;; adjacent pawns
+
+cql()
+
+(P == 1 and p == 1)
+
+[Aa] == 4
+
+** 100endings/57_58RPr.cql
+;; ending 57
+
+cql()
+
+flipcolor flipvertical (R == 1 and r == 1 and P[d6] == 1)
+
+[Aa] == 5
+
+** 100endings/100Qrp.cql
+;; ending 100 : Q vs R and rook's pawn
+
+cql()
+
+flipcolor flip (Q == 1 and r == 1 and p[a2] == 1)
+
+[Aa] == 5
+
+** 100endings/83_87KPPp.cql
+;;
+
+cql()
+
+flipcolor (P == 2 and p == 1) 
+
+[Aa] == 5
+
+** 100endings/33_36BPb.cql
+;; endings 33 - 36
+
+cql()
+
+(light B == 1 and light b == 1 and P == 1 and p == 0) or 
+(light B == 1 and light b == 1 and P == 0 and p == 1) or
+(dark B == 1 and dark b == 1 and P == 1 and p == 0) or 
+(dark B == 1 and dark b == 1 and P == 0 and p == 1)
+
+[Aa] == 5
+
+** 100endings/56RPr.cql
+;; ending 56 : rook and pawn (c,d,e,f)
+
+cql()
+
+flipcolor flip (R == 1 and P[c-d5-7] == 1 and r == 1) 
+
+[Aa] == 5
+
+
+** 100endings/42_43ocBPPb.cql
+;; Opposite colour bishops
+
+cql()
+
+;; white light squared bishop and black dark squared bishop
+
+(light B == 1 and
+ dark B == 0 and
+ dark b == 1 and
+ light b == 0 and
+ P[a-h5] == 2 and
+ connectedpawns == 2 and 
+ p == 0)
+
+or
+
+;; white dark squared bishop and black light squared bishop
+
+(dark B == 1 and
+ light B == 0 and
+ light b == 1 and
+ dark b == 0 and
+ P == 0 and
+ connectedpawns == 2 and 
+ p[a-h4] == 2)
+
+[Aa] == 6
+
+** 100endings/44_51ocBPPb.cql
+;; Opposite colour bishops
+
+cql()
+
+;; white light squared bishop and black dark squared bishop
+
+(light B == 1 and
+ dark B == 0 and
+ dark b == 1 and
+ light b == 0 and
+ P == 2 and
+ isolatedpawns == 2 and 
+ p == 0)
+
+or
+
+;; white dark squared bishop and black light squared bishop
+
+(dark B == 1 and
+ light B == 0 and
+ light b == 1 and
+ dark b == 0 and
+ P == 0 and
+ isolatedpawns == 2 and 
+ p == 2)
+
+[Aa] == 6
+
+** 100endings/6_7RB.cql
+cql()
+
+flipcolor (R == 1 and b == 1) 
+
+[Aa] == 4
+
+** 100endings/37_40BNP.cql
+cql()
+
+(B == 1 and P == 1 and N == 0 and b == 0 and p == 0 and n == 1) or 
+(B == 0 and P == 1 and N == 1 and b == 1 and p == 0 and n == 0) or 
+(B == 1 and P == 0 and N == 0 and b == 0 and p == 1 and n == 1) or 
+(B == 0 and P == 0 and N == 1 and b == 1 and p == 1 and n == 0) 
+
+[Aa] == 5
+
+** A2IM/R4r3.cql
+
+cql()
+
+R == 1
+r == 1 
+
+(P[a2-7] == 1 and P[f-h2-7] == 3 and connectedpawns == 6 and p[f-h2-7] == 3) or (p[a2-7] == 1 and p[f-h2-7] == 3 and connectedpawns == 6 and P[f-h2-7] == 3)
+
+[Aa] == 11
+
+** FCE/90-1Qa.cql
+;; Queen vs. minor
+
+cql()
+
+(Q == 1 and N == 0 and B == 0 and q == 0 and b == 0 and n == 1) or
+(Q == 1 and N == 0 and B == 0 and q == 0 and b == 1 and n == 0) or
+(Q == 0 and B == 0 and N == 1 and q == 1 and n == 0 and b == 0) or
+(Q == 0 and B == 1 and N == 0 and q == 1 and n == 0 and b == 0)
+
+R == 0
+r == 0
+
+
+** FCE/6-2-2RPPr.cql
+;; Rook and two pawns vs. Rook 
+
+cql()
+
+(R == 1 and P == 2 and r == 1 and p == 0) or 
+(R == 1 and P == 0 and r == 1 and p == 2)
+
+B == 0
+b == 0 
+N == 0
+n == 0 
+Q == 0
+q == 0 
+
+** FCE/99Qbrr.cql
+;; Queen and Bishop vs. Two Rooks (with no pawns)
+
+cql()
+
+(Q == 1 and R == 0 and B == 1 and q == 0 and r == 2 and b == 0) or
+(q == 1 and r == 0 and b == 1 and Q == 0 and R == 2 and B == 0)
+
+N == 0
+n == 0
+P == 0
+p == 0
+
+
+** FCE/90-3Qaa.cql
+;; Queen vs. two minor pieces
+
+cql()
+
+(Q == 1 and B == 0 and N == 0 and q == 0 and b == 2 and n == 0) or
+(Q == 1 and B == 0 and N == 0 and q == 0 and b == 1 and n == 1) or
+(Q == 1 and B == 0 and N == 0 and q == 0 and b == 0 and n == 2) or
+(Q == 0 and B == 2 and N == 0 and q == 1 and b == 0 and n == 0) or
+(Q == 0 and B == 1 and N == 1 and q == 1 and b == 0 and n == 0) or
+(Q == 0 and B == 0 and N == 2 and q == 1 and b == 0 and n == 0)
+
+R == 0
+r == 0
+
+
+** FCE/1-4BN.cql
+;; Bishop and Knight vs. King
+
+cql ()
+
+flipcolor (N == 1 and B == 1)
+
+[Aa] = 4
+
+** FCE/6-2-0Rr.cql
+;; Rook and pawns vs rook and pawns
+
+cql()
+
+R == 1 
+r == 1
+
+Q == 0
+q == 0
+N == 0
+n == 0
+B == 0
+b == 0
+
+
+** FCE/90-5Qrr.cql
+;; Queen vs two rooks (with or without pawns)
+
+cql()
+
+(Q == 1 and R == 0 and q == 0 and r == 2) or 
+(Q == 0 and R == 2 and q == 1 and r == 0)
+
+B == 0
+b == 0
+N == 0
+n == 0
+
+
+** FCE/3-2NN.cql
+;; Knight vs. Knight with pawns
+
+cql()
+
+(N == 1 and n == 1) and 
+((P >= 1 and p >= 1) or (P >= 1 and p == 0) or (P == 0 and p >= 1))
+
+Q == 0
+q == 0
+B == 0
+b == 0
+R == 0
+r == 0
+
+
+** FCE/8-1RNr.cql
+;; Rook and knight vs rook.
+
+cql()
+
+(R == 1 and N == 1 and r == 1 and n == 0) or 
+(R == 1 and N == 0 and r == 1 and n == 1)
+
+B == 0
+b == 0
+Q == 0
+q == 0
+
+;; without pawns
+;; P == 0
+;; p == 0
+
+
+** FCE/4-1Bp.cql
+;; Bishop vs. Pawns
+
+cql()
+
+(B == 1 and P == 0 and b == 0 and p >= 1) or 
+(B == 0 and P >= 1 and b == 1 and p == 0)
+
+Q == 0
+q == 0
+N == 0
+n == 0
+R == 0
+r == 0
+
+
+** FCE/90-7QAq.cql
+;; Queen vs. Queen and minor piece
+
+cql()
+
+(Q == 1 and B == 1 and N == 0 and q == 1 and b == 0 and n == 0) or 
+(Q == 1 and B == 0 and N == 1 and q == 1 and b == 0 and n == 0) or 
+(Q == 1 and B == 0 and N == 0 and q == 1 and b == 1 and n == 0) or 
+(Q == 1 and B == 0 and N == 0 and q == 1 and b == 0 and n == 1)
+
+
+R == 0
+r == 0
+
+
+** FCE/6-1-0RP.cql
+;; rook vs pawns
+
+cql()
+
+(R == 1 and P == 0 and r == 0 and p >= 1) or 
+(R == 0 and P >= 1 and r == 1 and p == 0)
+
+Q == 0
+q == 0
+N == 0
+n == 0
+B == 0
+b == 0
+
+** FCE/9-3QPq.cql
+;; Queen and pawn vs. Queen
+
+cql()
+
+(Q == 1 and P == 1 and q == 1 and p == 0) or 
+(Q == 1 and P == 0 and q == 1 and p == 1)
+
+
+B == 0
+b == 0
+N == 0
+n == 0
+R == 0
+r == 0
+
+
+** FCE/90-2Qr.cql
+;; Queen vs. Rook (with or without pawns)
+
+cql()
+
+(Q == 1 and R == 0 and q == 0 and r == 1) or 
+(Q == 0 and R == 1 and q == 1 and r == 0)
+
+B == 0
+b == 0
+N == 0
+n == 0
+
+;; for without pawns
+;; [Aa] == 4
+
+
+** FCE/7-1RN.cql
+;; Rook vs. Knight
+
+cql()
+
+(R == 1 and N == 0 and r == 0 and n == 1) or
+(R == 0 and N == 1 and r == 1 and n == 0) 
+
+Q == 0
+q == 0
+B == 0
+b == 0
+
+
+
+** FCE/9-2Qq.cql
+;; Queen vs. Queen (and pawns)
+
+cql()
+
+Q == 1
+q == 1
+
+B == 0
+b == 0
+N == 0
+n == 0
+R == 0
+r == 0
+
+
+** FCE/90-4Qra.cql
+;; Queen vs. Rook and minor piece
+
+cql()
+
+(Q == 1 and R == 0 and B == 0 and N == 0 and q == 0 and r == 1 and b == 1 and n == 0) or
+(Q == 1 and R == 0 and B == 0 and N == 0 and q == 0 and r == 1 and b == 0 and n == 1) or
+(Q == 0 and R == 1 and B == 1 and N == 0 and q == 1 and r == 0 and b == 0 and n == 0) or
+(Q == 0 and R == 1 and B == 0 and N == 1 and q == 1 and r == 0 and b == 0 and n == 0)
+
+
+** FCE/6-3RRrr.cql
+;; Two rooks vs. Two rooks (and pawns)
+
+cql()
+
+R == 2
+r == 2
+
+Q == 0
+q == 0
+B == 0
+b == 0
+N == 0
+n == 0
+
+
+** FCE/4-3ocBB.cql
+;; Opposite colour bishops
+
+cql()
+
+;; white light squared bishop and black dark squared bishop
+
+(B[a2,a4,a6,a8,b1,b3,b5,b7,c2,c4,c6,c8,d1,d3,d5,d7,e2,e4,e6,e8,f1,f3,f5,f7,g2,g4,g6,g8,h1,h3,h5,h7] == 1 and
+ B[a1,a3,a5,a7,b2,b4,b6,b8,c1,c3,c5,c7,d2,d4,d6,d8,e1,e3,e5,e7,f2,f4,f6,f8,g1,g3,g5,g7,h2,h4,h6,h8] == 0 and
+ b[a1,a3,a5,a7,b2,b4,b6,b8,c1,c3,c5,c7,d2,d4,d6,d8,e1,e3,e5,e7,f2,f4,f6,f8,g1,g3,g5,g7,h2,h4,h6,h8] == 1 and
+ b[a2,a4,a6,a8,b1,b3,b5,b7,c2,c4,c6,c8,d1,d3,d5,d7,e2,e4,e6,e8,f1,f3,f5,f7,g2,g4,g6,g8,h1,h3,h5,h7] == 0)
+
+or
+;; white dark squared bishop and black light squared bishop
+
+(B[a1,a3,a5,a7,b2,b4,b6,b8,c1,c3,c5,c7,d2,d4,d6,d8,e1,e3,e5,e7,f2,f4,f6,f8,g1,g3,g5,g7,h2,h4,h6,h8] == 1 and
+ B[a2,a4,a6,a8,b1,b3,b5,b7,c2,c4,c6,c8,d1,d3,d5,d7,e2,e4,e6,e8,f1,f3,f5,f7,g2,g4,g6,g8,h1,h3,h5,h7] == 0 and
+ b[a2,a4,a6,a8,b1,b3,b5,b7,c2,c4,c6,c8,d1,d3,d5,d7,e2,e4,e6,e8,f1,f3,f5,f7,g2,g4,g6,g8,h1,h3,h5,h7] == 1 and
+ b[a1,a3,a5,a7,b2,b4,b6,b8,c1,c3,c5,c7,d2,d4,d6,d8,e1,e3,e5,e7,f2,f4,f6,f8,g1,g3,g5,g7,h2,h4,h6,h8] == 0)
+
+R == 0
+r == 0
+N == 0
+n == 0
+Q == 0
+q == 0
+
+
+** FCE/8-3RAra.cql
+;; Rook and minor piece vs. Rook and minor piece
+
+cql()
+
+(R == 1 and B == 1 and N == 0 and r == 1 and b == 1 and n == 0) or
+(R == 1 and B == 1 and N == 0 and r == 1 and b == 0 and n == 1) or
+(R == 1 and B == 0 and N == 1 and r == 1 and b == 1 and n == 0) or
+(R == 1 and B == 0 and N == 1 and r == 1 and b == 0 and n == 1)
+
+Q == 0
+q == 0
+
+;; without pawns
+;; P == 0
+;; p == 0
+
+
+** FCE/5-0BvsN.cql
+;; bishop vs knight
+
+cql()
+
+(N == 1 and n == 0 and B == 0 and b == 1) or 
+(N == 0 and n == 1 and B == 1 and b == 0)
+
+Q == 0
+q == 0
+R == 0
+r == 0
+
+
+** FCE/9-1Qp.cql
+;; Queen vs. Pawn 
+
+cql()
+
+(Q == 1 and P == 0 and q == 0 and p >= 1) or 
+(Q == 0 and P >= 1 and q == 1 and p == 0)
+
+B == 0
+b == 0
+N == 0
+n == 0
+R == 0
+r == 0
+
+
+** FCE/7-2RB.cql
+;; Rook vs. Bishop
+
+cql()
+
+(R == 1 and B == 0 and r == 0 and b == 1) or
+(R == 0 and B == 1 and r == 1 and b == 0) 
+
+Q == 0
+q == 0
+N == 0
+n == 0
+
+
+** FCE/3-1Np.cql
+;; Knight vs. pawn(s)
+
+cql()
+
+(N == 1 and P == 0 and n == 0 and p >= 1) or 
+(N == 0 and P >= 1 and n == 1 and p == 0)
+
+Q == 0
+q == 0
+B == 0
+b == 0
+R == 0
+r == 0
+
+
+** FCE/6-2-1RPr.cql
+;; rook and pawn vs rook
+
+cql()
+
+
+(R==1 and P==1 and r==1 and p==0) or 
+(R==1 and P==0 and r==1 and p==1)
+
+Q == 0
+q == 0
+N == 0
+n == 0
+B == 0
+b == 0
+
+** FCE/2-1KPk.cql
+;; King and pawn vs. King
+
+cql()
+
+(P == 1 or p == 1)
+
+[Aa] == 3
+
+
+** FCE/2-0Pp.cql
+;; pure pawn endings
+
+cql()
+
+(P >= 1 and p == 0) or
+(P == 0 and p >= 1) or
+(P >= 1 and p >= 1)
+
+Q == 0
+q == 0
+B == 0
+b == 0
+N == 0
+n == 0
+R == 0
+r == 0
+
+
+** FCE/90-6Qaaa.cql
+;; Queen vs. three minor pieces
+
+cql()
+
+(Q == 1 and N == 0 and B == 0 and q == 0 and b == 0 and n == 3) or 
+(Q == 1 and N == 0 and B == 0 and q == 0 and b == 1 and n == 2) or 
+(Q == 1 and N == 0 and B == 0 and q == 0 and b == 2 and n == 1) or 
+(Q == 1 and N == 0 and B == 0 and q == 0 and b == 3 and n == 0) or 
+(q == 1 and n == 0 and b == 0 and Q == 0 and B == 0 and N == 3) or 
+(q == 1 and n == 0 and b == 0 and Q == 0 and B == 1 and N == 2) or 
+(q == 1 and n == 0 and b == 0 and Q == 0 and B == 2 and N == 1) or 
+(q == 1 and n == 0 and b == 0 and Q == 0 and B == 3 and N == 0)
+
+R == 0
+r == 0
+
+
+** FCE/4-2scBB.cql
+;; Same colour bishops
+
+cql()
+
+;; white light squared bishop and black light squared bishop
+
+(B[a2,a4,a6,a8,b1,b3,b5,b7,c2,c4,c6,c8,d1,d3,d5,d7,e2,e4,e6,e8,f1,f3,f5,f7,g2,g4,g6,g8,h1,h3,h5,h7] == 1 and
+ B[a1,a3,a5,a7,b2,b4,b6,b8,c1,c3,c5,c7,d2,d4,d6,d8,e1,e3,e5,e7,f2,f4,f6,f8,g1,g3,g5,g7,h2,h4,h6,h8] == 0 and
+ b[a1,a3,a5,a7,b2,b4,b6,b8,c1,c3,c5,c7,d2,d4,d6,d8,e1,e3,e5,e7,f2,f4,f6,f8,g1,g3,g5,g7,h2,h4,h6,h8] == 0 and
+ b[a2,a4,a6,a8,b1,b3,b5,b7,c2,c4,c6,c8,d1,d3,d5,d7,e2,e4,e6,e8,f1,f3,f5,f7,g2,g4,g6,g8,h1,h3,h5,h7] == 1)
+
+or
+;; white dark squared bishop and black dark squared bishop
+
+(B[a1,a3,a5,a7,b2,b4,b6,b8,c1,c3,c5,c7,d2,d4,d6,d8,e1,e3,e5,e7,f2,f4,f6,f8,g1,g3,g5,g7,h2,h4,h6,h8] == 1 and
+ B[a2,a4,a6,a8,b1,b3,b5,b7,c2,c4,c6,c8,d1,d3,d5,d7,e2,e4,e6,e8,f1,f3,f5,f7,g2,g4,g6,g8,h1,h3,h5,h7] == 0 and
+ b[a2,a4,a6,a8,b1,b3,b5,b7,c2,c4,c6,c8,d1,d3,d5,d7,e2,e4,e6,e8,f1,f3,f5,f7,g2,g4,g6,g8,h1,h3,h5,h7] == 0 and
+ b[a1,a3,a5,a7,b2,b4,b6,b8,c1,c3,c5,c7,d2,d4,d6,d8,e1,e3,e5,e7,f2,f4,f6,f8,g1,g3,g5,g7,h2,h4,h6,h8] == 1)
+
+R == 0
+r == 0
+N == 0
+n == 0
+Q == 0
+q == 0
+
+
+** FCE/8-2RBr.cql
+;; Rook and bishop vs rook 
+
+cql()
+
+(R == 1 and B == 1 and r == 1 and b == 0) or
+(R == 1 and B == 0 and r == 1 and b == 1)
+
+N == 0
+n == 0
+Q == 0
+q == 0
+
+;; without pawns
+;; P == 0
+;; p == 0
+
+
+** mates/retimate.cql
+
+
+;;cql()
+;;⬓{btm mate
+;;B -> k
+;;k -> B
+;;R -> B
+;;_ <- k == 3
+
+;;square all x in _ <- k
+;;       (B -> x) or (R -> x)}
+
+cql() mate flipcolor shift flip {
+    Bd8 Rd1-7 kc7
+}
+
+
+** mates/killbox.cql
+
+
+cql()
+⬓{btm mate
+R -> k
+k -> R
+not k -> Q
+Q -> R}
+
+;;cql() mate flipcolor shift flip {
+;;    ka5 Ra6 Qc4
+;;}
+
+
+** mates/legalmate.cql
+cql() mate flipcolor shift flip {
+    Nd5 Ne5 Bf7 ke7
+}
+
+
+** mates/BN.cql
+
+
+cql()
+⬓{btm mate
+[Aa] == 4}
+
+
+** mates/ismate.cql
+cql()
+
+⬓{btm mate}
+
+
+** mates/0PropMates.cql
+/*
+The aim of this script is to break down the proportion of checkmate patterns.
+*/
+
+cql()
+
+if mate {
+    persistent ismate += 1
+    persistent matched_pattern = 0
+
+    ;; anastasia
+    if flipcolor shift flip {Ne7 pg7 Rh5 kh7} {
+        persistent anastasia += 1
+        matched_pattern += 1
+    }
+
+    ;; anderssen
+    if ⬓{btm mate R -> k k -> R} {
+        persistent anderssen += 1
+        matched_pattern += 1
+    }
+
+    ;; arabian
+    if ⬓{btm mate R -> k k -> R N -> R _ <- k == 2} {
+        persistent arabian += 1
+        matched_pattern += 1
+    }
+
+    ;; back rank
+    if ⬓{btm mate (R -> k or Q -> k) _ <- k == 2} {
+        persistent backrank += 1
+        matched_pattern += 1
+    }
+
+    ;; balestra
+    if ⬓{btm mate B -> k square all x in _ <- k (B -> x) or (Q -> x)} {
+        persistent balestra += 1
+        matched_pattern += 1
+    }
+
+    ;; Bishop and Knight Mate
+    if ⬓{btm mate [Aa] == 4} {
+        persistent bishopknight += 1
+        matched_pattern += 1
+    }
+
+    ;; blackburne
+    if ⬓{btm mate B -> k square all x in _ <- k (B -> x) or (N -> x)} {
+        persistent blackburne += 1
+        matched_pattern += 1
+    }
+
+    ;; blind swine
+    if flipcolor shift flip {rf8 kg8 Rg7 Rh7} {
+        persistent blindswine += 1
+        matched_pattern += 1
+    }
+
+    ;; boden
+    if flipcolor shift flip {kc8 rd8 pd7 Ba6 Bf4} {
+        persistent boden += 1
+    }
+
+    ;; corner
+    if flipcolor shift flip {Nf7 kh8 ph7 Rg1-7} {
+        persistent corner += 1
+        matched_pattern += 1
+    }
+
+    ;; damiano's bishop
+    if ⬓{btm mate Q -> k k -> Q B -> Q} {
+        persistent damianobishop += 1
+        matched_pattern += 1
+    }
+
+    ;; double bishop
+    if ⬓{btm mate [Aa] == 4 B == 2} {
+        persistent doublebishop += 1
+        matched_pattern += 1
+    }
+
+    ;; double knight
+    if ⬓{btm mate N == 2 [Aa] == 4} {
+        persistent doubleknight += 1
+        matched_pattern += 1
+    }
+
+    ;; dovetail / cozio
+    ;; if flipcolor shift flip {Qf2 kg2 [a]h1 [a]h3 * attackedby k == 5 and A attacks (* attackedby k) == 1} {
+    ;;     persistent dovetail += 1
+    ;; }
+
+    ;; epaulette
+    if ⬓{btm mate [R]} {
+        persistent epaulette += 1
+        matched_pattern += 1
+    }
+
+    ;; greco
+    if ⬓{btm mate Q -> k square all x in _ <- k (B -> x) or (Q -> x)} {
+        persistent greco += 1
+        matched_pattern += 1
+    }
+
+    ;; hook
+    if ⬓{btm mate R -> k k -> R N -> R k -> N P -> N} {
+        persistent hook += 1
+        matched_pattern += 1
+    }
+
+    ;; kill box
+    if ⬓{btm mate R -> k k -> R not k -> Q Q -> R} {
+        persistent killbox += 1
+        matched_pattern += 1
+    }
+
+    ;; ladder
+    if ⬓{btm mate R -> k _ <- k == 5} {
+        persistent ladder += 1
+        matched_pattern += 1
+    }
+
+    ;; legal
+    if flipcolor shift flip {Nd5 Ne5 Bf7 ke7} {
+        persistent legalmate += 1
+        matched_pattern += 1
+    }
+
+    ;; lolli
+    if flipcolor shift flip {kg8 Qg7 Pf6} {
+        persistent lolli += 1
+        matched_pattern += 1
+    }
+
+    ;; max lange
+    if ⬓{btm mate Q -> k square all x in _ <- k (B -> x) or (Q -> x)} {
+        persistent maxlange += 1
+        matched_pattern += 1
+    }
+
+    ;; mayet/opera
+    if flipcolor shift flip {kg8 Rh8 Bb2} {
+        persistent mayet += 1
+        matched_pattern += 1
+    }
+
+    ;; morphy
+    if flipcolor shift flip {Bf6 Rg1 kh8} {
+        persistent morphy += 1
+        matched_pattern += 1
+    }
+
+    ;; pillsbury
+    if ⬓{btm mate R -> k _<-k == 2 square all x in _ <- k (B -> x) or (R -> x)} {
+        persistent pillsbury += 1
+        matched_pattern += 1
+    }
+
+    ;; reti
+    if flipcolor shift flip {Bd8 Rd1-5 kc7} {
+        persistent reti += 1
+        matched_pattern += 1
+    }
+
+    ;; smothered
+    if ⬓{btm mate not k -> [A_]} {
+        persistent smothered += 1
+        matched_pattern += 1
+    }
+
+    ;; suffocation
+    if flipcolor shift flip {Ne7 Bc3 kg8} {
+        persistent suffocation += 1
+        matched_pattern += 1
+    }
+
+    ;; swallowtail
+    if ⬓{btm mate Q -> k k -> Q _ <- k == 5} {
+        persistent swallowtail += 1
+        matched_pattern += 1
+    }
+
+    ;; triangle
+    if flipcolor shift flip {Qd6 Rd8 ke7 pf7} {
+        persistent triangle += 1
+        matched_pattern += 1
+    }
+
+    ;; vukovic
+    if flipcolor shift flip {Re7 Ne6 ke8} {
+        persistent vukovic += 1
+        matched_pattern += 1
+    }
+
+    ;; damiano
+    if flipcolor shift flip {kg8 rf8 Qh7 pg7 Pg6} {
+        persistent damiano += 1
+        matched_pattern += 1
+    }
+
+    ;; david and goliath
+    if ⬓{btm mate P -> k} {
+        persistent davidgoliath += 1
+        matched_pattern += 1
+    }
+
+    ;; opera
+    if ⬓{btm mate R->k k->R B->R} {
+        persistent opera += 1
+        matched_pattern += 1
+    }
+
+    if matched_pattern == 0 {  // If no pattern was matched
+        persistent unknown_pattern += 1
+        message ("Unknown pattern found in position: " str(fen))
+    }
+}
+
+
+false
+
+
+** mates/queen.cql
+
+
+
+cql()
+⬓{btm mate
+Q -> k
+k -> Q
+K -> Q}
+
+
+** mates/boden2.cql
+cql() mate flipcolor shift flip {
+    kc8 rd8 pd7 Ba6 Bf4
+}
+
+
+** mates/blackburnemate.cql
+
+
+cql()
+⬓{btm mate
+B -> k
+
+square all x in _ <- k
+       (B -> x) or (N -> x)}
+
+
+** mates/lolli.cql
+cql() mate flipcolor shift flip {
+    kg8 Qg7 Pf6
+}
+
+
+** mates/vukovicmate.cql
+cql() mate flipcolor shift flip {
+    Re7 Ne6 ke8
+}
+
+
+** mates/arabian2.cql
+cql() mate flipcolor shift flip {
+    Nf6 Rh7 kh8
+}
+
+
+** mates/balestramate.cql
+
+
+
+cql()
+⬓{btm mate
+B -> k
+
+square all x in _ <- k
+       (B -> x) or (Q -> x)}
+
+
+** mates/pillsbury.cql
+/*Pillsbury's mate[22] is a common method of checkmating and is named for
+Harry Nelson Pillsbury.
+It works by attacking the king with the rook while the bishop is
+cutting off the king.[23]
+It is very similar to Morphy's Mate, in fact in some ways
+they are interchangeable,
+the main difference is that in Pillsbury's mate, the bishop could be on h6.
+*/
+cql()
+⬓{btm mate
+R -> k
+_<-k == 2
+
+square all x in _ <- k
+       (B -> x) or (R -> x)}
+
+
+** mates/trianglemate.cql
+
+
+
+;;cql()
+;;⬓{btm mate
+;;Q -> k
+;;k -> Q
+;;k -> R
+;;Q -> R}
+
+cql() mate flipcolor shift flip {
+    Qd6 Rd8 ke7 af7
+}
+
+
+** mates/suffocationmate.cql
+
+
+
+cql()
+⬓{btm mate
+N -> k
+_ <- k == 2
+
+square all x in _ <- k
+       B -> x
+       }
+
+
+** mates/backrank.cql
+
+
+cql()
+⬓{btm mate
+R -> k
+_ <- k == 2}
+
+
+** mates/hookmate.cql
+
+
+
+cql()
+⬓{btm mate
+R -> k
+k -> R
+N -> R
+k -> N
+P -> N}
+
+;;cql() mate flipcolor shift flip {
+;;    Re8 Nf6 [PB]e5
+;;}
+
+
+** mates/KNN.cql
+
+
+cql()
+⬓{btm mate
+N == 2
+[Aa] == 4}
+
+
+** mates/blindswine2.cql
+cql() mate flipcolor shift flip {
+    rf8 kg8 Rg7 Rh7
+}
+
+
+** mates/morphymate.cql
+
+
+
+cql()
+⬓{btm mate
+B -> k
+_ <- k == 2
+
+square all x in _ <- k
+       (B -> x) or (R -> x)}
+
+cql() mate flipcolor shift flip {
+    Bf6 Rg1 kh8 
+}
+
+
+** mates/twoknightmate.cql
+
+
+cql()
+⬓{btm mate
+N -> k
+N == 2}
+
+
+** mates/damiano.cql
+cql() mate flipcolor shift flip {
+    kg8 rf8 Qh7 pg7 Pg6
+}
+
+
+** mates/arabianmate.cql
+cql()
+⬓{btm mate
+R -> k
+k -> R
+N -> R
+_ <- k == 2}
+
+
+** mates/KBB.cql
+
+
+
+cql()
+⬓{btm mate
+[Aa] == 4
+B == 2}
+
+
+** mates/opera.cql
+/*It works by attacking an uncastled king on the back rank
+with a rook using a bishop to protect it. An enemy pawn or
+a piece other than a knight is used to restrict the enemy
+king's movement.
+
+Rook attacks king
+King attacks rook
+*/
+
+cql()
+⬓{btm mate
+R->k
+k->R
+B->R}
+
+/*
+square all x in _ <- k
+       (B -> x) or (R -> x)
+*/
+
+*/
+cql() mate flipcolor shift flip {
+    Rd8 Bg5 ke8
+}
+*/
+
+** mates/twobishopmate.cql
+
+
+cql()
+⬓{btm mate
+B -> k
+_ <- k == 3}
+
+
+** mates/anderssen2.cql
+cql() mate flipcolor shift flip {
+    Kf6 pg7 kg8 Rh8
+}
+
+
+** mates/blindswinemate.cql
+
+
+cql()
+⬓{btm mate
+R -> k
+k -> R
+R -> R
+_ <- k == 2}
+
+
+** mates/dovetailmate2.cql
+// dovetail's mate.
+// Shift and flip the pattern across the board.
+cql() mate flipcolor shift flip {
+  // Establish the pattern with two friendly obstructing pieces.
+  Qf2 kg2 [a]h1 [a]h3
+  // All other squares are empty and only the queen prevents flight.
+  _ attackedby k == 5 and A attacks (_ attackedby k) == 1
+} 
+
+** mates/swallowtail.cql
+
+
+
+cql()
+⬓{btm mate
+Q -> k
+k -> Q
+_ <- k == 5}
+
+
+** mates/epaulettemate.cql
+
+
+cql()
+⬓{btm mate
+[R]}
+
+
+** mates/davidandgoliath.cql
+
+
+cql()
+⬓{btm mate
+P -> k}
+
+
+** mates/dovetailmate1.cql
+// dovetail's mate.
+// Shift and flip the pattern across the board.
+cql() mate flipcolor shift flip {
+  // Establish the pattern with two friendly obstructing pieces.
+  Qg2 kg3 [a]f4 [a]h4
+  // All other squares are empty and only the queen prevents flight.
+  _ attackedby k == 5 and A attacks (_ attackedby k) == 1
+} 
+
+** mates/mayet.cql
+
+
+cql()
+⬓{btm mate
+R -> k
+k -> R
+B -> R
+_ <- k == 3}
+
+cql() mate flipcolor shift flip {
+    kg8 Rh8 Bb2 
+}
+
+
+** mates/anderssen.cql
+cql()
+⬓{btm mate
+R -> k
+k -> R}
+
+
+** mates/anastasia.cql
+cql() mate flipcolor shift flip {
+    Ne7 pg7 Rh5 kh7
+}
+
+
+** mates/suffocation2.cql
+cql() mate flipcolor shift flip {
+    Ne7 Bc3 kg8
+}
+
+
+** mates/maxlangemate.cql
+/*seems exactly the same as greco's mate*/
+
+cql()
+⬓{btm mate
+Q -> k
+
+square all x in _ <- k
+       (B -> x) or (Q -> x)}
+
+;;cql() mate flipcolor shift flip {
+;;    Bf7 Qg8 kh7
+;;}
+
+
+** mates/damianobishopmate.cql
+
+
+cql()
+⬓{btm mate
+Q -> k
+k -> Q
+B -> Q}
+
+
+** mates/anastasiamate.cql
+
+
+cql()
+⬓{btm mate
+R -> k
+_ <- k == 4
+
+
+square all x in _ <- k
+       (R -> x) or (N -> x)}
+
+
+** mates/laddermate.cql
+
+
+cql()
+⬓{btm mate
+R -> k
+_ <- k == 5}
+
+
+** mates/greco.cql
+cql()
+⬓{btm mate
+Q -> k
+
+square all x in _ <- k
+       (B -> x) or (Q -> x)}
+
+
+;; if you wanted to sort by which has more pieces
+;;sort power a
+
+** mates/doubleknight.cql
+cql() mate flipcolor shift flip {
+    ka8 pa7 pb7 Nc7 Nd7
+}
+
+
+** mates/corner.cql
+cql() mate flipcolor shift flip {
+    Nf7 kh8 ph7 Rg1-7
+}
+
+
+** mates/rookmate.cql
+
+
+
+cql()
+⬓{btm mate
+R -> k
+_ <- k == 5
+
+square all x in _ <- k
+       (B -> x) or (K -> x)}
+
+
+** mates/smotheredmate.cql
+/*black is in smothered mate:
+  the black king does attacks neither
+  an empty square nor a white piece
+*/
+cql()
+⬓{btm mate
+not k -> [A_]}
+
+
+** mates/castlingmate.cql
+
+
+cql()
+⬓{o-o mate or o-o-o mate}
+
+
+** mates/bodenmate.cql
+
+
+cql()
+⬓{btm mate
+B -> k
+
+square all x in _ <- k
+       B -> x}
+
+
+** lhampton/epaulette.cql
+// Epaulette mate.
+// Pieces located relative to the king's position.
+cql() mate flipcolor {
+  // Locate the king and his epaulettes.
+  ka-h8  horizontal 1 k & r == 2
+  // King's field on adjacent rank are all empty or hold
+  // a double epaulette.
+  _ attackedby k == 3  or  p attackedby k == 2
+  // The queen (and only the queen) checks.
+  down 2 6 k & Q attacks k  and  A attacks k == 1
+  // Only the queen guards any of the flight squares.
+  A attacks (_ attackedby k) == 1
+}
+
+** lhampton/castleoppside.cql
+cql() line --> {wtm  move o-o} --> .* --> move o-o-o
+
+** lhampton/windmill.cql
+// Windmill - nested piece filters.
+// Ensure that there are only two pieces employed in the tactic.
+cql() ply > 40
+  flipcolor
+    // Iterate over the windmilling pieces.
+    piece Mill in [RBN]
+      // Iterate over the stationary pieces giving discovery.
+      piece Disc in [RB] {
+        Disc != Mill
+        sort "Line length"
+        line singlecolor
+          --> (Mill attacks k and move from k
+            --> Disc attacks k and move from k
+                  and move from Mill capture . previous){2 100}
+      }
+
+** lhampton/rookpintoqueen.cql
+cql() flipcolor ray diagonal (Q B r q)
+
+** lhampton/threewayknightfork.cql
+cql() piece Knight in N  [qr] attackedby Knight > 2 and not move capture Knight
+
+** lhampton/answercheckwithmate.cql
+cql() line --> check --> mate
+
+** lhampton/royalcheck.cql
+cql() line --> flipcolor {check  move from k} --> check
+
+** lhampton/skeweredking.cql
+cql() flipcolor xray ([BR] k q)
+
+** lhampton/doublecheckcapture.cql
+cql() flipcolor line --> move capture a --> [BN] attacks k == 2
+
+** lhampton/kinghunt.cql
+// The king hunt.
+cql() terminal flipcolor { result 1-0  ka-h1-3 
+  // Board congestion has never dropped below some threshold and
+  // the king has never felt secure enough to go on a casual walk.
+  not find <-- power [Aa] < 30 or not Q
+  // Consecutive checks with a lower bound.
+  sort "Checks"
+  line quiet singlecolor
+    <-- check {4 100}
+    <-- check and posBC = currentposition and comment("CQL begin checks")
+  // The king has been "drawn out" by decoys.
+  sort "Decoys"
+  find <-- 2 100 {
+    // The "decoy" is not too far distant from the checks.
+    currentposition >= posBC or distance(currentposition posBC) < 24
+    move from k capture (move to . previous)
+      and comment("Decoy")
+  }
+}
+
+** lhampton/pawnchain.cql
+// Pawn chains.
+cql()
+function BasePawns(S) { S & ~(S attackedby S) }
+function PeakPawns(S) { S & ~(S attacks S) }
+
+Chain = []
+square BP in BasePawns(P) {
+  not BP & Chain
+  Chain = BP  lastChain = []
+  while (Chain != lastChain) {
+    lastChain = Chain
+    Chain |= P attackedby Chain | P attacks Chain
+  }
+  Chain > 5 and BasePawns(Chain) > 1 and PeakPawns(Chain) > 2
+  comment("Chain at " Chain)
+}
+
+** lhampton/zwischenzug.cql
+// Zwischenzug.
+cql() flipcolor {
+  sort min "Line length"
+  line
+    --> // A capture that is not by a pawn and is not a recapture.
+        {
+        Square =? move capture a from ~P
+        not move capture Square previous
+        PowerDiff = power A - power a
+        }
+    --> // The recapture is delayed at least one move.
+        {
+        // The next move is not a recapture.
+        not check and move to ~Square
+        // Assign the [attacked] piece that is to be recaptured.
+        piece Piece = Square attackedby a
+        // That piece has fewer guards than attackers.
+        #(Square attackedby a) > #(Square attackedby A)
+        }
+    --> not move from Piece {1 5}
+    --> // The piece is eventually recaptured...
+        move to Square capture Piece
+    --> // ... resulting in material gain.
+        PowerDiff > power A - power a and not move capture .
+}
+
+** lhampton/dovetail.cql
+// Cozio's mate.
+// Shift and flip the pattern across the board.
+cql() mate flipcolor shift flip {
+  // Establish the pattern with two friendly obstructing pieces.
+  Qh2 kg3 [a]f3 [a]g4
+  // All other squares are empty and only the queen prevents flight.
+  _ attackedby k == 5 and A attacks (_ attackedby k) == 1
+}
+
+** lhampton/pawnforkrook.cql
+cql() flipcolor shift {ra8 rc8 Pb7}
+
+** lhampton/alekhinegun.cql
+cql() flipcolor ray up (Q R R)
+
+** lhampton/railroad.cql
+// Railroaded.
+cql() flipcolor rotate90 { result 1-0
+  sort "Line length"
+  line  // Walk the king up between the tracks.
+    --> (check and move from k to vertical between(Q R)
+      --> // Alternate between rook and queen moves.
+          move from R to diagonal 2 Q    or
+          move from Q to horizontal 2 R) {3 100}
+}
+
