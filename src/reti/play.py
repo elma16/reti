@@ -21,7 +21,8 @@ Features:
 - Multiple practice modes.
 - Results tracking using Lichess tablebase API and AI challenges.
 """
-LICHESS_TOKEN = os.environ.get('LICHESS_API_KEY')
+
+LICHESS_TOKEN = os.environ["LICHESS_TOKEN"]
 MAX_TABLEBASE_PIECES = 7  # Define the maximum number of pieces for tablebase lookup
 MAX_GENERATION_ATTEMPTS = 1000  # Limit attempts for random generation
 
@@ -144,7 +145,7 @@ def challenge_from_resigned_games(pgn_file, num_games, tally):
         try:
             response = requests.post(
                 "https://lichess.org/api/challenge/ai",
-                headers={"Authorization": f"Bearer {api_key}"},
+                headers={"Authorization": f"Bearer {LICHESS_TOKEN}"},
                 data={
                     "level": 8,  # Consider making level configurable
                     "clock.limit": 60,  # Increased time slightly
@@ -381,7 +382,7 @@ def challenge_from_endgame_positions(pgn_file, num_games, tally, aim="win"):  # 
         try:
             response = requests.post(
                 "https://lichess.org/api/challenge/ai",
-                headers={"Authorization": f"Bearer {api_key}"},
+                headers={"Authorization": f"Bearer {LICHESS_TOKEN}"},
                 data={
                     "level": 8,
                     "clock.limit": 60,  # More time for endgames
@@ -678,7 +679,7 @@ def challenge_from_random_endgame(
             try:
                 response = requests.post(
                     "https://lichess.org/api/challenge/ai",
-                    headers={"Authorization": f"Bearer {api_key}"},
+                    headers={"Authorization": f"Bearer {LICHESS_TOKEN}"},
                     data={
                         "level": 8,
                         "clock.limit": 60,  # Adjust time as needed
@@ -848,7 +849,7 @@ def main_fn():
 
     # Simple validation for api_key
     # ...(existing api_key validation remains the same)...
-    if not api_key or len(api_key) < 10:
+    if not LICHESS_TOKEN or len(LICHESS_TOKEN) < 10:
         print("Error: Lichess API key not found or seems invalid in env.py.")
         print(
             "Please ensure env.py exists in the same directory and contains api_key = 'YOUR_LICHESS_API_TOKEN'"

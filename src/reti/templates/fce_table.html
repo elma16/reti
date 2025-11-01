@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>FCE Table Analyzer</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css" />
+  <style>
+    *{box-sizing:border-box} body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Ubuntu,"Helvetica Neue",sans-serif;background:#101322;color:#111;margin:0;padding:24px}
+    .container{max-width:1200px;margin:0 auto}
+    .card{background:#fff;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.2);padding:24px;margin-bottom:24px}
+    h1{color:#fff;margin:0 0 16px}
+    .btn{background:#5b6ee1;color:#fff;border:none;border-radius:8px;padding:10px 16px;font-weight:600;cursor:pointer}
+    .btn:disabled{opacity:.5;cursor:not-allowed}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px}
+    .position-card{background:#f7f8ff;border-radius:10px;padding:14px}
+    .fen{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.9rem;background:#eef;border-radius:6px;padding:8px;margin-top:10px;word-break:break-all}
+    .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+    a.link{display:inline-block;background:#5b6ee1;color:#fff;text-decoration:none;padding:8px 12px;border-radius:8px;font-weight:600}
+    .tb{border:none;border-radius:8px;padding:8px 12px;font-weight:700;color:#fff;cursor:pointer}
+    .tb.win{background:linear-gradient(135deg,#11998e,#38ef7d)}
+    .tb.draw{background:linear-gradient(135deg,#757f9a,#d7dde8);color:#222}
+    .tb.loss{background:linear-gradient(135deg,#eb3349,#f45c43)}
+    .tb.cursed{background:linear-gradient(135deg,#c2e59c,#64b3f4)}
+    .tb.blessed{background:linear-gradient(135deg,#ffa751,#ffe259);color:#222}
+    .tb.loading{background:#999}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:12px;border-bottom:1px solid #eee}
+    thead th{background:#5b6ee1;color:#fff;text-align:left}
+    .expand{cursor:pointer}
+    .rotate{transform:rotate(180deg)}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>♟️ Fundamental Chess Endings Table Analyzer</h1>
+
+    <div class="card" id="uploadCard">
+      <form id="uploadForm">
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+          <input id="fileInput" type="file" name="pgn_file" accept=".pgn" />
+          <label>Min CQL matches per game:
+            <input id="minMatches" name="min_matches" type="number" value="{{ min_matches }}" min="1" max="10" style="width:80px;margin-left:6px">
+          </label>
+          <button class="btn" id="analyzeBtn" type="submit">Analyze PGN</button>
+        </div>
+        <p style="margin:8px 0 0;color:#555">Tip: big PGNs are OK — counting total games now uses a fast tag scan, not a full parse.</p>
+      </form>
+    </div>
+
+    <div class="card" id="loadingCard" style="display:none">
+      <div style="display:flex;gap:12px;align-items:center">
+        <div class="spinner" style="width:22px;height:22px;border-radius:50%;border:3px solid #eee;border-top-color:#5b6ee1;animation:spin 1s linear infinite"></div>
+        <div>Crunching…</div>
+      </div>
+      <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+    </div>
+
+    <div class="card" id="resultsCard" style="display:none">
+      <div id="stats">
+        <div class="row">
+          <div><b>Ending types:</b> <span id="statEndings">0</span></div>
+          <div><b>Qualifying games:</b> <span id="statQual">0</span></div>
+          <div><b>Total games in database:</b> <span id="statTotal">0</span></div>
+          <div><b>Min matches used:</b> <span id="statMin">0</span></div>
+        </div>
+      </div>
+
+      <h2 style="margin-top:16px">Fundamental Chess Endings Table</h2>
+      <table>
+        <thead><tr><th>Ending Type</th><th>Quantity</th><th>Percentage</th><th></th></tr></thead>
+        <tbody id="fceBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+  <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
+  <script>
+    const uploadForm = document.getElementById('uploadForm');
+    const loadingCard = document.getElementById('loadingCard');
+    const resultsCard = document.getElementById('resultsCard');
+    const fceBody = document.getElementById('fceBody');
+
+    uploadForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      loadingCard.style.display = 'block';
+      resultsCard.style.display = 'none';
+
+      const formData = new FormData(uploadForm);
+      try {
+        const resp = await fetch('/analyze', { method: 'POST', body: formData });
+        const data = await resp.json();
+        if (!resp.ok) throw new Error(data.error || 'Analysis failed');
+        renderResults(data);
+      } catch (err) {
+        alert(err.message);
+      } finally {
+        loadingCard.style.display = 'none';
+      }
+    });
+
+    function renderResults(data) {
+      resultsCard.style.display = 'block';
+      document.getElementById('statEndings').textContent = data.total_endings;
+      document.getElementById('statQual').textContent = data.total_qualifying_games.toLocaleString();
+      document.getElementById('statTotal').textContent = data.total_database_games.toLocaleString();
+      document.getElementById('statMin').textContent = data.min_matches;
+
+      fceBody.innerHTML = '';
+      const sorted = Object.entries(data.results).sort((a,b) => a[0].localeCompare(b[0], undefined, {numeric:true}));
+      for (const [scriptName, ending] of sorted) {
+        const tr = document.createElement('tr');
+        const id = `pos_${scriptName}`;
+        tr.innerHTML = `
+          <td>${ending.ending_name}</td>
+          <td>${ending.qualifying_games}</td>
+          <td>${ending.percentage.toFixed(2)}%</td>
+          <td class="expand" data-target="${id}">▼</td>`;
+        fceBody.appendChild(tr);
+
+        const tr2 = document.createElement('tr');
+        tr2.style.display = 'none';
+        tr2.id = id;
+        tr2.innerHTML = `<td colspan="4"><div class="grid" id="grid_${scriptName}"></div></td>`;
+        fceBody.appendChild(tr2);
+
+        tr.querySelector('.expand').addEventListener('click', () => {
+          const open = tr2.style.display !== 'none';
+          tr2.style.display = open ? 'none' : '';
+          if (!open && !tr2.dataset.loaded) {
+            const grid = document.getElementById(`grid_${scriptName}`);
+            ending.positions.forEach((p, i) => grid.appendChild(buildPositionCard(p, `${scriptName}_${i}`)));
+            // init boards
+            ending.positions.forEach((p, i) => Chessboard(`board_${scriptName}_${i}`, {
+              position: p.fen, pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
+            }));
+            tr2.dataset.loaded = '1';
+          }
+          tr.querySelector('.expand').classList.toggle('rotate', !open);
+        });
+      }
+    }
+
+    function buildPositionCard(pos, key) {
+      const card = document.createElement('div');
+      card.className = 'position-card';
+      const boardId = `board_${key}`;
+      const lichessUrl = 'https://lichess.org/analysis/standard/' + pos.fen.replace(/ /g, '_');
+
+      card.innerHTML = `
+        <div id="${boardId}" style="width:100%;max-width:360px;margin:0 auto 10px"></div>
+        <div><b>${pos.white}</b> vs <b>${pos.black}</b> &middot; ${pos.event} &middot; ${pos.date}</div>
+        <div>Side to move: <b>${pos.side_to_move}</b> &nbsp; Move: ${pos.move_number} &nbsp; Result: ${pos.result}</div>
+        <div class="row" style="margin-top:6px">
+          <a class="link" target="_blank" href="${lichessUrl}">Analyze on Lichess</a>
+          <button class="tb loading" onclick="queryTB(this,'${pos.fen.replace(/'/g, "\\'")}')">Query Tablebase</button>
+        </div>
+        <div class="fen">${pos.fen}</div>
+      `;
+      return card;
+    }
+
+    // Quick client-side guard: count men in FEN (7-man TB includes both kings!)
+    function isSevenMan(fen) {
+      const board = fen.split(' ')[0];
+      let pieces = 0;
+      for (const ch of board) {
+        if (/[prnbqkPRNBQK]/.test(ch)) pieces++;
+      }
+      return pieces <= 7;
+    }
+
+    async function queryTB(btn, fen) {
+      // Avoid pointless network calls for >7 men
+      if (!isSevenMan(fen)) {
+        btn.className = 'tb draw';
+        btn.textContent = 'Not a 7-man TB position';
+        return;
+      }
+      btn.disabled = true;
+      btn.className = 'tb loading';
+      btn.textContent = 'Querying…';
+      try {
+        const url = `/tablebase?fen=${encodeURIComponent(fen)}`;
+        const r = await fetch(url, { headers: { 'Accept': 'application/json' }});
+        if (r.status === 404) {
+          btn.className = 'tb draw'; btn.textContent = 'Not in TB'; return;
+        }
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        const data = await r.json();
+        // Map category to button style
+        const cat = (data.category || 'unknown').toLowerCase();
+        let label = '';
+        if (cat.includes('win') && !cat.includes('cursed')) { btn.className = 'tb win'; label = 'Win'; }
+        else if (cat.includes('cursed-win')) { btn.className = 'tb cursed'; label = 'Cursed win'; }
+        else if (cat.includes('draw')) { btn.className = 'tb draw'; label = 'Draw'; }
+        else if (cat.includes('blessed-loss')) { btn.className = 'tb blessed'; label = 'Blessed loss'; }
+        else if (cat.includes('loss')) { btn.className = 'tb loss'; label = 'Loss'; }
+        else { btn.className = 'tb'; label = 'Unknown'; }
+
+        const bits = [];
+        if (typeof data.dtz === 'number') bits.push(`DTZ ${data.dtz}`);
+        if (typeof data.dtm === 'number') bits.push(`DTM ${data.dtm}`);
+        btn.textContent = bits.length ? `${label} (${bits.join(', ')})` : label;
+      } catch (e) {
+        btn.className = 'tb'; btn.textContent = 'TB error';
+        console.error(e);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+    window.queryTB = queryTB;
+  </script>
+</body>
+</html>
