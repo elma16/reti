@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 from pathlib import Path
-from tests_cql.helpers import assert_matches, expected_matches_from_pgn
+from tests_cql.helpers import assert_matches
+
 
 def test_cql_file(cql_case, tmp_path: Path, cql_bin: str, utf8_env: dict):
     """

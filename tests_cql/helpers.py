@@ -9,12 +9,20 @@ try:
 except Exception:
     chess = None
 
-def run_cql(cql_bin: str, cql_file: str | Path, in_pgn: str | Path, out_pgn: str | Path,
-            extra: list[str] | None = None, env: dict | None = None) -> tuple[int, str, str]:
+
+def run_cql(
+    cql_bin: str,
+    cql_file: str | Path,
+    in_pgn: str | Path,
+    out_pgn: str | Path,
+    extra: list[str] | None = None,
+    env: dict | None = None,
+) -> tuple[int, str, str]:
     extra = extra or []
     cmd = [cql_bin, "-s", "-i", str(in_pgn), "-o", str(out_pgn), str(cql_file)] + extra
     r = subprocess.run(cmd, capture_output=True, text=True, env=env)
     return r.returncode, r.stdout, r.stderr
+
 
 def count_games(pgn_path: str | Path) -> int:
     if chess is not None:
@@ -31,6 +39,7 @@ def count_games(pgn_path: str | Path) -> int:
                 n += 1
     return n
 
+
 def expected_matches_from_pgn(pgn_path: str | Path, default: int = 1) -> int:
     if chess is None:
         return default
@@ -46,8 +55,15 @@ def expected_matches_from_pgn(pgn_path: str | Path, default: int = 1) -> int:
                 pass
     return default
 
-def assert_matches(cql_bin: str, cql_file: str | Path, in_pgn: str | Path,
-                   expected_games: int, tmpdir: Path, env: dict | None = None):
+
+def assert_matches(
+    cql_bin: str,
+    cql_file: str | Path,
+    in_pgn: str | Path,
+    expected_games: int,
+    tmpdir: Path,
+    env: dict | None = None,
+):
     out_pgn = tmpdir / "out.pgn"
     code, out, err = run_cql(cql_bin, cql_file, in_pgn, out_pgn, env=env)
     if code != 0:
@@ -57,3 +73,23 @@ def assert_matches(cql_bin: str, cql_file: str | Path, in_pgn: str | Path,
         f"{cql_file}: expected {expected_games} matched game(s), got {got}\n"
         f"STDERR:\n{err}\nSTDOUT:\n{out}"
     )
+
+
+def fens_to_pgn_text(fens: list[str]) -> str:
+    """
+    Build a minimal PGN string from a list of FEN positions.
+    Each FEN becomes its own game with SetUp/FEN tags so CQL can consume it.
+    """
+    games = []
+    for idx, fen in enumerate(fens, start=1):
+        games.append(
+            '[Event "generated fen case"]\n'
+            '[Site "tests_cql"]\n'
+            f'[Round "{idx}"]\n'
+            '[SetUp "1"]\n'
+            f'[FEN "{fen}"]\n'
+            '[Result "*"]\n'
+            "\n"
+            "*"
+        )
+    return "\n\n".join(games) + "\n"

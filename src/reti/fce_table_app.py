@@ -8,15 +8,13 @@ FCE Table Analyzer — Flask app
 """
 
 import os
-import io
 import re
-import json
 import mmap
 import tempfile
 import subprocess
 from pathlib import Path
 from functools import lru_cache
-from typing import Dict, Any, List, Tuple, Optional
+from typing import Any
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -43,6 +41,7 @@ app.config["UPLOAD_FOLDER"] = tempfile.gettempdir()
 RESULT_TAG = re.compile(rb'\[Result\s+"(?:1-0|0-1|1/2-1/2|\*)"\]')
 EVENT_TAG = re.compile(rb'\[Event\s+"')
 
+
 def fast_count_games_in_file(pgn_path: str) -> int:
     """Very fast count by scanning tags; fallback to slow parse if needed."""
     try:
@@ -55,6 +54,7 @@ def fast_count_games_in_file(pgn_path: str) -> int:
     except Exception:
         return count_total_games_in_pgn(pgn_path)
 
+
 def count_total_games_in_pgn(pgn_path: str) -> int:
     count = 0
     try:
@@ -65,6 +65,7 @@ def count_total_games_in_pgn(pgn_path: str) -> int:
         print(f"[WARN] Slow count failed: {e}")
         return 0
     return count
+
 
 # ------------------------------ Utilities ------------------------------------
 ENDING_NAMES = {
@@ -104,16 +105,22 @@ ENDING_NAMES = {
     "10-7-1QbrrPp": "10.7 Queen + Bishop vs Two Rooks (with pawns)",
 }
 
+
 def natural_sort_key(script_name: str):
-    parts = script_name.split('-')
+    parts = script_name.split("-")
     if len(parts) >= 2:
         try:
             major = int(parts[0])
-            minor = int(re.match(r'^(\d+)', parts[1]).group(1)) if re.match(r'^(\d+)', parts[1]) else 0
+            minor = (
+                int(re.match(r"^(\d+)", parts[1]).group(1))
+                if re.match(r"^(\d+)", parts[1])
+                else 0
+            )
             return (major, minor, script_name)
         except ValueError:
             pass
     return (999, 999, script_name)
+
 
 def parse_side_to_move_from_fen(fen: str) -> str:
     try:
@@ -122,10 +129,14 @@ def parse_side_to_move_from_fen(fen: str) -> str:
     except Exception:
         return "?"
 
-def traverse_all_nodes_count_cql(game: chess.pgn.Game) -> Tuple[int, Optional[chess.Board], Optional[chess.pgn.ChildNode]]:
+
+def traverse_all_nodes_count_cql(
+    game: chess.pgn.Game,
+) -> tuple[int, chess.Board | None, chess.pgn.ChildNode | None]:
     count = 0
     first_board = None
     first_node = None
+
     def walk(node: chess.pgn.GameNode, board: chess.Board):
         nonlocal count, first_board, first_node
         if node.comment and ("cql" in node.comment.lower()):
@@ -137,12 +148,14 @@ def traverse_all_nodes_count_cql(game: chess.pgn.Game) -> Tuple[int, Optional[ch
             board.push(var.move)
             walk(var, board)
             board.pop()
+
     root = game
     walk(root, game.board())
     return count, first_board, first_node
 
+
 def extract_positions_from_pgn(pgn_path: str, min_matches: int = MIN_CQL_MATCHES):
-    positions: List[Dict[str, Any]] = []
+    positions: list[dict[str, Any]] = []
     total_games = 0
     qualifying_games = 0
     try:
@@ -153,8 +166,10 @@ def extract_positions_from_pgn(pgn_path: str, min_matches: int = MIN_CQL_MATCHES
                     break
                 total_games += 1
                 H = game.headers
-                white = H.get("White", "?"); black = H.get("Black", "?")
-                event = H.get("Event", "?"); date = H.get("Date", "?")
+                white = H.get("White", "?")
+                black = H.get("Black", "?")
+                event = H.get("Event", "?")
+                date = H.get("Date", "?")
                 result = H.get("Result", "*")
 
                 # Case 1: FEN header output from CQL
@@ -163,13 +178,20 @@ def extract_positions_from_pgn(pgn_path: str, min_matches: int = MIN_CQL_MATCHES
                     cql_count = 1  # treat FEN-only game as one match
                     if cql_count >= min_matches:
                         qualifying_games += 1
-                        positions.append({
-                            "fen": fen, "white": white, "black": black,
-                            "event": event, "date": date, "result": result,
-                            "move_number": "-", "game_number": total_games,
-                            "cql_count_in_game": cql_count,
-                            "side_to_move": parse_side_to_move_from_fen(fen),
-                        })
+                        positions.append(
+                            {
+                                "fen": fen,
+                                "white": white,
+                                "black": black,
+                                "event": event,
+                                "date": date,
+                                "result": result,
+                                "move_number": "-",
+                                "game_number": total_games,
+                                "cql_count_in_game": cql_count,
+                                "side_to_move": parse_side_to_move_from_fen(fen),
+                            }
+                        )
                     continue
 
                 # Case 2: comments-based outputs
@@ -178,27 +200,45 @@ def extract_positions_from_pgn(pgn_path: str, min_matches: int = MIN_CQL_MATCHES
                     qualifying_games += 1
                     move_label = "-"
                     if first_node and first_node.parent:
-                        move_label = f"{first_board.fullmove_number}." if first_board.turn == chess.WHITE else f"{first_board.fullmove_number}..."
-                    positions.append({
-                        "fen": first_board.fen(), "white": white, "black": black,
-                        "event": event, "date": date, "result": result,
-                        "move_number": move_label, "game_number": total_games,
-                        "cql_count_in_game": cql_count,
-                        "side_to_move": "White" if first_board.turn == chess.WHITE else "Black",
-                    })
+                        move_label = (
+                            f"{first_board.fullmove_number}."
+                            if first_board.turn == chess.WHITE
+                            else f"{first_board.fullmove_number}..."
+                        )
+                    positions.append(
+                        {
+                            "fen": first_board.fen(),
+                            "white": white,
+                            "black": black,
+                            "event": event,
+                            "date": date,
+                            "result": result,
+                            "move_number": move_label,
+                            "game_number": total_games,
+                            "cql_count_in_game": cql_count,
+                            "side_to_move": "White"
+                            if first_board.turn == chess.WHITE
+                            else "Black",
+                        }
+                    )
     except Exception as e:
         print(f"[ERROR] extract_positions_from_pgn: {e}")
         return [], 0, 0
     return positions, total_games, qualifying_games
 
-def run_cql_script(pgn_file: str, script_path: Path, output_dir: str) -> Tuple[str, bool, str]:
+
+def run_cql_script(
+    pgn_file: str, script_path: Path, output_dir: str
+) -> tuple[str, bool, str]:
     """Run one CQL script; returns (script_name, ok, output_pgn or err)."""
     script_name = script_path.stem
     output_pgn = os.path.join(output_dir, f"{script_name}.pgn")
     try:
         result = subprocess.run(
             [CQL_BINARY, "-i", pgn_file, "-o", output_pgn, str(script_path)],
-            capture_output=True, text=True, timeout=900
+            capture_output=True,
+            text=True,
+            timeout=900,
         )
         if result.returncode != 0:
             return script_name, False, result.stderr.strip() or "CQL error"
@@ -208,18 +248,19 @@ def run_cql_script(pgn_file: str, script_path: Path, output_dir: str) -> Tuple[s
     except Exception as e:
         return script_name, False, str(e)
 
+
 def analyze_pgn_with_fce_table(pgn_path: str, min_matches: int = MIN_CQL_MATCHES):
     cql_dir = Path(CQL_SCRIPTS_DIR)
     cql_scripts = sorted(cql_dir.glob("*.cql"), key=lambda p: natural_sort_key(p.stem))
     if not cql_scripts:
         return {"error": f"No CQL scripts found in {CQL_SCRIPTS_DIR}"}
 
-    print(f"[INFO] Counting total games (fast) …")
+    print("[INFO] Counting total games (fast) …")
     total_database_games = fast_count_games_in_file(pgn_path)
     print(f"[INFO] Total games in database: {total_database_games:,}")
 
     output_dir = tempfile.mkdtemp(prefix="fce_results_")
-    results: Dict[str, Any] = {}
+    results: dict[str, Any] = {}
     total_qualifying_games = 0
 
     # -------- Run all scripts in parallel --------
@@ -236,8 +277,12 @@ def analyze_pgn_with_fce_table(pgn_path: str, min_matches: int = MIN_CQL_MATCHES
                 print(f"[CQL][FAIL] {script_name}: {out}")
                 continue
             output_pgn = out
-            positions, total_cql_games, qualifying_games = extract_positions_from_pgn(output_pgn, min_matches)
-            print(f"[CQL][OK] {ending_name}: {qualifying_games} qualifying (from {total_cql_games})")
+            positions, total_cql_games, qualifying_games = extract_positions_from_pgn(
+                output_pgn, min_matches
+            )
+            print(
+                f"[CQL][OK] {ending_name}: {qualifying_games} qualifying (from {total_cql_games})"
+            )
             if qualifying_games > 0:
                 results[script_name] = {
                     "ending_name": ending_name,
@@ -249,10 +294,12 @@ def analyze_pgn_with_fce_table(pgn_path: str, min_matches: int = MIN_CQL_MATCHES
 
     return results, total_qualifying_games, total_database_games
 
+
 # ------------------------------ Routes ---------------------------------------
 @app.route("/healthz")
 def healthz() -> Response:
     return Response("ok", status=200, mimetype="text/plain")
+
 
 @app.route("/")
 def index():
@@ -262,7 +309,7 @@ def index():
         return render_template("fce_table.html", min_matches=MIN_CQL_MATCHES)
     except Exception as e:
         print(f"[WARN] templates/fce_table.html not found or failed: {e}")
-        html = f"""
+        html = """
         <html><body>
         <h1>FCE Analyzer</h1>
         <p><b>Warning</b>: could not render templates/fce_table.html<br>
@@ -271,6 +318,7 @@ def index():
         </body></html>
         """
         return Response(html, status=200, mimetype="text/html")
+
 
 @app.route("/analyze", methods=["POST"])
 def analyze():
@@ -289,13 +337,19 @@ def analyze():
     try:
         file.save(tmp_path)
         print(f"[INFO] Analyze: {file.filename} (min_matches={min_matches})")
-        results, total_qualifying_games, total_database_games = analyze_pgn_with_fce_table(tmp_path, min_matches)
+        results, total_qualifying_games, total_database_games = (
+            analyze_pgn_with_fce_table(tmp_path, min_matches)
+        )
 
         if isinstance(results, dict) and "error" in results:
             return jsonify(results), 500
 
         for data in results.values():
-            data["percentage"] = (data["qualifying_games"] / total_database_games * 100.0) if total_database_games else 0.0
+            data["percentage"] = (
+                (data["qualifying_games"] / total_database_games * 100.0)
+                if total_database_games
+                else 0.0
+            )
 
         payload = {
             "success": True,
@@ -307,16 +361,22 @@ def analyze():
         }
         return jsonify(payload)
     except Exception as e:
-        import traceback; traceback.print_exc()
+        import traceback
+
+        traceback.print_exc()
         return jsonify({"error": f"Analysis failed: {e}"}), 500
     finally:
-        try: os.unlink(tmp_path)
-        except Exception: pass
+        try:
+            os.unlink(tmp_path)
+        except Exception:
+            pass
+
 
 # Lichess Tablebase proxy (avoid CORS; small in-memory cache)
 @lru_cache(maxsize=4096)
 def _tb_fetch_cached(fen_underscored: str) -> requests.Response:
     return requests.get(TB_URL, params={"fen": fen_underscored}, timeout=6)
+
 
 @app.route("/tablebase")
 def tablebase():
@@ -341,14 +401,17 @@ def tablebase():
     except ValueError:
         return jsonify({"error": "Invalid JSON from TB"}), 502
 
-    return jsonify({
-        "category": data.get("category"),
-        "dtz": data.get("dtz"),
-        "dtm": data.get("dtm"),
-        "checkmate": data.get("checkmate"),
-        "stalemate": data.get("stalemate"),
-        "moves": data.get("moves", []),
-    })
+    return jsonify(
+        {
+            "category": data.get("category"),
+            "dtz": data.get("dtz"),
+            "dtm": data.get("dtm"),
+            "checkmate": data.get("checkmate"),
+            "stalemate": data.get("stalemate"),
+            "moves": data.get("moves", []),
+        }
+    )
+
 
 if __name__ == "__main__":
     here = Path.cwd()

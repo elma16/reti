@@ -13,7 +13,6 @@ import subprocess
 import tempfile
 import chess.pgn
 from pathlib import Path
-from collections import defaultdict
 
 # Configuration
 CQL_BINARY = "/Users/elliottmacneil/python/chess-stuff/reti/bins/cql6-1/cql"
@@ -66,16 +65,16 @@ def count_cql_comments_in_game(game):
     """
     count = 0
     node = game
-    
+
     while node is not None:
         if node.comment and "CQL" in node.comment:
             count += 1
-        
+
         if node.variations:
             node = node.variations[0]
         else:
             node = None
-    
+
     return count
 
 
@@ -90,69 +89,69 @@ def extract_positions_from_pgn(pgn_path, min_matches=MIN_CQL_MATCHES):
     positions = []
     total_games = 0
     qualifying_games = 0
-    
+
     try:
         with open(pgn_path, encoding="utf-8", errors="replace") as pgn_file:
             while True:
                 game = chess.pgn.read_game(pgn_file)
                 if game is None:
                     break
-                
+
                 total_games += 1
-                
+
                 # Count CQL comments in this game
                 cql_count = count_cql_comments_in_game(game)
-                
+
                 # Skip games that don't meet minimum requirement
                 if cql_count < min_matches:
                     continue
-                
+
                 qualifying_games += 1
-                
+
                 # Extract ONLY THE FIRST CQL position from this game
                 board = game.board()
                 move_num = 0
                 found_first = False
-                
+
                 for node in game.mainline():
                     move = node.move
                     move_num += 1
                     comment = node.comment
                     board.push(move)
-                    
+
                     if comment and "CQL" in comment and not found_first:
                         fen = board.fen()
-                        
+
                         # Determine side to move
                         side_to_move = "White" if board.turn else "Black"
-                        
+
                         # Calculate full move number
                         full_move = (move_num + 1) // 2
                         if move_num % 2 == 1:
                             move_str = f"{full_move}."
                         else:
                             move_str = f"{full_move}..."
-                        
+
                         position_info = {
-                            'fen': fen,
-                            'white': game.headers.get("White", "?"),
-                            'black': game.headers.get("Black", "?"),
-                            'event': game.headers.get("Event", "?"),
-                            'date': game.headers.get("Date", "?"),
-                            'result': game.headers.get("Result", "*"),
-                            'move_number': move_str,
-                            'game_number': total_games,
-                            'cql_count_in_game': cql_count,
-                            'side_to_move': side_to_move
+                            "fen": fen,
+                            "white": game.headers.get("White", "?"),
+                            "black": game.headers.get("Black", "?"),
+                            "event": game.headers.get("Event", "?"),
+                            "date": game.headers.get("Date", "?"),
+                            "result": game.headers.get("Result", "*"),
+                            "move_number": move_str,
+                            "game_number": total_games,
+                            "cql_count_in_game": cql_count,
+                            "side_to_move": side_to_move,
                         }
                         positions.append(position_info)
                         found_first = True
                         break  # Only take first CQL position
-                        
+
     except Exception as e:
         print(f"Error extracting positions from {pgn_path}: {e}")
         return [], 0, 0
-    
+
     return positions, total_games, qualifying_games
 
 
@@ -163,21 +162,21 @@ def run_cql_script(pgn_file, cql_script_path, output_dir):
     """
     script_name = cql_script_path.stem
     output_pgn = os.path.join(output_dir, f"{script_name}.pgn")
-    
+
     try:
         result = subprocess.run(
             [CQL_BINARY, "-i", pgn_file, "-o", output_pgn, str(cql_script_path)],
             capture_output=True,
             text=True,
-            timeout=300
+            timeout=300,
         )
-        
+
         if result.returncode != 0:
             print(f"  CQL error for {script_name}: {result.stderr}")
             return None, False
-        
+
         return output_pgn, True
-        
+
     except subprocess.TimeoutExpired:
         print(f"  CQL timeout for {script_name}")
         return None, False
@@ -208,12 +207,13 @@ def natural_sort_key(script_name):
     Extracts: major number (10), minor number (2), then rest of string.
     """
     import re
-    parts = script_name.split('-')
+
+    parts = script_name.split("-")
     if len(parts) >= 2:
         try:
             major = int(parts[0])
             # Extract minor number from second part (e.g., "2Qr" -> 2)
-            minor_match = re.match(r'^(\d+)', parts[1])
+            minor_match = re.match(r"^(\d+)", parts[1])
             minor = int(minor_match.group(1)) if minor_match else 0
             return (major, minor, script_name)
         except ValueError:
@@ -229,55 +229,57 @@ def analyze_pgn_with_fce_table(pgn_path, min_matches=MIN_CQL_MATCHES):
     """
     cql_dir = Path(CQL_SCRIPTS_DIR)
     cql_scripts = sorted(cql_dir.glob("*.cql"), key=lambda p: natural_sort_key(p.stem))
-    
+
     if not cql_scripts:
         print(f"Error: No CQL scripts found in {CQL_SCRIPTS_DIR}")
         return None
-    
+
     # Count total games in original database for percentage calculation
     print("\nCounting total games in database...")
     total_database_games = count_total_games_in_pgn(pgn_path)
     print(f"Total games in database: {total_database_games:,}")
-    
+
     print(f"\nFound {len(cql_scripts)} CQL scripts")
     print(f"Minimum CQL matches per game: {min_matches}\n")
-    
+
     # Create temporary output directory
     output_dir = tempfile.mkdtemp(prefix="fce_table_results_")
-    
+
     results = {}
     total_qualifying_games = 0
-    
+
     for i, script_path in enumerate(cql_scripts, 1):
         script_name = script_path.stem
         ending_name = ENDING_NAMES.get(script_name, script_name)
-        
+
         print(f"[{i}/{len(cql_scripts)}] Processing: {ending_name}")
-        
+
         # Run CQL script
         output_pgn, success = run_cql_script(pgn_path, script_path, output_dir)
-        
+
         if not success or not output_pgn:
-            print(f"  -> Skipped (CQL failed)")
+            print("  -> Skipped (CQL failed)")
             continue
-        
+
         # Extract positions from qualifying games
         positions, total_games, qualifying_games = extract_positions_from_pgn(
             output_pgn, min_matches
         )
-        
-        print(f"  -> {qualifying_games} games with >={min_matches} CQL comments (from {total_games} total matches)")
-        
+
+        print(
+            f"  -> {qualifying_games} games with >={min_matches} CQL comments (from {total_games} total matches)"
+        )
+
         if qualifying_games > 0:
             results[script_name] = {
-                'ending_name': ending_name,
-                'qualifying_games': qualifying_games,
-                'total_games': total_games,
-                'positions': positions,
-                'pgn_file': output_pgn
+                "ending_name": ending_name,
+                "qualifying_games": qualifying_games,
+                "total_games": total_games,
+                "positions": positions,
+                "pgn_file": output_pgn,
             }
             total_qualifying_games += qualifying_games
-    
+
     return results, total_qualifying_games, total_database_games
 
 
@@ -290,29 +292,33 @@ def format_table_output(results, total_qualifying_games, total_database_games):
     if not results:
         print("\nNo endings found!")
         return
-    
-    print("\n" + "="*80)
+
+    print("\n" + "=" * 80)
     print("FUNDAMENTAL CHESS ENDINGS - ANALYSIS RESULTS")
-    print("="*80)
+    print("=" * 80)
     print(f"\nTotal games in database: {total_database_games:,}")
-    print(f"Total qualifying games (with >={MIN_CQL_MATCHES} CQL matches): {total_qualifying_games:,}")
+    print(
+        f"Total qualifying games (with >={MIN_CQL_MATCHES} CQL matches): {total_qualifying_games:,}"
+    )
     print(f"Minimum CQL matches per game: {MIN_CQL_MATCHES}")
-    print("\n" + "-"*80)
+    print("\n" + "-" * 80)
     print(f"{'Ending Type':<50} {'Quantity':<15} {'Percentage':<10}")
-    print("-"*80)
-    
+    print("-" * 80)
+
     # Sort by ending name using natural sort
     sorted_results = sorted(results.items(), key=lambda x: natural_sort_key(x[0]))
-    
+
     for script_name, data in sorted_results:
-        ending_name = data['ending_name']
-        count = data['qualifying_games']
+        ending_name = data["ending_name"]
+        count = data["qualifying_games"]
         # Calculate percentage based on TOTAL DATABASE SIZE (like the book does)
-        percentage = (count / total_database_games * 100) if total_database_games > 0 else 0
-        
+        percentage = (
+            (count / total_database_games * 100) if total_database_games > 0 else 0
+        )
+
         print(f"{ending_name:<50} {count:<15,} {percentage:>6.2f}%")
-    
-    print("-"*80)
+
+    print("-" * 80)
     print()
 
 
@@ -320,19 +326,21 @@ def display_positions_summary(results):
     """
     Display a summary of positions available for each ending.
     """
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("POSITIONS SUMMARY")
-    print("="*80)
-    
-    sorted_results = sorted(results.items(), key=lambda x: x[1]['ending_name'])
-    
+    print("=" * 80)
+
+    sorted_results = sorted(results.items(), key=lambda x: x[1]["ending_name"])
+
     for script_name, data in sorted_results:
-        ending_name = data['ending_name']
-        positions = data['positions']
-        
+        ending_name = data["ending_name"]
+        positions = data["positions"]
+
         if positions:
             print(f"\n{ending_name}: {len(positions)} positions available")
-            print(f"  First position: {positions[0]['white']} vs {positions[0]['black']}")
+            print(
+                f"  First position: {positions[0]['white']} vs {positions[0]['black']}"
+            )
             print(f"  PGN file: {data['pgn_file']}")
 
 
@@ -341,43 +349,45 @@ def main():
         print("Usage: python fce_table_analyzer.py <pgn_file> [min_cql_matches]")
         print(f"\nDefault min_cql_matches: {MIN_CQL_MATCHES}")
         sys.exit(1)
-    
+
     pgn_path = sys.argv[1]
-    
+
     if not os.path.exists(pgn_path):
         print(f"Error: PGN file not found: {pgn_path}")
         sys.exit(1)
-    
+
     # Allow overriding MIN_CQL_MATCHES from command line
     min_matches = MIN_CQL_MATCHES
     if len(sys.argv) >= 3:
         try:
             min_matches = int(sys.argv[2])
         except ValueError:
-            print(f"Warning: Invalid min_cql_matches value. Using default: {MIN_CQL_MATCHES}")
-    
+            print(
+                f"Warning: Invalid min_cql_matches value. Using default: {MIN_CQL_MATCHES}"
+            )
+
     print(f"\nAnalyzing: {pgn_path}")
     print(f"CQL Scripts Directory: {CQL_SCRIPTS_DIR}")
     print(f"Minimum CQL matches per game: {min_matches}")
-    
+
     # Run analysis
     result = analyze_pgn_with_fce_table(pgn_path, min_matches)
-    
+
     if result is None:
         print("\nAnalysis failed!")
         sys.exit(1)
-    
+
     results, total_qualifying_games, total_database_games = result
-    
+
     # Display table
     format_table_output(results, total_qualifying_games, total_database_games)
-    
+
     # Display positions summary
     display_positions_summary(results)
-    
-    print("\n" + "="*80)
+
+    print("\n" + "=" * 80)
     print("Analysis complete!")
-    print("="*80)
+    print("=" * 80)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,24 @@
+{
+  "datasets": {
+    "fce-sample": {
+      "pgn": "FCE/1-4BN.pgn"
+    },
+    "ykm-single-fen": {
+      "fen": "100YMK/6.txt"
+    }
+  },
+  "cases": [
+    {
+      "cql": "cql-files/FCE/table/3-2NN.cql",
+      "dataset": "fce-sample",
+      "expected": 0,
+      "id": "3-2NN vs fce-sample"
+    },
+    {
+      "cql_glob": "cql-files/FCE/table/*.cql",
+      "dataset": "ykm-single-fen",
+      "expected": 1,
+      "id": "all FCE table vs fen net"
+    }
+  ]
+}

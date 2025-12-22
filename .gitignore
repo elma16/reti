@@ -8,9 +8,15 @@ data
 build 
 cql6-1
 cql6-2
+tests_cql/.generated/
 
 /training/env.py
 
 .venv/
 
 *.cql
+*.csv
+vscode-cql6
+.vscode/
+*__pycache__
+*.jpeg

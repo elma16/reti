@@ -1,0 +1,21 @@
+{
+  "datasets": {
+    "common-db": {
+      "pgn": "db.pgn"
+    }
+  },
+  "cases": [
+    {
+      "cql": "cql-files/others/most_visited_square.cql",
+      "dataset": "common-db",
+      "expected": 0,
+      "id": "most_visited_square on db.pgn"
+    },
+    {
+      "cql": "cql-files/others/rook_homerun.cql",
+      "dataset": "common-db",
+      "expected": 1,
+      "id": "rook_homerun negative on db.pgn"
+    }
+  ]
+}
