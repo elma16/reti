@@ -45,8 +45,12 @@ app.config["UPLOAD_FOLDER"] = tempfile.gettempdir()
 app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0  # Disable caching for development
 
 # Configuration
-CQL_BINARY = "/Users/elliottmacneil/python/chess-stuff/reti/bins/cql6-2/cql"
-CQL_SCRIPTS_DIR = "/Users/elliottmacneil/python/chess-stuff/reti/cql-files/mates"
+PROJECT_ROOT = SCRIPT_DIR.parent.absolute()
+DEFAULT_CQL_BINARY = PROJECT_ROOT / "bins" / "cql6-2" / "cql"
+DEFAULT_CQL_SCRIPTS_DIR = PROJECT_ROOT / "cql-files" / "mates"
+
+CQL_BINARY = os.environ.get("CQL_BINARY", str(DEFAULT_CQL_BINARY))
+CQL_SCRIPTS_DIR = os.environ.get("CQL_SCRIPTS_DIR", str(DEFAULT_CQL_SCRIPTS_DIR))
 
 # Parallel processing configuration
 # Number of CQL scripts to run in parallel (None = use all CPU cores)
@@ -376,12 +380,12 @@ if __name__ == "__main__":
     # Check if CQL binary exists
     if not os.path.exists(CQL_BINARY):
         print(f"WARNING: CQL binary not found at {CQL_BINARY}")
-        print("Please update CQL_BINARY in the script")
+        print("Set CQL_BINARY (environment variable) or update the default path")
 
     # Check if CQL scripts directory exists
     if not os.path.exists(CQL_SCRIPTS_DIR):
         print(f"WARNING: CQL scripts directory not found at {CQL_SCRIPTS_DIR}")
-        print("Please update CQL_SCRIPTS_DIR in the script")
+        print("Set CQL_SCRIPTS_DIR (environment variable) or update the default path")
 
     print(f"Templates directory: {TEMPLATE_DIR}")
     print("Starting Flask app...")
