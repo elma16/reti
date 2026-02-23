@@ -1,0 +1,4 @@
+# positive (should match)
+r4rk1/ppp2ppp/8/2bppb2/8/N5P1/PP1PP3/R1BK1q1n w - - 0 23
+# negative (single tweak, should not match)
+r4rk1/ppp2ppp/8/2bppb2/8/N5P1/PP1PP3/R1BK1q1n b - - 0 23

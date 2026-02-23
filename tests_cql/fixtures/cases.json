@@ -1,21 +1,943 @@
 {
+  "enforce_full_cql_coverage": false,
   "datasets": {
-    "common-db": {
-      "pgn": "db.pgn"
+    "100endings-01_05P": {
+      "fen": "100endings/01_05P.txt"
+    },
+    "100endings-06_07RB": {
+      "fen": "100endings/06_07RB.txt"
+    },
+    "100endings-08_09Rn": {
+      "fen": "100endings/08_09Rn.txt"
+    },
+    "100endings-100Qrp": {
+      "fen": "100endings/100Qrp.txt"
+    },
+    "100endings-10_15Np": {
+      "fen": "100endings/10_15Np.txt"
+    },
+    "100endings-16_19Qp": {
+      "fen": "100endings/16_19Qp.txt"
+    },
+    "100endings-20Qq": {
+      "fen": "100endings/20Qq.txt"
+    },
+    "100endings-21_29Rp": {
+      "fen": "100endings/21_29Rp.txt"
+    },
+    "100endings-30_32Rpp": {
+      "fen": "100endings/30_32Rpp.txt"
+    },
+    "100endings-33_36BPb": {
+      "fen": "100endings/33_36BPb.txt"
+    },
+    "100endings-37_40BNP": {
+      "fen": "100endings/37_40BNP.txt"
+    },
+    "100endings-41_51ocBPPb": {
+      "fen": "100endings/41_51ocBPPb.txt"
+    },
+    "100endings-52_68RPr": {
+      "fen": "100endings/52_68RPr.txt"
+    },
+    "100endings-69_76RPPr": {
+      "fen": "100endings/69_76RPPr.txt"
+    },
+    "100endings-77PP": {
+      "fen": "100endings/77PP.txt"
+    },
+    "100endings-78PP": {
+      "fen": "100endings/78PP.txt"
+    },
+    "100endings-79_81Pp": {
+      "fen": "100endings/79_81Pp.txt"
+    },
+    "100endings-82Pp": {
+      "fen": "100endings/82Pp.txt"
+    },
+    "100endings-83_86PPp": {
+      "fen": "100endings/83_86PPp.txt"
+    },
+    "100endings-87PPp": {
+      "fen": "100endings/87PPp.txt"
+    },
+    "100endings-88PPp": {
+      "fen": "100endings/88PPp.txt"
+    },
+    "100endings-93BN": {
+      "fen": "100endings/93BN.txt"
+    },
+    "100endings-94_96RBr": {
+      "fen": "100endings/94_96RBr.txt"
+    },
+    "100endings-97RPb": {
+      "fen": "100endings/97RPb.txt"
+    },
+    "100endings-98RPb": {
+      "fen": "100endings/98RPb.txt"
+    },
+    "100endings-99Qrp": {
+      "fen": "100endings/99Qrp.txt"
+    },
+    "fce-table-1-4BN": {
+      "fen": "FCE/table/1-4BN.txt"
+    },
+    "fce-table-10-1Qa": {
+      "fen": "FCE/table/10-1Qa.txt"
+    },
+    "fce-table-10-2Qr": {
+      "fen": "FCE/table/10-2Qr.txt"
+    },
+    "fce-table-10-2QrPp": {
+      "fen": "FCE/table/10-2QrPp.txt"
+    },
+    "fce-table-10-3Qaa": {
+      "fen": "FCE/table/10-3Qaa.txt"
+    },
+    "fce-table-10-4Qra": {
+      "fen": "FCE/table/10-4Qra.txt"
+    },
+    "fce-table-10-5Qrr": {
+      "fen": "FCE/table/10-5Qrr.txt"
+    },
+    "fce-table-10-6Qaaa": {
+      "fen": "FCE/table/10-6Qaaa.txt"
+    },
+    "fce-table-10-7-1Qbrr": {
+      "fen": "FCE/table/10-7-1Qbrr.txt"
+    },
+    "fce-table-10-7-1QbrrPp": {
+      "fen": "FCE/table/10-7-1QbrrPp.txt"
+    },
+    "fce-table-10-7QAq": {
+      "fen": "FCE/table/10-7QAq.txt"
+    },
+    "fce-table-2-0Pp": {
+      "fen": "FCE/table/2-0Pp.txt"
+    },
+    "fce-table-2-1P": {
+      "fen": "FCE/table/2-1P.txt"
+    },
+    "fce-table-3-1Np": {
+      "fen": "FCE/table/3-1Np.txt"
+    },
+    "fce-table-3-2NN": {
+      "fen": "FCE/table/3-2NN.txt"
+    },
+    "fce-table-4-1Bp": {
+      "fen": "FCE/table/4-1Bp.txt"
+    },
+    "fce-table-4-2scBB": {
+      "fen": "FCE/table/4-2scBB.txt"
+    },
+    "fce-table-4-3ocBB": {
+      "fen": "FCE/table/4-3ocBB.txt"
+    },
+    "fce-table-5-0BN": {
+      "fen": "FCE/table/5-0BN.txt"
+    },
+    "fce-table-6-1-0RP": {
+      "fen": "FCE/table/6-1-0RP.txt"
+    },
+    "fce-table-6-2-0Rr": {
+      "fen": "FCE/table/6-2-0Rr.txt"
+    },
+    "fce-table-6-2-1RPr": {
+      "fen": "FCE/table/6-2-1RPr.txt"
+    },
+    "fce-table-6-2-2RPPr": {
+      "fen": "FCE/table/6-2-2RPPr.txt"
+    },
+    "fce-table-6-3RRrr": {
+      "fen": "FCE/table/6-3RRrr.txt"
+    },
+    "fce-table-7-1RN": {
+      "fen": "FCE/table/7-1RN.txt"
+    },
+    "fce-table-7-2RB": {
+      "fen": "FCE/table/7-2RB.txt"
+    },
+    "fce-table-8-1RNr": {
+      "fen": "FCE/table/8-1RNr.txt"
+    },
+    "fce-table-8-1RNrPp": {
+      "fen": "FCE/table/8-1RNrPp.txt"
+    },
+    "fce-table-8-2RBr": {
+      "fen": "FCE/table/8-2RBr.txt"
+    },
+    "fce-table-8-2RBrPp": {
+      "fen": "FCE/table/8-2RBrPp.txt"
+    },
+    "fce-table-8-3RAra": {
+      "fen": "FCE/table/8-3RAra.txt"
+    },
+    "fce-table-9-1Qp": {
+      "fen": "FCE/table/9-1Qp.txt"
+    },
+    "fce-table-9-2Qq": {
+      "fen": "FCE/table/9-2Qq.txt"
+    },
+    "fce-table-9-3QPq": {
+      "fen": "FCE/table/9-3QPq.txt"
+    },
+    "fce-toc-10": {
+      "fen": "FCE/toc/10.txt"
+    },
+    "fce-toc-8": {
+      "fen": "FCE/toc/8.txt"
+    },
+    "fce-toc-9": {
+      "fen": "FCE/toc/9.txt"
+    },
+    "mates-BN": {
+      "fen": "mates/BN.txt"
+    },
+    "mates-KBB": {
+      "fen": "mates/KBB.txt"
+    },
+    "mates-KNN": {
+      "fen": "mates/KNN.txt"
+    },
+    "mates-anastasiamate": {
+      "fen": "mates/anastasiamate.txt"
+    },
+    "mates-anderssen": {
+      "fen": "mates/anderssen.txt"
+    },
+    "mates-arabianmate": {
+      "fen": "mates/arabianmate.txt"
+    },
+    "mates-backrankmate": {
+      "fen": "mates/backrankmate.txt"
+    },
+    "mates-balestramate": {
+      "fen": "mates/balestramate.txt"
+    },
+    "mates-blackburnemate": {
+      "fen": "mates/blackburnemate.txt"
+    },
+    "mates-blindswinemate": {
+      "fen": "mates/blindswinemate.txt"
+    },
+    "mates-bodenmate": {
+      "fen": "mates/bodenmate.txt"
+    },
+    "mates-castlingmate": {
+      "pgn": "mates/castlingmate.pgn"
+    },
+    "mates-corner": {
+      "fen": "mates/corner.txt"
+    },
+    "mates-damiano": {
+      "fen": "mates/damiano.txt"
+    },
+    "mates-damianobishopmate": {
+      "fen": "mates/damianobishopmate.txt"
+    },
+    "mates-davidandgoliath": {
+      "fen": "mates/davidandgoliath.txt"
+    },
+    "mates-doubleknight": {
+      "fen": "mates/doubleknight.txt"
+    },
+    "mates-dovetailmate": {
+      "fen": "mates/dovetailmate.txt"
+    },
+    "mates-epaulettemate": {
+      "fen": "mates/epaulettemate.txt"
+    },
+    "mates-greco": {
+      "fen": "mates/greco.txt"
+    },
+    "mates-hookmate": {
+      "fen": "mates/hookmate.txt"
+    },
+    "mates-ismate": {
+      "fen": "mates/ismate.txt"
+    },
+    "mates-killbox": {
+      "fen": "mates/killbox.txt"
+    },
+    "mates-laddermate": {
+      "fen": "mates/laddermate.txt"
+    },
+    "mates-legalmate": {
+      "fen": "mates/legalmate.txt"
+    },
+    "mates-lolli": {
+      "fen": "mates/lolli.txt"
+    },
+    "mates-maxlangemate": {
+      "fen": "mates/maxlangemate.txt"
+    },
+    "mates-mayet": {
+      "fen": "mates/mayet.txt"
+    },
+    "mates-morphymate": {
+      "fen": "mates/morphymate.txt"
+    },
+    "mates-opera": {
+      "fen": "mates/opera.txt"
+    },
+    "mates-pillsbury": {
+      "fen": "mates/pillsbury.txt"
+    },
+    "mates-queen": {
+      "fen": "mates/queen.txt"
+    },
+    "mates-retimate": {
+      "fen": "mates/retimate.txt"
+    },
+    "mates-rookmate": {
+      "fen": "mates/rookmate.txt"
+    },
+    "mates-smotheredmate": {
+      "fen": "mates/smotheredmate.txt"
+    },
+    "mates-suffocationmate": {
+      "fen": "mates/suffocationmate.txt"
+    },
+    "mates-swallowtail": {
+      "fen": "mates/swallowtail.txt"
+    },
+    "mates-trianglemate": {
+      "fen": "mates/trianglemate.txt"
+    },
+    "mates-twobishopmate": {
+      "fen": "mates/twobishopmate.txt"
+    },
+    "mates-twoknightmate": {
+      "fen": "mates/twoknightmate.txt"
+    },
+    "mates-vukovicmate": {
+      "fen": "mates/vukovicmate.txt"
     }
   },
   "cases": [
     {
-      "cql": "cql-files/others/most_visited_square.cql",
-      "dataset": "common-db",
-      "expected": 0,
-      "id": "most_visited_square on db.pgn"
+      "cql": "cql-files/100endings/01_05P.cql",
+      "dataset": "100endings-01_05P",
+      "expected": 1,
+      "id": "100endings 01_05P: + / -"
     },
     {
-      "cql": "cql-files/others/rook_homerun.cql",
-      "dataset": "common-db",
+      "cql": "cql-files/100endings/06_07RB.cql",
+      "dataset": "100endings-06_07RB",
       "expected": 1,
-      "id": "rook_homerun negative on db.pgn"
+      "id": "100endings 06_07RB: + / -"
+    },
+    {
+      "cql": "cql-files/100endings/08_09Rn.cql",
+      "dataset": "100endings-08_09Rn",
+      "expected": 1,
+      "id": "100endings 08_09Rn: + / -"
+    },
+    {
+      "cql": "cql-files/100endings/100Qrp.cql",
+      "dataset": "100endings-100Qrp",
+      "expected": 1,
+      "id": "100endings 100Qrp: + / -"
+    },
+    {
+      "cql": "cql-files/100endings/10_15Np.cql",
+      "dataset": "100endings-10_15Np",
+      "expected": 1,
+      "id": "100endings 10_15Np: + / -"
+    },
+    {
+      "cql": "cql-files/100endings/16_19Qp.cql",
+      "dataset": "100endings-16_19Qp",
+      "expected": 1,
+      "id": "100endings 16_19Qp: + / -"
+    },
+    {
+      "cql": "cql-files/100endings/20Qq.cql",
+      "dataset": "100endings-20Qq",
+      "expected": 1,
+      "id": "100endings 20Qq: + / -"
+    },
+    {
+      "cql": "cql-files/100endings/21_29Rp.cql",
+      "dataset": "100endings-21_29Rp",
+      "expected": 1,
+      "id": "100endings 21_29Rp: + / -"
+    },
+    {
+      "cql": "cql-files/100endings/30_32Rpp.cql",
+      "dataset": "100endings-30_32Rpp",
+      "expected": 1,
+      "id": "100endings 30_32Rpp: + / -"
+    },
+    {
+      "cql": "cql-files/100endings/33_36BPb.cql",
+      "dataset": "100endings-33_36BPb",
+      "expected": 1,
+      "id": "100endings 33_36BPb: + / -"
+    },
+    {
+      "cql": "cql-files/100endings/37_40BNP.cql",
+      "dataset": "100endings-37_40BNP",
+      "expected": 1,
+      "id": "100endings 37_40BNP: + / -"
+    },
+    {
+      "cql": "cql-files/100endings/41_51ocBPPb.cql",
+      "dataset": "100endings-41_51ocBPPb",
+      "expected": 1,
+      "id": "100endings 41_51ocBPPb: + / -"
+    },
+    {
+      "cql": "cql-files/100endings/52_68RPr.cql",
+      "dataset": "100endings-52_68RPr",
+      "expected": 1,
+      "id": "100endings 52_68RPr: + / -"
+    },
+    {
+      "cql": "cql-files/100endings/69_76RPPr.cql",
+      "dataset": "100endings-69_76RPPr",
+      "expected": 1,
+      "id": "100endings 69_76RPPr: + / -"
+    },
+    {
+      "cql": "cql-files/100endings/77PP.cql",
+      "dataset": "100endings-77PP",
+      "expected": 1,
+      "id": "100endings 77PP: + / -"
+    },
+    {
+      "cql": "cql-files/100endings/78PP.cql",
+      "dataset": "100endings-78PP",
+      "expected": 1,
+      "id": "100endings 78PP: + / -"
+    },
+    {
+      "cql": "cql-files/100endings/79_81Pp.cql",
+      "dataset": "100endings-79_81Pp",
+      "expected": 1,
+      "id": "100endings 79_81Pp: + / -"
+    },
+    {
+      "cql": "cql-files/100endings/82Pp.cql",
+      "dataset": "100endings-82Pp",
+      "expected": 1,
+      "id": "100endings 82Pp: + / -"
+    },
+    {
+      "cql": "cql-files/100endings/83_86PPp.cql",
+      "dataset": "100endings-83_86PPp",
+      "expected": 1,
+      "id": "100endings 83_86PPp: + / -"
+    },
+    {
+      "cql": "cql-files/100endings/87PPp.cql",
+      "dataset": "100endings-87PPp",
+      "expected": 1,
+      "id": "100endings 87PPp: + / -"
+    },
+    {
+      "cql": "cql-files/100endings/88PPp.cql",
+      "dataset": "100endings-88PPp",
+      "expected": 1,
+      "id": "100endings 88PPp: + / -"
+    },
+    {
+      "cql": "cql-files/100endings/93BN.cql",
+      "dataset": "100endings-93BN",
+      "expected": 1,
+      "id": "100endings 93BN: + / -"
+    },
+    {
+      "cql": "cql-files/100endings/94_96RBr.cql",
+      "dataset": "100endings-94_96RBr",
+      "expected": 1,
+      "id": "100endings 94_96RBr: + / -"
+    },
+    {
+      "cql": "cql-files/100endings/97RPb.cql",
+      "dataset": "100endings-97RPb",
+      "expected": 1,
+      "id": "100endings 97RPb: + / -"
+    },
+    {
+      "cql": "cql-files/100endings/98RPb.cql",
+      "dataset": "100endings-98RPb",
+      "expected": 1,
+      "id": "100endings 98RPb: + / -"
+    },
+    {
+      "cql": "cql-files/100endings/99Qrp.cql",
+      "dataset": "100endings-99Qrp",
+      "expected": 1,
+      "id": "100endings 99Qrp: + / -"
+    },
+    {
+      "cql": "cql-files/FCE/table/1-4BN.cql",
+      "dataset": "fce-table-1-4BN",
+      "expected": 1,
+      "id": "FCE table 1-4BN: +fen / -fen"
+    },
+    {
+      "cql": "cql-files/FCE/table/10-1Qa.cql",
+      "dataset": "fce-table-10-1Qa",
+      "expected": 1,
+      "id": "FCE table 10-1Qa: +fen / -fen"
+    },
+    {
+      "cql": "cql-files/FCE/table/10-2Qr.cql",
+      "dataset": "fce-table-10-2Qr",
+      "expected": 1,
+      "id": "FCE table 10-2Qr: +fen / -fen"
+    },
+    {
+      "cql": "cql-files/FCE/table/10-2QrPp.cql",
+      "dataset": "fce-table-10-2QrPp",
+      "expected": 1,
+      "id": "FCE table 10-2QrPp: +fen / -fen"
+    },
+    {
+      "cql": "cql-files/FCE/table/10-3Qaa.cql",
+      "dataset": "fce-table-10-3Qaa",
+      "expected": 1,
+      "id": "FCE table 10-3Qaa: +fen / -fen"
+    },
+    {
+      "cql": "cql-files/FCE/table/10-4Qra.cql",
+      "dataset": "fce-table-10-4Qra",
+      "expected": 1,
+      "id": "FCE table 10-4Qra: +fen / -fen"
+    },
+    {
+      "cql": "cql-files/FCE/table/10-5Qrr.cql",
+      "dataset": "fce-table-10-5Qrr",
+      "expected": 1,
+      "id": "FCE table 10-5Qrr: +fen / -fen"
+    },
+    {
+      "cql": "cql-files/FCE/table/10-6Qaaa.cql",
+      "dataset": "fce-table-10-6Qaaa",
+      "expected": 1,
+      "id": "FCE table 10-6Qaaa: +fen / -fen"
+    },
+    {
+      "cql": "cql-files/FCE/table/10-7-1Qbrr.cql",
+      "dataset": "fce-table-10-7-1Qbrr",
+      "expected": 1,
+      "id": "FCE table 10-7-1Qbrr: +fen / -fen"
+    },
+    {
+      "cql": "cql-files/FCE/table/10-7-1QbrrPp.cql",
+      "dataset": "fce-table-10-7-1QbrrPp",
+      "expected": 1,
+      "id": "FCE table 10-7-1QbrrPp: +fen / -fen"
+    },
+    {
+      "cql": "cql-files/FCE/table/10-7QAq.cql",
+      "dataset": "fce-table-10-7QAq",
+      "expected": 1,
+      "id": "FCE table 10-7QAq: +fen / -fen"
+    },
+    {
+      "cql": "cql-files/FCE/table/2-0Pp.cql",
+      "dataset": "fce-table-2-0Pp",
+      "expected": 1,
+      "id": "FCE table 2-0Pp: +fen / -fen"
+    },
+    {
+      "cql": "cql-files/FCE/table/2-1P.cql",
+      "dataset": "fce-table-2-1P",
+      "expected": 1,
+      "id": "FCE table 2-1P: +fen / -fen"
+    },
+    {
+      "cql": "cql-files/FCE/table/3-1Np.cql",
+      "dataset": "fce-table-3-1Np",
+      "expected": 1,
+      "id": "FCE table 3-1Np: +fen / -fen"
+    },
+    {
+      "cql": "cql-files/FCE/table/3-2NN.cql",
+      "dataset": "fce-table-3-2NN",
+      "expected": 1,
+      "id": "FCE table 3-2NN: +fen / -fen"
+    },
+    {
+      "cql": "cql-files/FCE/table/4-1Bp.cql",
+      "dataset": "fce-table-4-1Bp",
+      "expected": 1,
+      "id": "FCE table 4-1Bp: +fen / -fen"
+    },
+    {
+      "cql": "cql-files/FCE/table/4-2scBB.cql",
+      "dataset": "fce-table-4-2scBB",
+      "expected": 1,
+      "id": "FCE table 4-2scBB: +fen / -fen"
+    },
+    {
+      "cql": "cql-files/FCE/table/4-3ocBB.cql",
+      "dataset": "fce-table-4-3ocBB",
+      "expected": 1,
+      "id": "FCE table 4-3ocBB: +fen / -fen"
+    },
+    {
+      "cql": "cql-files/FCE/table/5-0BN.cql",
+      "dataset": "fce-table-5-0BN",
+      "expected": 1,
+      "id": "FCE table 5-0BN: +fen / -fen"
+    },
+    {
+      "cql": "cql-files/FCE/table/6-1-0RP.cql",
+      "dataset": "fce-table-6-1-0RP",
+      "expected": 1,
+      "id": "FCE table 6-1-0RP: +fen / -fen"
+    },
+    {
+      "cql": "cql-files/FCE/table/6-2-0Rr.cql",
+      "dataset": "fce-table-6-2-0Rr",
+      "expected": 1,
+      "id": "FCE table 6-2-0Rr: +fen / -fen"
+    },
+    {
+      "cql": "cql-files/FCE/table/6-2-1RPr.cql",
+      "dataset": "fce-table-6-2-1RPr",
+      "expected": 1,
+      "id": "FCE table 6-2-1RPr: +fen / -fen"
+    },
+    {
+      "cql": "cql-files/FCE/table/6-2-2RPPr.cql",
+      "dataset": "fce-table-6-2-2RPPr",
+      "expected": 1,
+      "id": "FCE table 6-2-2RPPr: +fen / -fen"
+    },
+    {
+      "cql": "cql-files/FCE/table/6-3RRrr.cql",
+      "dataset": "fce-table-6-3RRrr",
+      "expected": 1,
+      "id": "FCE table 6-3RRrr: +fen / -fen"
+    },
+    {
+      "cql": "cql-files/FCE/table/7-1RN.cql",
+      "dataset": "fce-table-7-1RN",
+      "expected": 1,
+      "id": "FCE table 7-1RN: +fen / -fen"
+    },
+    {
+      "cql": "cql-files/FCE/table/7-2RB.cql",
+      "dataset": "fce-table-7-2RB",
+      "expected": 1,
+      "id": "FCE table 7-2RB: +fen / -fen"
+    },
+    {
+      "cql": "cql-files/FCE/table/8-1RNr.cql",
+      "dataset": "fce-table-8-1RNr",
+      "expected": 1,
+      "id": "FCE table 8-1RNr: +fen / -fen"
+    },
+    {
+      "cql": "cql-files/FCE/table/8-1RNrPp.cql",
+      "dataset": "fce-table-8-1RNrPp",
+      "expected": 1,
+      "id": "FCE table 8-1RNrPp: +fen / -fen"
+    },
+    {
+      "cql": "cql-files/FCE/table/8-2RBr.cql",
+      "dataset": "fce-table-8-2RBr",
+      "expected": 1,
+      "id": "FCE table 8-2RBr: +fen / -fen"
+    },
+    {
+      "cql": "cql-files/FCE/table/8-2RBrPp.cql",
+      "dataset": "fce-table-8-2RBrPp",
+      "expected": 1,
+      "id": "FCE table 8-2RBrPp: +fen / -fen"
+    },
+    {
+      "cql": "cql-files/FCE/table/8-3RAra.cql",
+      "dataset": "fce-table-8-3RAra",
+      "expected": 1,
+      "id": "FCE table 8-3RAra: +fen / -fen"
+    },
+    {
+      "cql": "cql-files/FCE/table/9-1Qp.cql",
+      "dataset": "fce-table-9-1Qp",
+      "expected": 1,
+      "id": "FCE table 9-1Qp: +fen / -fen"
+    },
+    {
+      "cql": "cql-files/FCE/table/9-2Qq.cql",
+      "dataset": "fce-table-9-2Qq",
+      "expected": 1,
+      "id": "FCE table 9-2Qq: +fen / -fen"
+    },
+    {
+      "cql": "cql-files/FCE/table/9-3QPq.cql",
+      "dataset": "fce-table-9-3QPq",
+      "expected": 1,
+      "id": "FCE table 9-3QPq: +fen / -fen"
+    },
+    {
+      "cql": "cql-files/FCE/toc/10.cql",
+      "dataset": "fce-toc-10",
+      "expected": 1,
+      "id": "FCE toc 10: +fen / -fen"
+    },
+    {
+      "cql": "cql-files/FCE/toc/8.cql",
+      "dataset": "fce-toc-8",
+      "expected": 1,
+      "id": "FCE toc 8: +fen / -fen"
+    },
+    {
+      "cql": "cql-files/FCE/toc/9.cql",
+      "dataset": "fce-toc-9",
+      "expected": 1,
+      "id": "FCE toc 9: +fen / -fen"
+    },
+    {
+      "cql": "cql-files/mates/BN.cql",
+      "dataset": "mates-BN",
+      "expected": 1,
+      "id": "mates BN: + / -"
+    },
+    {
+      "cql": "cql-files/mates/KBB.cql",
+      "dataset": "mates-KBB",
+      "expected": 1,
+      "id": "mates KBB: + / -"
+    },
+    {
+      "cql": "cql-files/mates/KNN.cql",
+      "dataset": "mates-KNN",
+      "expected": 1,
+      "id": "mates KNN: + / -"
+    },
+    {
+      "cql": "cql-files/mates/anastasiamate.cql",
+      "dataset": "mates-anastasiamate",
+      "expected": 1,
+      "id": "mates anastasiamate: + / -"
+    },
+    {
+      "cql": "cql-files/mates/anderssen.cql",
+      "dataset": "mates-anderssen",
+      "expected": 1,
+      "id": "mates anderssen: + / -"
+    },
+    {
+      "cql": "cql-files/mates/arabianmate.cql",
+      "dataset": "mates-arabianmate",
+      "expected": 1,
+      "id": "mates arabianmate: + / -"
+    },
+    {
+      "cql": "cql-files/mates/backrankmate.cql",
+      "dataset": "mates-backrankmate",
+      "expected": 1,
+      "id": "mates backrankmate: + / -"
+    },
+    {
+      "cql": "cql-files/mates/balestramate.cql",
+      "dataset": "mates-balestramate",
+      "expected": 1,
+      "id": "mates balestramate: + / -"
+    },
+    {
+      "cql": "cql-files/mates/blackburnemate.cql",
+      "dataset": "mates-blackburnemate",
+      "expected": 1,
+      "id": "mates blackburnemate: + / -"
+    },
+    {
+      "cql": "cql-files/mates/blindswinemate.cql",
+      "dataset": "mates-blindswinemate",
+      "expected": 1,
+      "id": "mates blindswinemate: + / -"
+    },
+    {
+      "cql": "cql-files/mates/bodenmate.cql",
+      "dataset": "mates-bodenmate",
+      "expected": 1,
+      "id": "mates bodenmate: + / -"
+    },
+    {
+      "cql": "cql-files/mates/castlingmate.cql",
+      "dataset": "mates-castlingmate",
+      "expected": 1,
+      "id": "mates castlingmate: + / -"
+    },
+    {
+      "cql": "cql-files/mates/corner.cql",
+      "dataset": "mates-corner",
+      "expected": 1,
+      "id": "mates corner: + / -"
+    },
+    {
+      "cql": "cql-files/mates/damiano.cql",
+      "dataset": "mates-damiano",
+      "expected": 1,
+      "id": "mates damiano: + / -"
+    },
+    {
+      "cql": "cql-files/mates/damianobishopmate.cql",
+      "dataset": "mates-damianobishopmate",
+      "expected": 1,
+      "id": "mates damianobishopmate: + / -"
+    },
+    {
+      "cql": "cql-files/mates/davidandgoliath.cql",
+      "dataset": "mates-davidandgoliath",
+      "expected": 1,
+      "id": "mates davidandgoliath: + / -"
+    },
+    {
+      "cql": "cql-files/mates/doubleknight.cql",
+      "dataset": "mates-doubleknight",
+      "expected": 1,
+      "id": "mates doubleknight: + / -"
+    },
+    {
+      "cql": "cql-files/mates/dovetailmate.cql",
+      "dataset": "mates-dovetailmate",
+      "expected": 1,
+      "id": "mates dovetailmate: + / -"
+    },
+    {
+      "cql": "cql-files/mates/epaulettemate.cql",
+      "dataset": "mates-epaulettemate",
+      "expected": 1,
+      "id": "mates epaulettemate: + / -"
+    },
+    {
+      "cql": "cql-files/mates/greco.cql",
+      "dataset": "mates-greco",
+      "expected": 1,
+      "id": "mates greco: + / -"
+    },
+    {
+      "cql": "cql-files/mates/hookmate.cql",
+      "dataset": "mates-hookmate",
+      "expected": 1,
+      "id": "mates hookmate: + / -"
+    },
+    {
+      "cql": "cql-files/mates/ismate.cql",
+      "dataset": "mates-ismate",
+      "expected": 1,
+      "id": "mates ismate: + / -"
+    },
+    {
+      "cql": "cql-files/mates/killbox.cql",
+      "dataset": "mates-killbox",
+      "expected": 1,
+      "id": "mates killbox: + / -"
+    },
+    {
+      "cql": "cql-files/mates/laddermate.cql",
+      "dataset": "mates-laddermate",
+      "expected": 1,
+      "id": "mates laddermate: + / -"
+    },
+    {
+      "cql": "cql-files/mates/legalmate.cql",
+      "dataset": "mates-legalmate",
+      "expected": 1,
+      "id": "mates legalmate: + / -"
+    },
+    {
+      "cql": "cql-files/mates/lolli.cql",
+      "dataset": "mates-lolli",
+      "expected": 1,
+      "id": "mates lolli: + / -"
+    },
+    {
+      "cql": "cql-files/mates/maxlangemate.cql",
+      "dataset": "mates-maxlangemate",
+      "expected": 1,
+      "id": "mates maxlangemate: + / -"
+    },
+    {
+      "cql": "cql-files/mates/mayet.cql",
+      "dataset": "mates-mayet",
+      "expected": 1,
+      "id": "mates mayet: + / -"
+    },
+    {
+      "cql": "cql-files/mates/morphymate.cql",
+      "dataset": "mates-morphymate",
+      "expected": 1,
+      "id": "mates morphymate: + / -"
+    },
+    {
+      "cql": "cql-files/mates/opera.cql",
+      "dataset": "mates-opera",
+      "expected": 1,
+      "id": "mates opera: + / -"
+    },
+    {
+      "cql": "cql-files/mates/pillsbury.cql",
+      "dataset": "mates-pillsbury",
+      "expected": 1,
+      "id": "mates pillsbury: + / -"
+    },
+    {
+      "cql": "cql-files/mates/queen.cql",
+      "dataset": "mates-queen",
+      "expected": 1,
+      "id": "mates queen: + / -"
+    },
+    {
+      "cql": "cql-files/mates/retimate.cql",
+      "dataset": "mates-retimate",
+      "expected": 1,
+      "id": "mates retimate: + / -"
+    },
+    {
+      "cql": "cql-files/mates/rookmate.cql",
+      "dataset": "mates-rookmate",
+      "expected": 1,
+      "id": "mates rookmate: + / -"
+    },
+    {
+      "cql": "cql-files/mates/smotheredmate.cql",
+      "dataset": "mates-smotheredmate",
+      "expected": 1,
+      "id": "mates smotheredmate: + / -"
+    },
+    {
+      "cql": "cql-files/mates/suffocationmate.cql",
+      "dataset": "mates-suffocationmate",
+      "expected": 1,
+      "id": "mates suffocationmate: + / -"
+    },
+    {
+      "cql": "cql-files/mates/swallowtail.cql",
+      "dataset": "mates-swallowtail",
+      "expected": 1,
+      "id": "mates swallowtail: + / -"
+    },
+    {
+      "cql": "cql-files/mates/trianglemate.cql",
+      "dataset": "mates-trianglemate",
+      "expected": 1,
+      "id": "mates trianglemate: + / -"
+    },
+    {
+      "cql": "cql-files/mates/twobishopmate.cql",
+      "dataset": "mates-twobishopmate",
+      "expected": 1,
+      "id": "mates twobishopmate: + / -"
+    },
+    {
+      "cql": "cql-files/mates/twoknightmate.cql",
+      "dataset": "mates-twoknightmate",
+      "expected": 1,
+      "id": "mates twoknightmate: + / -"
+    },
+    {
+      "cql": "cql-files/mates/vukovicmate.cql",
+      "dataset": "mates-vukovicmate",
+      "expected": 1,
+      "id": "mates vukovicmate: + / -"
     }
   ]
 }

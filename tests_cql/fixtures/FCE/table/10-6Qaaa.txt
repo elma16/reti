@@ -1,0 +1,4 @@
+# positive (should match)
+4k3/2bnn3/8/8/8/8/8/3QK3 w - - 0 1
+# negative (single tweak, should not match)
+4k3/2bn4/8/8/8/8/8/3QK3 w - - 0 1

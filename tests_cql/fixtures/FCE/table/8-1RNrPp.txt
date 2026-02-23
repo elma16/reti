@@ -1,0 +1,4 @@
+# positive (should match)
+r3k3/8/8/8/8/8/P7/R3K1N1 w - - 0 1
+# negative (single tweak, should not match)
+r3k3/8/8/8/8/8/P7/R1B1K1N1 w - - 0 1

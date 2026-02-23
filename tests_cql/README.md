@@ -41,6 +41,8 @@ Notes:
   `tests_cql/.generated` automatically.
 - `expected` defaults to `expected_matches_from_pgn()` when omitted, so set it
   explicitly for FEN datasets.
+- Test resolution prefers `bins/cql6-2/cql` before `bins/cql6-1/cql` so
+  Unicode-form CQL files (for example in `cql-files/mates/`) parse reliably.
 
 Existing behaviour
 ------------------
@@ -51,20 +53,33 @@ manifest gradually without breaking current tests.
 
 Coverage requirement
 --------------------
-Test collection now fails if any `.cql` under `cql-files/` has no corresponding
-test case. Add entries to `tests_cql/fixtures/cases.json` (preferred), or supply
-a fixture PGN alongside the `.cql`, until the missing list is empty.
+Manifest mode supports an opt-in strict check:
 
-Common test dataset
--------------------
+- Set `"enforce_full_cql_coverage": true` in `cases.json` to fail collection if
+  any `.cql` under `cql-files/` has no test case.
+- Leave it unset/false for focused suites (for example, testing only one
+  directory like FCE table scripts).
 
-We include a small shared PGN fixture `tests_cql/fixtures/db.pgn` and a manifest
-`tests_cql/fixtures/cases.json` to drive a couple of smoke tests:
+FCE suite
+---------
 
-- `common-db` dataset points to `db.pgn`.
-- `most_visited_square.cql` is expected to match both games (expected 2).
-- `rook_homerun.cql` is expected to find none (expected 0).
+The current manifest includes a focused FCE suite for `cql-files/FCE/**/*.cql`:
 
-Use this as a pattern for adding more CQL scripts: drop minimal positions into
-`db.pgn` or another dataset, add a case entry with an explicit expected count,
-and run `pytest tests_cql --cql-bin /path/to/cql`.
+- Each CQL file has a dedicated FEN fixture in `tests_cql/fixtures/FCE/`.
+- Each fixture contains two positions:
+  - One positive FEN expected to match.
+  - One near-miss negative FEN expected not to match.
+- Every FCE case is configured with `expected: 1`.
+
+Use this pattern for other directories: add per-script FEN pairs, point datasets
+at those files, and set explicit expected counts.
+
+Mates suite
+-----------
+
+The manifest also includes `cql-files/mates/*.cql`:
+
+- Most mate scripts use paired FEN fixtures in `tests_cql/fixtures/mates/*.txt`.
+- `castlingmate.cql` is move-dependent, so it uses
+  `tests_cql/fixtures/mates/castlingmate.pgn` with two one-move games from FEN
+  start positions (positive and near-miss negative).

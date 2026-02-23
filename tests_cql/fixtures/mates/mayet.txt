@@ -1,0 +1,4 @@
+# positive (should match)
+6k1/ppp2pBp/5P2/8/2p3P1/3q4/P2b3P/3Kr3 w - - 1 29
+# negative (single tweak, should not match)
+6k1/ppp2pBp/5P2/8/2p3P1/3q4/P2b3P/3Kr3 b - - 1 29

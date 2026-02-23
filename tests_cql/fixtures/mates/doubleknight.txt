@@ -1,0 +1,4 @@
+# positive (should match)
+k7/ppNN4/8/8/8/8/8/7K b - - 0 1
+# negative (single tweak, should not match)
+k7/ppNN4/8/8/8/8/8/7K w - - 0 1
