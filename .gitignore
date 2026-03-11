@@ -16,6 +16,18 @@ tests_cql/.generated/
 
 *.cql
 *.csv
+# Whitelist only the public CQL collections we intend to keep in-repo.
+!cql-files/
+cql-files/*
+!cql-files/FCE/
+!cql-files/mates/
+!cql-files/silly/
+!cql-files/100endings/
+!cql-files/FCE/**/*.cql
+!cql-files/mates/**/*.cql
+!cql-files/silly/**/*.cql
+!cql-files/100endings/**/*.cql
+!cql-files/FCE/table/manifest.csv
 vscode-cql6
 .vscode/
 *__pycache__
