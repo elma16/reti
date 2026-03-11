@@ -11,6 +11,7 @@ requires-python = ">=3.10"
 authors = [{name = "Elliott Macneil", email = "ucabem1@ucl.ac.uk"}]
 dependencies = [
     "python-chess",
+    "tqdm",
 ]
 
 

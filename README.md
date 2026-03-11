@@ -10,12 +10,14 @@ the command line.
 ## Repository layout
 
 - `cql-files/`: the main script collections, including the FCE material
+- `src/reti/repair_pgn.py`: one-time in-place PGN repair and normalization before CQL runs
 - `src/reti/analyse_cql.py`: batch CLI runner for `pgn|dir x cql|dir` matrix execution
 - `scripts/build_fce_table_subset.py`: builds the curated FCE subset used for the public table workflow
 - `scripts/render_fce_table_from_summary.py`: renders markdown table rows from `analyse_cql.py` output
 - `tests_cql/`: fixtures and tests for the CQL scripts
 - `docs/analyse_cql.md`: detailed documentation for the batch CQL runner
 - `docs/fce_table.md`: workflow for building the curated FCE table subset and rendering the final table
+- `docs/repair_pgn.md`: one-time PGN repair workflow for CQL-unfriendly databases
 
 ## Install
 
@@ -35,15 +37,42 @@ it up automatically.
 Run the batch CQL runner:
 
 ```bash
-python src/reti/analyse_cql.py path/to/pgn_or_dir path/to/cql path/to/script_or_directory -o path/to/output_dir
+python src/reti/analyse_cql.py \
+  --pgn path/to/pgn_or_dir \
+  --cql-bin path/to/cql \
+  --scripts path/to/script_or_directory \
+  --jobs 1 \
+  -o path/to/output_dir
 ```
 
 `src/reti/analyse_cql.py` accepts either a single PGN or a directory of PGNs,
 and either a single CQL script or a directory of CQL scripts. It runs the full
-cross-product and writes one output PGN per pair plus a `summary.csv`.
+cross-product and writes one output PGN per pair plus a `summary.csv`. During
+preflight, if a PGN contains text-level incompatibilities that older CQL builds
+dislike, the runner uses a sanitized temporary copy for that run and leaves the
+original PGN untouched. By default the preflight stays cheap; deeper PGN parser
+checks and the up-front CQL smoke test are both opt-in flags. The runner now
+defaults to sequential job execution so CQL can use its own internal threading
+without process-level oversubscription.
 
 Detailed usage, output layout, and examples are in
 [docs/analyse_cql.md](docs/analyse_cql.md).
+
+If a PGN makes CQL abort, repair it once in place before analysis:
+
+```bash
+python src/reti/repair_pgn.py \
+  --pgn ~/Downloads/LumbrasGigaBase_OTB_1900-1949.pgn \
+  --cql-bin ./bins/cql6-2/cql
+```
+
+That rewrites the PGN through a streaming sanitize-and-normalize pass and only
+replaces the original file if the repaired temp copy passes a CQL smoke test.
+If you want the rewrite to finish as quickly as possible and are willing to
+skip that extra validation pass, omit `--cql-bin`.
+The repaired output is intentionally CQL-safe: it keeps headers and mainline
+moves, but drops comments and side variations.
+Full details are in [docs/repair_pgn.md](docs/repair_pgn.md).
 
 For the FCE table workflow, first build the curated subset:
 
@@ -55,7 +84,12 @@ Then run the batch analysis over your PGN directory and render the markdown
 table:
 
 ```bash
-python src/reti/analyse_cql.py path/to/pgn_dir path/to/cql cql-files/FCE/table -o output/fce-table
+python src/reti/analyse_cql.py \
+  --pgn path/to/pgn_dir \
+  --cql-bin path/to/cql \
+  --scripts cql-files/FCE/table \
+  --jobs 1 \
+  -o output/fce-table
 python scripts/render_fce_table_from_summary.py output/fce-table/summary.csv path/to/pgn_dir
 ```
 

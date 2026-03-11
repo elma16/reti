@@ -42,9 +42,10 @@ If your PGNs live in a directory:
 
 ```bash
 python src/reti/analyse_cql.py \
-  path/to/pgn_dir \
-  path/to/cql \
-  cql-files/FCE/table \
+  --pgn path/to/pgn_dir \
+  --cql-bin path/to/cql \
+  --scripts cql-files/FCE/table \
+  --jobs 1 \
   -o output/fce-table
 ```
 
@@ -70,6 +71,10 @@ That prints a markdown table with:
 ## Notes
 
 - `analyse_cql.py` accepts either a single PGN or a directory of PGNs.
+- `--jobs 1` is now the default and is a sensible choice for the FCE table
+  workflow because CQL itself is multithreaded.
+- If you want process-level parallelism across scripts, raise `--jobs` and
+  consider `--cql-threads 1`.
 - The rendered percentages use the total number of games across the original
   PGN input, not the number of matched games.
 - Rebuild `cql-files/FCE/table/` whenever you make changes to the broader

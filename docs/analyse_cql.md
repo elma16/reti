@@ -14,19 +14,36 @@ files.
 ## Command
 
 ```bash
-python src/reti/analyse_cql.py PGN_INPUT CQL_BINARY CQL_INPUT -o OUTPUT_DIR
+python src/reti/analyse_cql.py --pgn PGN_INPUT --cql-bin CQL_BINARY --scripts CQL_INPUT --jobs 1 -o OUTPUT_DIR
 ```
 
 Arguments:
 
-- `PGN_INPUT`: a `.pgn` file or a directory containing `.pgn` files
-- `CQL_BINARY`: a path to the `cql` executable, or an executable name on `PATH`
-- `CQL_INPUT`: a `.cql` file or a directory containing `.cql` files
+- `--pgn PGN_INPUT`: a `.pgn` file or a directory containing `.pgn` files
+- `--cql-bin CQL_BINARY`: a path to the `cql` executable, or an executable name on `PATH`
+- `--scripts CQL_INPUT`: a `.cql` file or a directory containing `.cql` files
+- `--jobs JOBS`: number of CQL subprocesses to run in parallel, default `1`
+- `--cql-threads THREADS`: thread count per CQL process, or `auto`
 - `-o OUTPUT_DIR`: directory where result PGNs and `summary.csv` are written
 
 Optional flags:
 
 - `--keep-output`: when `-o` is omitted, keep the temporary output directory
+- `--skip-pgn-preflight`: skip the initial PGN validation pass
+- `--smoke-test-pgns`: run one cheap CQL smoke query per PGN during preflight
+- `--strict-pgn-parse`: run a full `python-chess` parse during preflight
+
+Legacy positional syntax still works for now, but the explicit flag form above
+is the intended interface.
+
+Threading model:
+
+- By default the runner uses `--jobs 1`, so it runs scripts sequentially and
+  lets CQL choose its own internal thread count.
+- If you raise `--jobs` above `1`, the runner automatically treats
+  `--cql-threads auto` as `1` to avoid oversubscribing the machine.
+- If you want full manual control, pass both `--jobs` and `--cql-threads`
+  explicitly.
 
 ## Discovery rules
 
@@ -83,6 +100,19 @@ result PGN.
 
 ## Console behavior
 
+Before the full matrix run, the runner does a PGN preflight by default:
+
+- it rejects files with no `[Event ` tags
+- if a PGN contains a UTF-8 BOM, invalid UTF-8, NUL bytes, or other control
+  characters, it creates a sanitized temporary runtime copy and leaves the
+  original file untouched
+- by default it does not run a full `python-chess` parse or a CQL smoke test,
+  so startup stays cheap on large databases
+- `--strict-pgn-parse` enables the full `python-chess` parse check
+- `--smoke-test-pgns` enables one cheap CQL smoke query per PGN so CQL-level
+  crashes caused by the PGN itself show up before the `PGN x CQL`
+  cross-product starts
+
 For each job, the runner prints:
 
 - the current job number
@@ -103,9 +133,10 @@ Run one PGN against one CQL:
 
 ```bash
 python src/reti/analyse_cql.py \
-  tests_cql/fixtures/db.pgn \
-  path/to/cql \
-  cql-files/mates/ismate.cql \
+  --pgn tests_cql/fixtures/db.pgn \
+  --cql-bin path/to/cql \
+  --scripts cql-files/mates/ismate.cql \
+  --jobs 1 \
   -o output/ismate-demo
 ```
 
@@ -113,9 +144,10 @@ Run one PGN against a whole CQL directory:
 
 ```bash
 python src/reti/analyse_cql.py \
-  tests_cql/fixtures/db.pgn \
-  path/to/cql \
-  cql-files/mates \
+  --pgn tests_cql/fixtures/db.pgn \
+  --cql-bin path/to/cql \
+  --scripts cql-files/mates \
+  --jobs 1 \
   -o output/mates-on-db
 ```
 
@@ -123,9 +155,10 @@ Run a directory of PGNs against one CQL:
 
 ```bash
 python src/reti/analyse_cql.py \
-  tests_cql/fixtures \
-  path/to/cql \
-  cql-files/mates/ismate.cql \
+  --pgn tests_cql/fixtures \
+  --cql-bin path/to/cql \
+  --scripts cql-files/mates/ismate.cql \
+  --jobs 1 \
   -o output/ismate-on-fixtures
 ```
 
@@ -133,9 +166,10 @@ Run a directory of PGNs against a directory of CQL scripts:
 
 ```bash
 python src/reti/analyse_cql.py \
-  tests_cql/fixtures \
-  path/to/cql \
-  cql-files/FCE \
+  --pgn tests_cql/fixtures \
+  --cql-bin path/to/cql \
+  --scripts cql-files/FCE \
+  --jobs 1 \
   -o output/fce-batch
 ```
 
@@ -143,9 +177,10 @@ Use a temporary output directory and keep it:
 
 ```bash
 python src/reti/analyse_cql.py \
-  tests_cql/fixtures/db.pgn \
-  path/to/cql \
-  cql-files/mates \
+  --pgn tests_cql/fixtures/db.pgn \
+  --cql-bin path/to/cql \
+  --scripts cql-files/mates \
+  --jobs 1 \
   --keep-output
 ```
 
@@ -156,10 +191,21 @@ python src/reti/analyse_cql.py \
   you pass `--keep-output`.
 - Large matrix runs can generate many PGN files quickly; prefer a dedicated
   output directory per run.
+- The runner shows a `tqdm` progress bar for both the PGN preflight pass and
+  the overall CQL job matrix.
+- The default execution model is sequential at the process level: `--jobs 1`.
+- If you raise `--jobs`, the runner constrains each CQL process to one thread
+  unless you explicitly override `--cql-threads`.
 - The script counts matched games by scanning the output PGN for `[Event `
   tags. That is fast and sufficient for summary reporting.
+- If preflight reports that it is using a sanitized temporary copy, that copy
+  exists only for the current run; the source PGN on disk is not modified.
+- If you want to normalize a problematic PGN once and then reuse that repaired
+  file for future analyses, run `src/reti/repair_pgn.py` first.
 - If you want to rerun the same batch and compare outputs, use a fresh output
   directory rather than sharing one between experiments.
+- Negative subprocess return codes mean CQL was terminated by a signal. For
+  example, `-6` is reported as `SIGABRT`.
 - If you keep a private local CQL binary under `bins/`, you can pass that path
   here as well. `bins/` is ignored by Git; the public repo does not rely on
   committed binaries.
