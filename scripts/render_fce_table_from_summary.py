@@ -54,7 +54,9 @@ def discover_pgns(location: Path) -> list[Path]:
         return [location]
     if location.is_dir():
         return sorted(
-            path for path in location.rglob("*") if path.is_file() and path.suffix == ".pgn"
+            path
+            for path in location.rglob("*")
+            if path.is_file() and path.suffix == ".pgn"
         )
     raise SystemExit(f"Invalid PGN input: {location}")
 
@@ -89,7 +91,9 @@ def main() -> int:
             "Render the FCE markdown table from analyse_cql.py summary.csv output."
         )
     )
-    parser.add_argument("summary_csv", type=Path, help="Path to analyse_cql.py summary.csv")
+    parser.add_argument(
+        "summary_csv", type=Path, help="Path to analyse_cql.py summary.csv"
+    )
     parser.add_argument(
         "pgn_input",
         type=Path,
@@ -98,7 +102,9 @@ def main() -> int:
     args = parser.parse_args()
 
     counts = load_counts(args.summary_csv)
-    total_games = sum(count_games_in_pgn(path) for path in discover_pgns(args.pgn_input))
+    total_games = sum(
+        count_games_in_pgn(path) for path in discover_pgns(args.pgn_input)
+    )
     print(render_markdown(counts, total_games))
     return 0
 

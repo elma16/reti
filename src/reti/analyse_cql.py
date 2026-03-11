@@ -107,9 +107,11 @@ def build_output_path(
     """
     Keep outputs deterministic and collision-free across matrix runs.
     """
-    return output_dir / relative_stem(pgn_path, pgn_root) / relative_stem(
-        cql_path, cql_root
-    ).with_suffix(".pgn")
+    return (
+        output_dir
+        / relative_stem(pgn_path, pgn_root)
+        / relative_stem(cql_path, cql_root).with_suffix(".pgn")
+    )
 
 
 def format_relative(path: Path, root: Path) -> str:

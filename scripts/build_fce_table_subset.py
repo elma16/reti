@@ -116,8 +116,7 @@ def resolve_source(target: str, available: dict[str, Path]) -> Resolution:
     second_score = scored[1][0] if len(scored) > 1 else 0.0
     if best_score < 0.72 or (best_score - second_score) < 0.08:
         raise ValueError(
-            f"Could not resolve '{target}' confidently. "
-            f"Best candidates: {scored[:3]}"
+            f"Could not resolve '{target}' confidently. Best candidates: {scored[:3]}"
         )
 
     return Resolution(
