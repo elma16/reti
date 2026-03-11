@@ -11,9 +11,9 @@ the command line.
 
 - `cql-files/`: the main script collections, including the FCE material
 - `src/reti/analyse_cql.py`: batch CLI runner for `pgn|dir x cql|dir` matrix execution
-- `src/reti/fce_table_analyzer.py`: CLI workflow for reproducing the Fundamental Chess Endings table from a PGN database
+- `scripts/build_fce_table_subset.py`: builds the curated FCE subset used for the public table workflow
+- `scripts/render_fce_table_from_summary.py`: renders markdown table rows from `analyse_cql.py` output
 - `tests_cql/`: fixtures and tests for the CQL scripts
-- `bins/`: checked-in CQL binaries used by local tooling
 - `docs/analyse_cql.md`: detailed documentation for the batch CQL runner
 - `docs/fce_table.md`: workflow for building the curated FCE table subset and rendering the final table
 
@@ -25,8 +25,10 @@ source .venv/bin/activate  # use .venv\Scripts\Activate.ps1 on Windows
 pip install -e .
 ```
 
-You will also need a CQL binary. This repo keeps local copies under `bins/`, or
-you can point the scripts at your own installed `cql` executable.
+You will also need a CQL binary. You can point the scripts at any installed
+`cql` executable. If you keep a private local copy under `bins/`, that
+directory is ignored by Git; the test and CLI resolution logic will still pick
+it up automatically.
 
 ## CLI usage
 
@@ -53,7 +55,7 @@ Then run the batch analysis over your PGN directory and render the markdown
 table:
 
 ```bash
-python src/reti/analyse_cql.py path/to/pgn_dir bins/cql6-2/cql cql-files/FCE/table -o output/fce-table
+python src/reti/analyse_cql.py path/to/pgn_dir path/to/cql cql-files/FCE/table -o output/fce-table
 python scripts/render_fce_table_from_summary.py output/fce-table/summary.csv path/to/pgn_dir
 ```
 

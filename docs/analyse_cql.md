@@ -104,7 +104,7 @@ Run one PGN against one CQL:
 ```bash
 python src/reti/analyse_cql.py \
   tests_cql/fixtures/db.pgn \
-  bins/cql6-2/cql \
+  path/to/cql \
   cql-files/mates/ismate.cql \
   -o output/ismate-demo
 ```
@@ -114,7 +114,7 @@ Run one PGN against a whole CQL directory:
 ```bash
 python src/reti/analyse_cql.py \
   tests_cql/fixtures/db.pgn \
-  bins/cql6-2/cql \
+  path/to/cql \
   cql-files/mates \
   -o output/mates-on-db
 ```
@@ -124,7 +124,7 @@ Run a directory of PGNs against one CQL:
 ```bash
 python src/reti/analyse_cql.py \
   tests_cql/fixtures \
-  bins/cql6-2/cql \
+  path/to/cql \
   cql-files/mates/ismate.cql \
   -o output/ismate-on-fixtures
 ```
@@ -134,7 +134,7 @@ Run a directory of PGNs against a directory of CQL scripts:
 ```bash
 python src/reti/analyse_cql.py \
   tests_cql/fixtures \
-  bins/cql6-2/cql \
+  path/to/cql \
   cql-files/FCE \
   -o output/fce-batch
 ```
@@ -144,7 +144,7 @@ Use a temporary output directory and keep it:
 ```bash
 python src/reti/analyse_cql.py \
   tests_cql/fixtures/db.pgn \
-  bins/cql6-2/cql \
+  path/to/cql \
   cql-files/mates \
   --keep-output
 ```
@@ -160,3 +160,6 @@ python src/reti/analyse_cql.py \
   tags. That is fast and sufficient for summary reporting.
 - If you want to rerun the same batch and compare outputs, use a fresh output
   directory rather than sharing one between experiments.
+- If you keep a private local CQL binary under `bins/`, you can pass that path
+  here as well. `bins/` is ignored by Git; the public repo does not rely on
+  committed binaries.

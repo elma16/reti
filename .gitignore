@@ -1,18 +1,24 @@
 *.DS_Store
 *.pgn
+*.jpeg
+*.py[cod]
 
-output
-src/reti.egg-info
-src/build
-data
-build 
-cql6-1
-cql6-2
+__pycache__/
+.ipynb_checkpoints/
+.pytest_cache/
+.ruff_cache/
+
+output/
+# Private local CQL binaries are allowed here but are never committed.
+bins/
+src/reti.egg-info/
+build/
+data/
 tests_cql/.generated/
 
-/training/env.py
-
 .venv/
+.vscode/
+vscode-cql6/
 
 *.cql
 *.csv
@@ -28,7 +34,3 @@ cql-files/*
 !cql-files/silly/**/*.cql
 !cql-files/100endings/**/*.cql
 !cql-files/FCE/table/manifest.csv
-vscode-cql6
-.vscode/
-*__pycache__
-*.jpeg

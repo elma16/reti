@@ -41,7 +41,8 @@ Notes:
   `tests_cql/.generated` automatically.
 - `expected` defaults to `expected_matches_from_pgn()` when omitted, so set it
   explicitly for FEN datasets.
-- Test resolution prefers `bins/cql6-2/cql` before `bins/cql6-1/cql` so
+- If private local binaries exist under the ignored `bins/` directory, test
+  resolution prefers `bins/cql6-2/cql` before `bins/cql6-1/cql` so
   Unicode-form CQL files (for example in `cql-files/mates/`) parse reliably.
 
 Existing behaviour

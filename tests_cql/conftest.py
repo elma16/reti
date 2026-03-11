@@ -58,7 +58,7 @@ def cql_bin(request, repo_root: Path) -> str:
     # Resolution order:
     # 1) --cql-bin flag
     # 2) $CQL_BIN env
-    # 3) repo-local bins/cql
+    # 3) ignored local bins/ copies, if present
     # 4) whatever "cql" on PATH
     candidates = []
 
@@ -94,7 +94,7 @@ def cql_bin(request, repo_root: Path) -> str:
     pytest.skip(
         "CQL binary not found. Tried: "
         + ", ".join(str(c) for c in candidates)
-        + ". Set --cql-bin, $CQL_BIN, put cql on PATH, or place an executable at bins/cql."
+        + ". Set --cql-bin, $CQL_BIN, put cql on PATH, or keep a private ignored copy at bins/cql6-2/cql."
     )
 
 

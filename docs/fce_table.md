@@ -43,7 +43,7 @@ If your PGNs live in a directory:
 ```bash
 python src/reti/analyse_cql.py \
   path/to/pgn_dir \
-  bins/cql6-2/cql \
+  path/to/cql \
   cql-files/FCE/table \
   -o output/fce-table
 ```
