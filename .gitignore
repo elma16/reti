@@ -13,6 +13,7 @@ output/
 cql-bin/
 src/reti.egg-info/
 build/
+native/**/target/
 data/
 tests_cql/.generated/
 

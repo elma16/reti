@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import codecs
+import functools
 import io
 import os
 import shutil
@@ -14,7 +15,15 @@ from pathlib import Path
 
 import chess.pgn as chess_pgn
 
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from reti.fast_pgn_repair import FastPgnRewriteStats, rewrite_pgn_fast
 from tqdm import tqdm as tqdm_progress
+
+FAST_REPAIR_MODE = "fast"
+STRICT_REPAIR_MODE = "strict"
+REPAIR_MODES = (FAST_REPAIR_MODE, STRICT_REPAIR_MODE)
 
 
 def progress_write(message: str) -> None:
@@ -57,6 +66,11 @@ class PgnNormalizationStats:
     games_written: int
     parser_error_games: int
     parser_errors: int
+    mode: str
+    used_native_accelerator: bool
+    comments_removed: int
+    variations_removed: int
+    line_comments_removed: int
 
 
 @dataclass(frozen=True)
@@ -78,14 +92,6 @@ def describe_returncode(returncode: int) -> str:
     except ValueError:
         signal_name = f"SIG{signal_number}"
     return f"terminated by signal {signal_number} ({signal_name})"
-
-
-def first_nonempty_line(text: str) -> str:
-    for line in text.splitlines():
-        stripped = line.strip()
-        if stripped:
-            return stripped
-    return ""
 
 
 def resolve_cql_binary(cql_binary: str) -> Path | None:
@@ -213,6 +219,69 @@ def sanitize_pgn_to_path(source_path: Path, destination_path: Path) -> TextSanit
     )
 
 
+class _StreamingPgnNormalizer(
+    chess_pgn.StringExporterMixin,
+    chess_pgn.BaseVisitor["_StreamingPgnNormalizer"],
+):
+    """Normalize a game directly from the parser without building a Game tree."""
+
+    def __init__(self, handle: io.TextIOBase) -> None:
+        super().__init__(columns=80, headers=True, comments=False, variations=False)
+        self.handle = handle
+        self.game_headers = chess_pgn.Headers()
+        self.error_count = 0
+
+    def begin_game(self) -> None:
+        self.force_movenumber = True
+        self.lines = []
+        self.current_line = ""
+        self.variation_depth = 0
+        self.game_headers = chess_pgn.Headers()
+        self.error_count = 0
+
+    def begin_headers(self) -> chess_pgn.Headers:
+        return self.game_headers
+
+    def visit_header(self, tagname: str, tagvalue: str) -> None:
+        self.game_headers[tagname] = tagvalue
+
+    def end_headers(self) -> None:
+        return None
+
+    def visit_result(self, result: str) -> None:
+        if self.game_headers.get("Result", "*") == "*":
+            self.game_headers["Result"] = result
+
+    def handle_error(self, error: Exception) -> None:
+        self.error_count += 1
+
+    def end_game(self) -> None:
+        for tagname, tagvalue in self.game_headers.items():
+            self.handle.write(f'[{tagname} "{tagvalue}"]\n')
+        self.handle.write("\n")
+        self.write_token(self.game_headers.get("Result", "*") + " ")
+        self.flush_current_line()
+        for line in self.lines:
+            self.handle.write(line + "\n")
+        self.handle.write("\n")
+
+    def result(self) -> _StreamingPgnNormalizer:
+        return self
+
+
+def _normalization_stats_from_fast(stats: FastPgnRewriteStats) -> PgnNormalizationStats:
+    return PgnNormalizationStats(
+        games_written=stats.games_written,
+        parser_error_games=0,
+        parser_errors=0,
+        mode=FAST_REPAIR_MODE,
+        used_native_accelerator=stats.used_native_accelerator,
+        comments_removed=stats.comments_removed,
+        variations_removed=stats.variations_removed,
+        line_comments_removed=stats.line_comments_removed,
+    )
+
+
 def normalize_pgn_file(source_path: Path, destination_path: Path) -> PgnNormalizationStats:
     games_written = 0
     parser_error_games = 0
@@ -231,9 +300,10 @@ def normalize_pgn_file(source_path: Path, destination_path: Path) -> PgnNormaliz
     with source_path.open("r", encoding="utf-8", newline="") as input_handle, destination_path.open(
         "w", encoding="utf-8", newline="\n"
     ) as output_handle:
+        normalizer_factory = functools.partial(_StreamingPgnNormalizer, output_handle)
         last_position = 0
         while True:
-            game = chess_pgn.read_game(input_handle)
+            game = chess_pgn.read_game(input_handle, Visitor=normalizer_factory)
             current_position = input_handle.tell()
             progress.update(max(0, current_position - last_position))
             last_position = current_position
@@ -241,18 +311,9 @@ def normalize_pgn_file(source_path: Path, destination_path: Path) -> PgnNormaliz
             if game is None:
                 break
 
-            errors = list(getattr(game, "errors", None) or [])
-            if errors:
+            if game.error_count:
                 parser_error_games += 1
-                parser_errors += len(errors)
-
-            exporter = chess_pgn.FileExporter(
-                output_handle,
-                headers=True,
-                variations=False,
-                comments=False,
-            )
-            game.accept(exporter)
+                parser_errors += game.error_count
             games_written += 1
 
         if last_position < total_bytes:
@@ -269,6 +330,11 @@ def normalize_pgn_file(source_path: Path, destination_path: Path) -> PgnNormaliz
         games_written=games_written,
         parser_error_games=parser_error_games,
         parser_errors=parser_errors,
+        mode=STRICT_REPAIR_MODE,
+        used_native_accelerator=False,
+        comments_removed=0,
+        variations_removed=0,
+        line_comments_removed=0,
     )
 
 
@@ -290,9 +356,7 @@ def smoke_test_pgn_with_cql(
         str(smoke_output),
         str(smoke_script),
     ]
-    process = subprocess.run(
-        command,
-    )
+    process = subprocess.run(command)
     return process.returncode
 
 
@@ -369,7 +433,10 @@ def repair_pgn_file_in_place(
     overwrite_backup: bool = False,
     cql_binary: Path | None = None,
     cql_lineincrement: int = 1000,
+    mode: str = FAST_REPAIR_MODE,
 ) -> PgnRepairResult:
+    if mode not in REPAIR_MODES:
+        raise ValueError(f"Unsupported repair mode: {mode}")
     if not pgn_path.exists():
         raise FileNotFoundError(f"PGN file not found: {pgn_path}")
 
@@ -378,11 +445,23 @@ def repair_pgn_file_in_place(
         dir=pgn_path.parent,
     ) as tmpdir:
         tmp_path = Path(tmpdir)
-        sanitized_path = tmp_path / "sanitized.pgn"
         repaired_path = tmp_path / "repaired.pgn"
 
-        sanitization = sanitize_pgn_to_path(pgn_path, sanitized_path)
-        normalization = normalize_pgn_file(sanitized_path, repaired_path)
+        if mode == FAST_REPAIR_MODE:
+            fast_stats = rewrite_pgn_fast(pgn_path, repaired_path)
+            sanitization = TextSanitizationStats(
+                removed_bom=fast_stats.removed_bom,
+                invalid_utf8_replaced=fast_stats.invalid_utf8_replaced,
+                control_characters_removed=fast_stats.control_characters_removed,
+            )
+            normalization = _normalization_stats_from_fast(fast_stats)
+        else:
+            sanitized_path = tmp_path / "sanitized.pgn"
+            sanitization = sanitize_pgn_to_path(pgn_path, sanitized_path)
+            normalization = normalize_pgn_file(sanitized_path, repaired_path)
+
+        if normalization.games_written == 0:
+            raise RuntimeError("No PGN games could be repaired from the input.")
 
         smoke_test_message = None
         if cql_binary is not None:
@@ -411,10 +490,10 @@ def repair_pgn_file_in_place(
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Rewrite PGN files in place once so they are cleaner and more likely "
-            "to be readable by CQL. The repair step strips problematic control "
-            "bytes, normalizes each game through python-chess, and can optionally "
-            "run a CQL smoke test before replacing the original file."
+            "Rewrite PGN files in place so they are more likely to be readable by "
+            "CQL. The default fast mode uses a single-pass lexical rewrite that "
+            "strips parser-hostile comments and variations. Strict mode keeps the "
+            "older python-chess normalization path."
         )
     )
     parser.add_argument(
@@ -422,6 +501,17 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         dest="pgn_location",
         required=True,
         help="Path to a .pgn file or a directory containing .pgn files.",
+    )
+    parser.add_argument(
+        "--mode",
+        dest="mode",
+        choices=REPAIR_MODES,
+        default=FAST_REPAIR_MODE,
+        help=(
+            "Repair mode. 'fast' is a CQL-safe lexical rewrite and is the "
+            "default. 'strict' reparses through python-chess for canonical "
+            "mainline-only normalization."
+        ),
     )
     parser.add_argument(
         "--cql-bin",
@@ -467,6 +557,40 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
+def _format_repair_summary(display_path: str, result: PgnRepairResult) -> str:
+    summary = (
+        f"Repaired {display_path}: "
+        f"{result.normalization.games_written} game(s), "
+        f"{result.sanitization.control_characters_removed} control char(s) removed, "
+        f"{result.sanitization.invalid_utf8_replaced} invalid UTF-8 byte(s) replaced, "
+        f"mode={result.normalization.mode}"
+    )
+    if result.sanitization.removed_bom:
+        summary += ", BOM removed"
+    if result.normalization.used_native_accelerator:
+        summary += ", native fast path"
+    if result.normalization.comments_removed:
+        summary += f", {result.normalization.comments_removed} comment block(s) removed"
+    if result.normalization.variations_removed:
+        summary += (
+            f", {result.normalization.variations_removed} variation(s) removed"
+        )
+    if result.normalization.line_comments_removed:
+        summary += (
+            f", {result.normalization.line_comments_removed} line comment(s) removed"
+        )
+    if result.normalization.parser_errors:
+        summary += (
+            f", {result.normalization.parser_errors} parser error note(s) across "
+            f"{result.normalization.parser_error_games} game(s)"
+        )
+    if result.backup_path is not None:
+        summary += f", backup: {result.backup_path.name}"
+    if result.smoke_test_message is not None:
+        summary += f", {result.smoke_test_message}"
+    return summary
+
+
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     if args.cql_lineincrement < 1:
@@ -488,7 +612,7 @@ def main(argv: list[str] | None = None) -> int:
 
     backup_suffix = None if args.no_backup else args.backup_suffix
 
-    print(f"Repairing {len(pgn_files)} PGN file(s) in place...")
+    print(f"Repairing {len(pgn_files)} PGN file(s) in place with mode={args.mode}...")
     overall_progress = tqdm_progress(
         pgn_files,
         total=len(pgn_files),
@@ -510,6 +634,7 @@ def main(argv: list[str] | None = None) -> int:
                 overwrite_backup=args.overwrite_backup,
                 cql_binary=cql_binary,
                 cql_lineincrement=args.cql_lineincrement,
+                mode=args.mode,
             )
         except Exception as exc:
             failures += 1
@@ -517,24 +642,7 @@ def main(argv: list[str] | None = None) -> int:
             continue
 
         results.append(result)
-        summary = (
-            f"Repaired {display_path}: "
-            f"{result.normalization.games_written} game(s), "
-            f"{result.sanitization.control_characters_removed} control char(s) removed, "
-            f"{result.sanitization.invalid_utf8_replaced} invalid UTF-8 byte(s) replaced"
-        )
-        if result.sanitization.removed_bom:
-            summary += ", BOM removed"
-        if result.normalization.parser_errors:
-            summary += (
-                f", {result.normalization.parser_errors} parser error note(s) across "
-                f"{result.normalization.parser_error_games} game(s)"
-            )
-        if result.backup_path is not None:
-            summary += f", backup: {result.backup_path.name}"
-        if result.smoke_test_message is not None:
-            summary += f", {result.smoke_test_message}"
-        progress_write(summary)
+        progress_write(_format_repair_summary(display_path, result))
 
     overall_progress.close()
 

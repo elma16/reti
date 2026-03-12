@@ -11,6 +11,7 @@ the command line.
 
 - `cql-files/`: the main script collections, including the FCE material
 - `src/reti/repair_pgn.py`: one-time in-place PGN repair and normalization before CQL runs
+- `src/reti/fast_pgn_repair.py`: fast lexical PGN repair path with optional native acceleration
 - `src/reti/analyse_cql.py`: batch CLI runner for `pgn|dir x cql|dir` matrix execution
 - `src/reti/export_cql_positions.py`: exports `{CQL}`-annotated PGN positions to an evaluated CSV
 - `src/reti/fce_sankey.py`: core logic for building an interactive FCE transition Sankey
@@ -71,12 +72,14 @@ python src/reti/repair_pgn.py \
   --cql-bin ./bins/cql6-2/cql
 ```
 
-That rewrites the PGN through a streaming sanitize-and-normalize pass and only
-replaces the original file if the repaired temp copy passes a CQL smoke test.
-If you want the rewrite to finish as quickly as possible and are willing to
-skip that extra validation pass, omit `--cql-bin`.
-The repaired output is intentionally CQL-safe: it keeps headers and mainline
-moves, but drops comments and side variations.
+That now defaults to a fast CQL-safe lexical rewrite, optionally backed by the
+native Rust helper under `native/repair-pgn-fast/` when you build it with Cargo.
+It only replaces the original file if the repaired temp copy passes a CQL smoke
+test. If you want the rewrite to finish as quickly as possible, omit
+`--cql-bin`. If you need the older canonical python-chess normalization, add
+`--mode strict`.
+The fast repaired output is intentionally CQL-safe rather than canonical: it
+keeps headers and movetext, but strips comments and side variations.
 Full details are in [docs/repair_pgn.md](docs/repair_pgn.md).
 
 If you already have PGNs containing `{CQL}` move comments, export those marked
