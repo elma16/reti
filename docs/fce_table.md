@@ -7,6 +7,7 @@ this repo is:
 1. Build the curated `cql-files/FCE/table/` subset once.
 2. Run `analyse_cql.py` over your PGN file or PGN directory with that subset.
 3. Render the final markdown table from `summary.csv`.
+4. Optionally render an interactive Sankey from the annotated PGN outputs.
 
 ## 1. Build the curated subset
 
@@ -68,6 +69,18 @@ That prints a markdown table with:
 - total matched games per table script
 - percentage of the original PGN corpus
 
+## 4. Render the interactive Sankey
+
+```bash
+python scripts/render_fce_sankey.py \
+  --pgn-dir output/fce-table \
+  --output-html docs/fce_sankey.html
+```
+
+That reads the annotated PGNs in `output/fce-table/`, reconstructs
+ending-to-ending transitions within games, and emits a static HTML file that is
+ready for GitHub Pages or any other static host.
+
 ## Notes
 
 - `analyse_cql.py` accepts either a single PGN or a directory of PGNs.
@@ -77,5 +90,6 @@ That prints a markdown table with:
   consider `--cql-threads 1`.
 - The rendered percentages use the total number of games across the original
   PGN input, not the number of matched games.
+- The Sankey reads the annotated PGN outputs directly, not `summary.csv`.
 - Rebuild `cql-files/FCE/table/` whenever you make changes to the broader
   `cql-files/FCE/` corpus and want the curated subset to stay in sync.

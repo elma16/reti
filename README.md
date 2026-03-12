@@ -12,10 +12,15 @@ the command line.
 - `cql-files/`: the main script collections, including the FCE material
 - `src/reti/repair_pgn.py`: one-time in-place PGN repair and normalization before CQL runs
 - `src/reti/analyse_cql.py`: batch CLI runner for `pgn|dir x cql|dir` matrix execution
+- `src/reti/export_cql_positions.py`: exports `{CQL}`-annotated PGN positions to an evaluated CSV
+- `src/reti/fce_sankey.py`: core logic for building an interactive FCE transition Sankey
 - `scripts/build_fce_table_subset.py`: builds the curated FCE subset used for the public table workflow
 - `scripts/render_fce_table_from_summary.py`: renders markdown table rows from `analyse_cql.py` output
+- `scripts/render_fce_sankey.py`: renders a standalone interactive Sankey HTML file from annotated FCE PGNs
 - `tests_cql/`: fixtures and tests for the CQL scripts
 - `docs/analyse_cql.md`: detailed documentation for the batch CQL runner
+- `docs/export_cql_positions.md`: detailed documentation for exporting annotated positions to CSV
+- `docs/fce_sankey.md`: workflow for turning annotated FCE PGN output into a public static Sankey page
 - `docs/fce_table.md`: workflow for building the curated FCE table subset and rendering the final table
 - `docs/repair_pgn.md`: one-time PGN repair workflow for CQL-unfriendly databases
 
@@ -74,6 +79,24 @@ The repaired output is intentionally CQL-safe: it keeps headers and mainline
 moves, but drops comments and side variations.
 Full details are in [docs/repair_pgn.md](docs/repair_pgn.md).
 
+If you already have PGNs containing `{CQL}` move comments, export those marked
+positions to CSV like this:
+
+```bash
+python src/reti/export_cql_positions.py \
+  --pgn path/to/annotated_pgn_or_dir \
+  --output-csv output/cql_positions.csv \
+  --syzygy-dir /path/to/syzygy \
+  --stockfish-bin path/to/stockfish
+```
+
+For marked positions with 5 pieces or fewer, the exporter uses Syzygy. For
+larger positions, it uses Stockfish for a configurable fixed time budget per
+position. The CSV includes the source PGN, ending label from the PGN filename,
+move context, FEN, and raw evaluation fields. Do not run `repair_pgn.py` on
+these annotated PGNs first: the repair step deliberately strips comments.
+Full details are in [docs/export_cql_positions.md](docs/export_cql_positions.md).
+
 For the FCE table workflow, first build the curated subset:
 
 ```bash
@@ -94,6 +117,20 @@ python scripts/render_fce_table_from_summary.py output/fce-table/summary.csv pat
 ```
 
 Detailed FCE instructions are in [docs/fce_table.md](docs/fce_table.md).
+
+If you want an interactive web-facing view of how games move between FCE
+endings, render the annotated output PGNs directly into a standalone HTML
+Sankey:
+
+```bash
+python scripts/render_fce_sankey.py \
+  --pgn-dir output/fce-table \
+  --output-html docs/fce_sankey.html
+```
+
+That HTML file uses Plotly from a CDN and can be published as-is on GitHub
+Pages or any other static host. Full details are in
+[docs/fce_sankey.md](docs/fce_sankey.md).
 
 ## FCE table reference
 
