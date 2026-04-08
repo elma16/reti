@@ -10,7 +10,7 @@ __pycache__/
 
 output/
 # Private local CQL binaries are allowed here but are never committed.
-bins/
+cql-bin/
 src/reti.egg-info/
 build/
 data/
