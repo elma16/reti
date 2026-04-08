@@ -1,21 +1,34 @@
 
 cql()
 
-reversecolor{ P == 2 and p == 1 }
+;; Bahr's rule: KPP vs KP rook pawn endgame
+;; When all three conditions are met, the position favours the defender (draw).
 
-[QqRrBbNn] == 0 
+;; Pure pawn endgame: no pieces
+[QqRrBbNn] == 0
 
-passedpawns == 1
+;; 3 pawns total
+[Pp] == 3
 
-;; condition 1. the rook's pawn is not past the halfway line.
+flipcolor flipvertical {
 
-flipvertical (Pa2-7 and pa2-7) 
+    ;; Stronger side has 2 pawns, weaker side has 1
+    P == 2
+    p == 1
 
-;; condition 2. the attacking king is adjacent to the pawn.
+    ;; Exactly one passed pawn (the outside pawn)
+    passedpawns == 1
 
-flipcolor (K->P and ray right (K P)) 
+    ;; Condition 1: both sides have rook pawns on the a-file
+    ;; (flipvertical handles h-file mirror)
+    ;; and the stronger side's rook pawn has not crossed the 4th rank
+    Pa2-4
+    pa2-7
 
-;; condition 3. the defending king is either in front of the pawn or in front of the king
-;;((ray vertical (K k) or (ray vertical (K p) or (ray vertical (k P))
+    ;; Condition 2: the attacking king is adjacent to the passed pawn
+    K attacks (P & passedpawns)
 
-ray vertical (K k) or ray vertical (K p) or ray vertical (k P)
+    ;; Condition 3: the defending king is in front of the passed pawn
+    ;; or in front of the attacking king
+    (k & (up 1 7 (P & passedpawns))) or (k & (up 1 7 K))
+}
