@@ -1,7 +1,7 @@
-;; Triangulation finder (CQL6)
-;; Three consecutive king moves: leave the start square, visit two new squares, return to start.
-;; flipcolor covers either side.
-;; BROKEN
+// Triangulation finder (CQL6)
+// Three consecutive king moves: leave the start square, visit two new squares, return to start.
+// flipcolor covers either side.
+// BROKEN
 
 cql(
   input "path/to/games.pgn"

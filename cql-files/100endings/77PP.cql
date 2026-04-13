@@ -1,4 +1,4 @@
-;; ending 77 : doubled pawns
+// ending 77 : doubled pawns
 
 cql()
 

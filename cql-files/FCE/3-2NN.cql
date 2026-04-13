@@ -1,4 +1,4 @@
-;; Knight and pawns vs. Knight and pawns
+// Knight and pawns vs. Knight and pawns
 
 cql()
 

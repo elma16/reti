@@ -1,4 +1,4 @@
-;; ending 10: knight vs 7-th rank pawn
+// ending 10: knight vs 7-th rank pawn
 
 cql()
 

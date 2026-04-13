@@ -1,7 +1,7 @@
-;; Double-attacked mate finder (CQL6)
-;; Finds mates where the mating move steps onto a square attacked at least twice by the opponent.
-;; Works for either color via flipcolor.
-;; BROKEN
+// Double-attacked mate finder (CQL6)
+// Finds mates where the mating move steps onto a square attacked at least twice by the opponent.
+// Works for either color via flipcolor.
+// BROKEN
 
 cql(
   input "path/to/games.pgn"

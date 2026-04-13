@@ -1,4 +1,4 @@
-;; ending 65 - 68: rook + rooks pawn vs rook
+// ending 65 - 68: rook + rooks pawn vs rook
 
 cql()
 

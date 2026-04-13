@@ -1,4 +1,4 @@
-;; Rook vs. Knight
+// Rook vs. Knight
 
 cql()
 

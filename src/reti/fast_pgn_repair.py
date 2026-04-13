@@ -22,8 +22,16 @@ class FastPgnRewriteStats:
 
 
 class _FastPgnLexicalWriter:
-    def __init__(self, output_handle: io.TextIOBase) -> None:
+    def __init__(
+        self,
+        output_handle: io.TextIOBase,
+        *,
+        preserve_markup: bool = False,
+        inspect_only: bool = False,
+    ) -> None:
         self.output_handle = output_handle
+        self.preserve_markup = preserve_markup
+        self.inspect_only = inspect_only
 
         self.removed_bom = False
         self.invalid_utf8_replaced = 0
@@ -58,7 +66,11 @@ class _FastPgnLexicalWriter:
             self._finish_line(had_newline=False)
 
         self._write_missing_result(before_new_game=False)
-        if self.games_written == 0 and self._saw_nonwhitespace_output:
+        if (
+            not self.inspect_only
+            and self.games_written == 0
+            and self._saw_nonwhitespace_output
+        ):
             self.games_written = 1
 
         return FastPgnRewriteStats(
@@ -99,39 +111,40 @@ class _FastPgnLexicalWriter:
             if char in " \t":
                 self._leading_whitespace.append(char)
                 return
-            if self._recovery_armed and char == "[":
+            if not self.preserve_markup and self._recovery_armed and char == "[":
                 self._in_comment = False
                 self._variation_depth = 0
                 self._recovery_armed = False
 
-        if self._skip_line_comment:
+        if not self.preserve_markup and self._skip_line_comment:
             return
 
         if self._header_line:
             self._line_output.append(char)
             return
 
-        if self._in_comment:
-            if char == "}":
-                self._in_comment = False
-                if self._variation_depth == 0:
-                    self._recovery_armed = False
-            return
+        if not self.preserve_markup:
+            if self._in_comment:
+                if char == "}":
+                    self._in_comment = False
+                    if self._variation_depth == 0:
+                        self._recovery_armed = False
+                return
 
-        if self._variation_depth:
-            if char == "{":
-                self._finish_token()
-                self.comments_removed += 1
-                self._in_comment = True
-            elif char == "(":
-                self._finish_token()
-                self.variations_removed += 1
-                self._variation_depth += 1
-            elif char == ")":
-                self._variation_depth -= 1
-                if self._variation_depth == 0:
-                    self._recovery_armed = False
-            return
+            if self._variation_depth:
+                if char == "{":
+                    self._finish_token()
+                    self.comments_removed += 1
+                    self._in_comment = True
+                elif char == "(":
+                    self._finish_token()
+                    self.variations_removed += 1
+                    self._variation_depth += 1
+                elif char == ")":
+                    self._variation_depth -= 1
+                    if self._variation_depth == 0:
+                        self._recovery_armed = False
+                return
 
         if self._line_start:
             if char == "[":
@@ -142,7 +155,7 @@ class _FastPgnLexicalWriter:
                 self._line_start = False
                 return
 
-            if char in "%;":
+            if not self.preserve_markup and char in "%;":
                 self.line_comments_removed += 1
                 self._skip_line_comment = True
                 self._leading_whitespace.clear()
@@ -152,23 +165,24 @@ class _FastPgnLexicalWriter:
             self._leading_whitespace.clear()
             self._line_start = False
 
-        if char == "{":
-            self._finish_token()
-            self.comments_removed += 1
-            self._in_comment = True
-            return
+        if not self.preserve_markup:
+            if char == "{":
+                self._finish_token()
+                self.comments_removed += 1
+                self._in_comment = True
+                return
 
-        if char == "(":
-            self._finish_token()
-            self.variations_removed += 1
-            self._variation_depth = 1
-            return
+            if char == "(":
+                self._finish_token()
+                self.variations_removed += 1
+                self._variation_depth = 1
+                return
 
-        if char == ";":
-            self._finish_token()
-            self.line_comments_removed += 1
-            self._skip_line_comment = True
-            return
+            if char == ";":
+                self._finish_token()
+                self.line_comments_removed += 1
+                self._skip_line_comment = True
+                return
 
         if char in " \t":
             if self._line_output:
@@ -198,10 +212,11 @@ class _FastPgnLexicalWriter:
             self._current_game_has_moves = False
             self._current_game_has_result = False
 
-        if line_text:
-            self.output_handle.write(line_text)
-        if had_newline:
-            self.output_handle.write("\n")
+        if not self.inspect_only:
+            if line_text:
+                self.output_handle.write(line_text)
+            if had_newline:
+                self.output_handle.write("\n")
 
         if (self._in_comment or self._variation_depth) and not self._source_line_has_nonspace:
             self._recovery_armed = True
@@ -226,10 +241,11 @@ class _FastPgnLexicalWriter:
         if not self._current_game_has_moves or self._current_game_has_result:
             return
 
-        if before_new_game:
-            self.output_handle.write("*\n\n")
-        else:
-            self.output_handle.write("*\n")
+        if not self.inspect_only:
+            if before_new_game:
+                self.output_handle.write("*\n\n")
+            else:
+                self.output_handle.write("*\n")
         self._current_game_has_result = True
         self._saw_nonwhitespace_output = True
 
@@ -289,9 +305,14 @@ def _rewrite_pgn_fast_native(
     source_path: Path,
     destination_path: Path,
     binary_path: Path,
+    *,
+    preserve_markup: bool = False,
 ) -> FastPgnRewriteStats:
+    command = [str(binary_path), str(source_path), str(destination_path)]
+    if preserve_markup:
+        command.insert(1, "--preserve-markup")
     process = subprocess.run(
-        [str(binary_path), str(source_path), str(destination_path)],
+        command,
         capture_output=True,
         text=True,
         encoding="utf-8",
@@ -305,6 +326,8 @@ def _rewrite_pgn_fast_native(
 def rewrite_pgn_fast_python(
     source_path: Path,
     destination_path: Path,
+    *,
+    preserve_markup: bool = False,
 ) -> FastPgnRewriteStats:
     writer: _FastPgnLexicalWriter
     stats: FastPgnRewriteStats
@@ -317,7 +340,7 @@ def rewrite_pgn_fast_python(
             errors="replace",
             newline=None,
         )
-        writer = _FastPgnLexicalWriter(output_handle)
+        writer = _FastPgnLexicalWriter(output_handle, preserve_markup=preserve_markup)
         for chunk in iter(lambda: text_handle.read(1024 * 1024), ""):
             writer.feed(chunk)
         stats = writer.finish()
@@ -325,15 +348,70 @@ def rewrite_pgn_fast_python(
     return stats
 
 
+def _inspect_pgn_fast_native(
+    source_path: Path,
+    binary_path: Path,
+) -> FastPgnRewriteStats:
+    process = subprocess.run(
+        [str(binary_path), "--inspect", str(source_path)],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+    if process.returncode != 0:
+        raise RuntimeError(process.stderr.strip() or "fast repair native helper failed")
+    return _parse_native_stats(process.stdout)
+
+
+def inspect_pgn_fast(source_path: Path) -> FastPgnRewriteStats:
+    """
+    Scan a PGN and return the same stats rewrite_pgn_fast would produce, without
+    writing an output file. Uses the Rust helper when available.
+    """
+    binary_path = find_fast_repair_binary()
+    if binary_path is not None:
+        try:
+            return _inspect_pgn_fast_native(source_path, binary_path)
+        except Exception:
+            pass
+
+    with source_path.open("rb") as raw_handle:
+        text_handle = io.TextIOWrapper(
+            raw_handle,
+            encoding="utf-8",
+            errors="replace",
+            newline=None,
+        )
+        sink = io.StringIO()
+        writer = _FastPgnLexicalWriter(
+            sink, preserve_markup=True, inspect_only=True
+        )
+        for chunk in iter(lambda: text_handle.read(1024 * 1024), ""):
+            writer.feed(chunk)
+        return writer.finish()
+
+
 def rewrite_pgn_fast(
     source_path: Path,
     destination_path: Path,
+    *,
+    preserve_markup: bool = False,
 ) -> FastPgnRewriteStats:
     binary_path = find_fast_repair_binary()
     if binary_path is not None:
         try:
-            return _rewrite_pgn_fast_native(source_path, destination_path, binary_path)
+            return _rewrite_pgn_fast_native(
+                source_path,
+                destination_path,
+                binary_path,
+                preserve_markup=preserve_markup,
+            )
         except Exception:
             pass
 
-    return rewrite_pgn_fast_python(source_path, destination_path)
+    return rewrite_pgn_fast_python(
+        source_path,
+        destination_path,
+        preserve_markup=preserve_markup,
+    )

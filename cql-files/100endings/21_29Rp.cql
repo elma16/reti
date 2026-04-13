@@ -1,4 +1,4 @@
-;; endings 21 - 29: R vs p
+// endings 21 - 29: R vs p
 
 cql()
 

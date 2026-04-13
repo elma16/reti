@@ -1,4 +1,4 @@
-;; Two rooks vs. Two rooks (and pawns)
+// Two rooks vs. Two rooks (and pawns)
 
 cql()
 

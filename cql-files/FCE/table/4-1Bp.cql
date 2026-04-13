@@ -1,4 +1,4 @@
-;; Bishop vs. Pawns
+// Bishop vs. Pawns
 
 
 cql()

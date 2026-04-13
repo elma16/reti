@@ -8,7 +8,7 @@ King attacks rook
 */
 
 cql()
-⬓{btm mate
+flipcolor{btm mate
 R->k
 k->R
 B->R

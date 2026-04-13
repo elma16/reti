@@ -1,6 +1,6 @@
 cql()
-;; Crosspin : A piece is pinned in two ways simultaneously: relative and absolute.
-;; TODO loop over all pieces q,r,n,b,p 
+// Crosspin : A piece is pinned in two ways simultaneously: relative and absolute.
+// TODO loop over all pieces q,r,n,b,p 
 
 flipcolor flip{
     piece zz = p

@@ -1,4 +1,4 @@
-;; endings 6-7 : Rook vs bishop
+// endings 6-7 : Rook vs bishop
 
 cql()
 

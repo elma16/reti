@@ -1,4 +1,4 @@
-;; ending 88: king vs 2 passed pawns
+// ending 88: king vs 2 passed pawns
 
 cql()
 

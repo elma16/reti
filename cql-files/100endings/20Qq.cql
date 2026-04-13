@@ -1,4 +1,4 @@
-;; endings 20: Queen vs queen
+// endings 20: Queen vs queen
 
 cql()
 

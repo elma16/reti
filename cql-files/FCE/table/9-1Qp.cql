@@ -1,4 +1,4 @@
-;; Chapter 9.1 Queen vs. Pawns
+// Chapter 9.1 Queen vs. Pawns
 
 cql()
 

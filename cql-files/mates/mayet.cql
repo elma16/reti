@@ -1,7 +1,7 @@
 
 
 cql()
-⬓{btm mate
+flipcolor{btm mate
 R -> k
 k -> R
 B -> R

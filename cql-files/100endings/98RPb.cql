@@ -1,4 +1,4 @@
-;; ending 98 : rook + rook's pawn vs bishop
+// ending 98 : rook + rook's pawn vs bishop
 
 
 cql()

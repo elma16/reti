@@ -1,4 +1,4 @@
-;; ending 57
+// ending 57
 
 cql()
 

@@ -2,9 +2,9 @@
 
 cql()
 
-T∊♖
- ✵⊢◎T
-    a1――h1
-      ――h8
-      ――a8
+TelementR
+ flippathfocusT
+    a1--h1
+      --h8
+      --a8
 

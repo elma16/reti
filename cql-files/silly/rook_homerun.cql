@@ -1,4 +1,4 @@
-;; Rook homerun (consecutive rook moves to all four corners in a fixed order).
+// Rook homerun (consecutive rook moves to all four corners in a fixed order).
 
 cql(
   input "path/to/games.pgn"

@@ -1,4 +1,4 @@
-;; endings 8 - 9: rook vs knight
+// endings 8 - 9: rook vs knight
 
 cql()
 

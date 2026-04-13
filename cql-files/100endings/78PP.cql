@@ -1,4 +1,4 @@
-;; ending 78: isolated pawns
+// ending 78: isolated pawns
 
 cql()
 

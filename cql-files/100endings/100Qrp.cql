@@ -1,4 +1,4 @@
-;; ending 100 : Q vs R and rook's pawn
+// ending 100 : Q vs R and rook's pawn
 
 cql()
 

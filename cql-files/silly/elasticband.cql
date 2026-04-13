@@ -3,7 +3,7 @@
 cql()
 
 pin from b through N to B
-⊢
-N × a
-b × B
-N × b
+path
+N [x] a
+b [x] B
+N [x] b

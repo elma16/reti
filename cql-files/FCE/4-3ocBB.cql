@@ -1,4 +1,4 @@
-;; bishop vs bishop (opposite colour)
+// bishop vs bishop (opposite colour)
 
 cql()
 

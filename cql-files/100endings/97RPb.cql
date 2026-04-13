@@ -1,4 +1,4 @@
-;; ending 97 : rook + 6th rank bishop pawn
+// ending 97 : rook + 6th rank bishop pawn
 
 
 cql()

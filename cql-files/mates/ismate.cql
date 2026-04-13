@@ -1,3 +1,3 @@
 cql()
 
-⬓{btm mate}
+flipcolor{btm mate}

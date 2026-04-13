@@ -1,4 +1,4 @@
-;; ending 11: knight vs knights pawn
+// ending 11: knight vs knights pawn
 
 cql()
 

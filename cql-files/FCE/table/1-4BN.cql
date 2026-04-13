@@ -1,4 +1,4 @@
-;; Bishop and Knight vs. King
+// Bishop and Knight vs. King
 
 cql()
 

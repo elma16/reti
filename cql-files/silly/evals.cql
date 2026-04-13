@@ -1,4 +1,4 @@
-;; finding the evaluations
+// finding the evaluations
 
 cql()
 

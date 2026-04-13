@@ -1,4 +1,4 @@
-;; Two knights vs pawn (troitsky line)
+// Two knights vs pawn (troitsky line)
 
 cql()
 

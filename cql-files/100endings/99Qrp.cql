@@ -1,4 +1,4 @@
-;; ending 99 : Q vs R and b-g pawn
+// ending 99 : Q vs R and b-g pawn
 
 cql()
 

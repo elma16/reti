@@ -1,4 +1,4 @@
-;; pure pawn endings
+// pure pawn endings
 
 cql()
 

@@ -1,7 +1,7 @@
-;; Unguarded Guard (CQL6)
-;; Interposing on an unguarded square to block a line-check.
-;; Looks for a checking line-piece (rook/queen on rank/file, bishop/queen on diagonal),
-;; and a legal interposition onto an empty, undefended square that stops the check.
+// Unguarded Guard (CQL6)
+// Interposing on an unguarded square to block a line-check.
+// Looks for a checking line-piece (rook/queen on rank/file, bishop/queen on diagonal),
+// and a legal interposition onto an empty, undefended square that stops the check.
 
 cql(
   input "path/to/games.pgn"

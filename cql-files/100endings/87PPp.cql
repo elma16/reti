@@ -1,4 +1,4 @@
-;; ending 87: knight and rooks pawn against rooks pawn
+// ending 87: knight and rooks pawn against rooks pawn
 
 cql()
 

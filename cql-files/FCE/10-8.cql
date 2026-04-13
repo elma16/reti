@@ -1,4 +1,4 @@
-  ;; 10.8: queen + minor piece vs queen + minor piece
+  // 10.8: queen + minor piece vs queen + minor piece
 
   cql()
 

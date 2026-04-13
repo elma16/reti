@@ -1,4 +1,4 @@
-;; endings 82: one pawn each (one passed pawn each)
+// endings 82: one pawn each (one passed pawn each)
 
 cql()
 

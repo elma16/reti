@@ -1,4 +1,4 @@
-;; Rook vs Bishop Endgame (with and without pawns)
+// Rook vs Bishop Endgame (with and without pawns)
 
 cql()
 

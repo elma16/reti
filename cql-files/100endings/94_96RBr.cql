@@ -1,4 +1,4 @@
-;; ending 94 - 96: rook + bishop vs rook
+// ending 94 - 96: rook + bishop vs rook
 
 
 cql()

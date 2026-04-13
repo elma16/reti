@@ -1,9 +1,9 @@
-;; anderssen's mate
+// anderssen's mate
 
-;;  the rook or queen is supported by a diagonally attacking piece such as a pawn or bishop as it checkmates the opposing king along the eighth rank. 
+//  the rook or queen is supported by a diagonally attacking piece such as a pawn or bishop as it checkmates the opposing king along the eighth rank. 
 
 cql()
-⬓{btm mate
+flipcolor{btm mate
 R -> k
 k -> R}
 

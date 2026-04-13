@@ -7,7 +7,7 @@ they are interchangeable,
 the main difference is that in Pillsbury's mate, the bishop could be on h6.
 */
 cql()
-⬓{btm mate
+flipcolor{btm mate
 R -> k
 _<-k == 2
 

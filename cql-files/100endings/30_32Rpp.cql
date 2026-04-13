@@ -1,5 +1,5 @@
-;; endings 30 - 32: Rook vs. two connected pawns.
-;; is the fact that the pawns are connected important?
+// endings 30 - 32: Rook vs. two connected pawns.
+// is the fact that the pawns are connected important?
 
 cql()
 

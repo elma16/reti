@@ -1,9 +1,9 @@
-;; anastasia's mate 
+// anastasia's mate 
 
-;; a knight and rook team up to trap the opposing king between the side of the board on one side and a friendly piece on the other.
+// a knight and rook team up to trap the opposing king between the side of the board on one side and a friendly piece on the other.
 
 cql()
-⬓{btm mate
+flipcolor{btm mate
 R -> k
 _ <- k == 4
 

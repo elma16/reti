@@ -434,9 +434,12 @@ def repair_pgn_file_in_place(
     cql_binary: Path | None = None,
     cql_lineincrement: int = 1000,
     mode: str = FAST_REPAIR_MODE,
+    preserve_markup: bool = False,
 ) -> PgnRepairResult:
     if mode not in REPAIR_MODES:
         raise ValueError(f"Unsupported repair mode: {mode}")
+    if preserve_markup and mode != FAST_REPAIR_MODE:
+        raise ValueError("preserve_markup is only supported in fast repair mode")
     if not pgn_path.exists():
         raise FileNotFoundError(f"PGN file not found: {pgn_path}")
 
@@ -448,7 +451,11 @@ def repair_pgn_file_in_place(
         repaired_path = tmp_path / "repaired.pgn"
 
         if mode == FAST_REPAIR_MODE:
-            fast_stats = rewrite_pgn_fast(pgn_path, repaired_path)
+            fast_stats = rewrite_pgn_fast(
+                pgn_path,
+                repaired_path,
+                preserve_markup=preserve_markup,
+            )
             sanitization = TextSanitizationStats(
                 removed_bom=fast_stats.removed_bom,
                 invalid_utf8_replaced=fast_stats.invalid_utf8_replaced,
@@ -545,6 +552,16 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Allow overwriting an existing backup file.",
     )
     parser.add_argument(
+        "--preserve-markup",
+        dest="preserve_markup",
+        action="store_true",
+        help=(
+            "Fast mode only: keep PGN comments ({...}, ;..., %...) and side "
+            "variations ((...)) instead of stripping them. Still scrubs BOMs, "
+            "invalid UTF-8, and control characters."
+        ),
+    )
+    parser.add_argument(
         "--cql-lineincrement",
         dest="cql_lineincrement",
         type=int,
@@ -596,6 +613,9 @@ def main(argv: list[str] | None = None) -> int:
     if args.cql_lineincrement < 1:
         print("Error: --cql-lineincrement must be at least 1.")
         return 1
+    if args.preserve_markup and args.mode != FAST_REPAIR_MODE:
+        print("Error: --preserve-markup is only supported with --mode fast.")
+        return 1
     pgn_files = discover_pgn_files(args.pgn_location)
     if pgn_files is None:
         return 1
@@ -635,6 +655,7 @@ def main(argv: list[str] | None = None) -> int:
                 cql_binary=cql_binary,
                 cql_lineincrement=args.cql_lineincrement,
                 mode=args.mode,
+                preserve_markup=args.preserve_markup,
             )
         except Exception as exc:
             failures += 1

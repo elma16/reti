@@ -1,4 +1,4 @@
-;; 2.1 Small number of pawns
+// 2.1 Small number of pawns
 
 cql()
 

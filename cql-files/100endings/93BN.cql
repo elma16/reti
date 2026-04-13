@@ -1,4 +1,4 @@
-;; ending 93 : bishop and knight mate
+// ending 93 : bishop and knight mate
 
 cql()
 

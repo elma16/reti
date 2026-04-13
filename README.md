@@ -80,6 +80,20 @@ test. If you want the rewrite to finish as quickly as possible, omit
 `--mode strict`.
 The fast repaired output is intentionally CQL-safe rather than canonical: it
 keeps headers and movetext, but strips comments and side variations.
+
+To repair an entire directory of PGNs at once (e.g. the full lumbra-gigabase),
+pass the directory path to `--pgn`. Building the native Rust accelerator first
+is recommended for large databases:
+
+```bash
+cargo build --release --manifest-path native/repair-pgn-fast/Cargo.toml
+python src/reti/repair_pgn.py --pgn lumbra-gigabase/ --no-backup
+```
+
+This uses `--mode fast` (the default), which is the fastest option and produces
+CQL-safe output. The native accelerator is detected automatically when
+available. Use `--no-backup` to avoid doubling disk usage on large databases.
+
 Full details are in [docs/repair_pgn.md](docs/repair_pgn.md).
 
 If you already have PGNs containing `{CQL}` move comments, export those marked

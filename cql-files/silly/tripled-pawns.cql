@@ -1,4 +1,4 @@
-;; tripled pawns
+// tripled pawns
 
 cql()
 

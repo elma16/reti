@@ -1,4 +1,4 @@
-;; endings 83 - 86: two pawns vs one (one pair of rooks pawns and one passed pawn)
+// endings 83 - 86: two pawns vs one (one pair of rooks pawns and one passed pawn)
 
 cql()
 

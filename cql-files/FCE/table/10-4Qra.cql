@@ -1,4 +1,4 @@
-;; Queen vs. Rook and minor piece
+// Queen vs. Rook and minor piece
 
 cql()
 

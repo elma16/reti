@@ -7,19 +7,37 @@ from collections import Counter, defaultdict
 from dataclasses import dataclass
 from pathlib import Path
 
+from tqdm import tqdm
+
 from reti.annotated_pgn import (
     ParsedAnnotatedGame,
     discover_pgn_files,
+    fast_iter_annotated_pgn,
     format_pgn_display_path,
+    iter_annotated_pgn,
     parse_annotated_pgn,
 )
-from reti.fce_metadata import FCE_ENDINGS, FCE_ENDINGS_BY_STEM, FceEnding
+from reti.ending_catalog import Ending, EndingCatalog
 
 START_NODE = "__start__"
 END_NODE = "__end__"
 START_LABEL = "Start"
 END_LABEL = "End"
 START_END_COLOR = "#9AA1A9"
+
+CATALOGS: dict[str, str] = {
+    "fce": "reti.fce_metadata:FCE_CATALOG",
+    "100endings": "reti.endings100_metadata:ENDINGS_100_CATALOG",
+}
+
+
+def load_catalog(name: str) -> EndingCatalog:
+    spec = CATALOGS[name]
+    module_path, attr = spec.rsplit(":", 1)
+    import importlib
+
+    module = importlib.import_module(module_path)
+    return getattr(module, attr)
 
 
 @dataclass(frozen=True)
@@ -74,18 +92,19 @@ def build_game_key(parsed_game: ParsedAnnotatedGame) -> str:
     return hashlib.sha1(payload.encode("utf-8")).hexdigest()
 
 
-def resolve_same_ply_overlap(endings: set[str]) -> str:
+def resolve_same_ply_overlap(endings: set[str], catalog: EndingCatalog) -> str:
     return min(
         endings,
         key=lambda stem: (
-            FCE_ENDINGS_BY_STEM[stem].specificity_rank,
-            FCE_ENDINGS_BY_STEM[stem].display_label,
+            catalog.endings_by_stem[stem].specificity_rank,
+            catalog.endings_by_stem[stem].display_label,
         ),
     )
 
 
 def build_game_sequences(
     hits_by_game: dict[str, list[EndingHit]],
+    catalog: EndingCatalog,
 ) -> dict[str, list[str]]:
     sequences: dict[str, list[str]] = {}
     for game_key, hits in hits_by_game.items():
@@ -95,7 +114,7 @@ def build_game_sequences(
 
         ordered_stems: list[str] = []
         for ply_index in sorted(by_ply):
-            ordered_stems.append(resolve_same_ply_overlap(by_ply[ply_index]))
+            ordered_stems.append(resolve_same_ply_overlap(by_ply[ply_index], catalog))
 
         collapsed: list[str] = []
         for stem in ordered_stems:
@@ -127,23 +146,31 @@ def hex_to_rgba(hex_color: str, alpha: float) -> str:
     return f"rgba({red}, {green}, {blue}, {alpha:.3f})"
 
 
-def node_label_for_stem(stem: str) -> str:
+def _node_label(
+    stem: str,
+    catalog: EndingCatalog,
+    *,
+    show_numbers: bool,
+) -> str:
     if stem == START_NODE:
         return START_LABEL
     if stem == END_NODE:
         return END_LABEL
-    return FCE_ENDINGS_BY_STEM[stem].display_label
+    ending = catalog.endings_by_stem[stem]
+    return ending.display_label if show_numbers else ending.label
 
 
-def node_color_for_stem(stem: str) -> str:
+def _node_color(stem: str, catalog: EndingCatalog) -> str:
     if stem in (START_NODE, END_NODE):
         return START_END_COLOR
-    return FCE_ENDINGS_BY_STEM[stem].color
+    return catalog.endings_by_stem[stem].color
 
 
-def node_hover_for_stem(
+def _node_hover(
     stem: str,
+    catalog: EndingCatalog,
     *,
+    show_numbers: bool,
     outgoing: dict[str, int],
     incoming: dict[str, int],
 ) -> str:
@@ -152,16 +179,22 @@ def node_hover_for_stem(
     if stem == END_NODE:
         return f"{END_LABEL}<br>Games leaving Sankey: {incoming.get(stem, 0)}"
 
-    ending = FCE_ENDINGS_BY_STEM[stem]
+    ending = catalog.endings_by_stem[stem]
+    label = ending.display_label if show_numbers else ending.label
     return (
-        f"{ending.display_label}<br>"
+        f"{label}<br>"
         f"Chapter: {ending.chapter_label}<br>"
         f"Incoming transitions: {incoming.get(stem, 0)}<br>"
         f"Outgoing transitions: {outgoing.get(stem, 0)}"
     )
 
 
-def build_sankey_data(game_sequences: dict[str, list[str]]) -> SankeyData:
+def build_sankey_data(
+    game_sequences: dict[str, list[str]],
+    catalog: EndingCatalog,
+    *,
+    show_numbers: bool = True,
+) -> SankeyData:
     transitions = count_transitions(game_sequences)
     total_transitions = sum(transitions.values())
 
@@ -170,11 +203,13 @@ def build_sankey_data(game_sequences: dict[str, list[str]]) -> SankeyData:
     }
     node_ids = [
         START_NODE,
-        *[ending.stem for ending in FCE_ENDINGS if ending.stem in encountered_stems],
+        *[ending.stem for ending in catalog.endings if ending.stem in encountered_stems],
         END_NODE,
     ]
-    node_labels = [node_label_for_stem(stem) for stem in node_ids]
-    node_colors = [node_color_for_stem(stem) for stem in node_ids]
+    node_labels = [
+        _node_label(stem, catalog, show_numbers=show_numbers) for stem in node_ids
+    ]
+    node_colors = [_node_color(stem, catalog) for stem in node_ids]
     node_index = {stem: index for index, stem in enumerate(node_ids)}
 
     outgoing: dict[str, int] = defaultdict(int)
@@ -191,17 +226,21 @@ def build_sankey_data(game_sequences: dict[str, list[str]]) -> SankeyData:
 
     ordered_links = sorted(
         transitions.items(),
-        key=lambda item: (-item[1], node_label_for_stem(item[0][0]), node_label_for_stem(item[0][1])),
+        key=lambda item: (
+            -item[1],
+            _node_label(item[0][0], catalog, show_numbers=show_numbers),
+            _node_label(item[0][1], catalog, show_numbers=show_numbers),
+        ),
     )
     for (source, target), value in ordered_links:
-        source_label = node_label_for_stem(source)
-        target_label = node_label_for_stem(target)
+        source_label = _node_label(source, catalog, show_numbers=show_numbers)
+        target_label = _node_label(target, catalog, show_numbers=show_numbers)
         share = (value / total_transitions * 100.0) if total_transitions else 0.0
 
         link_sources.append(node_index[source])
         link_targets.append(node_index[target])
         link_values.append(value)
-        link_colors.append(hex_to_rgba(node_color_for_stem(source), 0.42))
+        link_colors.append(hex_to_rgba(_node_color(source, catalog), 0.42))
         link_hover.append(
             f"{source_label} -> {target_label}<br>"
             f"Count: {value}<br>"
@@ -209,12 +248,22 @@ def build_sankey_data(game_sequences: dict[str, list[str]]) -> SankeyData:
         )
 
     node_hover = [
-        node_hover_for_stem(stem, outgoing=outgoing, incoming=incoming)
+        _node_hover(
+            stem,
+            catalog,
+            show_numbers=show_numbers,
+            outgoing=outgoing,
+            incoming=incoming,
+        )
         for stem in node_ids
     ]
 
     top_transitions = [
-        (node_label_for_stem(source), node_label_for_stem(target), value)
+        (
+            _node_label(source, catalog, show_numbers=show_numbers),
+            _node_label(target, catalog, show_numbers=show_numbers),
+            value,
+        )
         for (source, target), value in ordered_links[:10]
     ]
 
@@ -239,6 +288,7 @@ def collect_hits_from_pgn_dir(
     pgn_dir: str,
     *,
     marker_text: str,
+    catalog: EndingCatalog,
 ) -> tuple[dict[str, list[EndingHit]] | None, tuple[str, ...], int, int]:
     discovery = discover_pgn_files(pgn_dir)
     if discovery is None:
@@ -250,41 +300,67 @@ def collect_hits_from_pgn_dir(
     skipped_files = 0
     parsed_files = 0
 
+    # Build list of (path, ending, size) so we can weight the progress bar by bytes.
+    work_items: list[tuple[Path, Ending, int]] = []
     for pgn_path in pgn_files:
         stem = pgn_path.stem
         display_path = format_pgn_display_path(pgn_path, pgn_root)
-        ending: FceEnding | None = FCE_ENDINGS_BY_STEM.get(stem)
-        if ending is None:
+        ending_entry: Ending | None = catalog.endings_by_stem.get(stem)
+        if ending_entry is None:
             warnings.append(
-                f"Skipping {display_path}: file stem '{stem}' is not a curated FCE ending."
+                f"Skipping {display_path}: file stem '{stem}' is not a curated {catalog.name} ending."
             )
             skipped_files += 1
             continue
+        work_items.append((pgn_path, ending_entry, pgn_path.stat().st_size))
+
+    total_bytes = sum(size for _, _, size in work_items)
+    pbar = tqdm(
+        total=total_bytes,
+        unit="B",
+        unit_scale=True,
+        desc=f"Parsing {catalog.name} PGNs",
+    )
+
+    for pgn_path, ending, file_size in work_items:
+        display_path = format_pgn_display_path(pgn_path, pgn_root)
+        pbar.set_postfix_str(pgn_path.stem, refresh=False)
 
         try:
-            parsed_games = parse_annotated_pgn(pgn_path, marker_text=marker_text)
+            game_stream = fast_iter_annotated_pgn(pgn_path, marker_text=marker_text)
+            bytes_accounted = 0
+            for parsed_game, bytes_consumed in game_stream:
+                bytes_accounted += bytes_consumed
+                pbar.update(bytes_consumed)
+
+                if parsed_game.parse_errors:
+                    warnings.append(
+                        f"{display_path} game {parsed_game.game_index}: "
+                        + " | ".join(parsed_game.parse_errors)
+                    )
+
+                if not parsed_game.positions:
+                    continue
+
+                game_key = build_game_key(parsed_game)
+                for position in parsed_game.positions:
+                    hits_by_game[game_key].append(
+                        EndingHit(ending_stem=ending.stem, ply_index=position.ply_index)
+                    )
+
+            # Account for any trailing bytes after the last game.
+            if bytes_accounted < file_size:
+                pbar.update(file_size - bytes_accounted)
+
         except Exception as exc:
             warnings.append(f"Skipping {display_path}: failed to parse PGN ({exc}).")
             skipped_files += 1
+            pbar.update(file_size)
             continue
 
         parsed_files += 1
-        for parsed_game in parsed_games:
-            if parsed_game.parse_errors:
-                warnings.append(
-                    f"{display_path} game {parsed_game.game_index}: "
-                    + " | ".join(parsed_game.parse_errors)
-                )
 
-            if not parsed_game.positions:
-                continue
-
-            game_key = build_game_key(parsed_game)
-            for position in parsed_game.positions:
-                hits_by_game[game_key].append(
-                    EndingHit(ending_stem=ending.stem, ply_index=position.ply_index)
-                )
-
+    pbar.close()
     return hits_by_game, tuple(warnings), skipped_files, parsed_files
 
 
@@ -292,6 +368,12 @@ def render_sankey_html(
     sankey_data: SankeyData,
     *,
     title: str,
+    description: str = (
+        "This Sankey tracks how games move between curated ending categories. "
+        "Each edge counts a consecutive change in the ending label, after "
+        "collapsing immediate repeats and resolving same-ply overlaps to the "
+        "most specific ending."
+    ),
     warnings: tuple[str, ...] = (),
 ) -> str:
     plot_payload = {
@@ -455,7 +537,7 @@ def render_sankey_html(
   <main>
     <section class="hero">
       <h1>{title}</h1>
-      <p class="lede">This Sankey tracks how games move between curated Fundamental Chess Endings categories. Each edge counts a consecutive change in the ending label, after collapsing immediate repeats and resolving same-ply overlaps to the most specific ending.</p>
+      <p class="lede">{description}</p>
     </section>
 
     <section class="stats">
@@ -522,7 +604,7 @@ def render_sankey_html(
         displaylogo: false,
       }});
     }} else {{
-      chart.innerHTML = '<div class="empty">No transitions were found in the annotated PGNs. Check that the input directory contains FCE ending-named PGNs with {marker_example} comments.</div>';
+      chart.innerHTML = '<div class="empty">No transitions were found in the annotated PGNs. Check that the input directory contains ending-named PGNs with {marker_example} comments.</div>';
     }}
 
     const list = document.getElementById("top-transitions");
@@ -543,15 +625,19 @@ def build_sankey_from_pgn_dir(
     pgn_dir: str,
     *,
     marker_text: str,
+    catalog: EndingCatalog,
+    show_numbers: bool = True,
 ) -> SankeyBuildResult | None:
-    collection = collect_hits_from_pgn_dir(pgn_dir, marker_text=marker_text)
+    collection = collect_hits_from_pgn_dir(
+        pgn_dir, marker_text=marker_text, catalog=catalog
+    )
     hits_by_game, warnings, skipped_files, parsed_files = collection
     if hits_by_game is None:
         return None
 
-    game_sequences = build_game_sequences(hits_by_game)
+    game_sequences = build_game_sequences(hits_by_game, catalog)
     return SankeyBuildResult(
-        data=build_sankey_data(game_sequences),
+        data=build_sankey_data(game_sequences, catalog, show_numbers=show_numbers),
         warnings=warnings,
         skipped_files=skipped_files,
         parsed_files=parsed_files,
@@ -564,8 +650,15 @@ def render_fce_sankey(
     output_html: str,
     marker_text: str,
     title: str,
+    catalog: EndingCatalog,
+    show_numbers: bool = True,
 ) -> int:
-    result = build_sankey_from_pgn_dir(pgn_dir, marker_text=marker_text)
+    result = build_sankey_from_pgn_dir(
+        pgn_dir,
+        marker_text=marker_text,
+        catalog=catalog,
+        show_numbers=show_numbers,
+    )
     if result is None:
         return 1
 
@@ -576,8 +669,8 @@ def render_fce_sankey(
         encoding="utf-8",
     )
 
-    print("\n--- FCE Sankey Summary ---")
-    print(f"Parsed FCE PGN files: {result.parsed_files}")
+    print(f"\n--- {catalog.name} Sankey Summary ---")
+    print(f"Parsed PGN files: {result.parsed_files}")
     print(f"Skipped files: {result.skipped_files}")
     print(f"Games with transitions: {result.data.total_games}")
     print(f"Counted transitions: {result.data.total_transitions}")
@@ -596,14 +689,14 @@ def render_fce_sankey(
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Render an interactive static Sankey diagram from annotated FCE PGN output."
+            "Render an interactive static Sankey diagram from annotated ending PGN output."
         )
     )
     parser.add_argument(
         "--pgn-dir",
         dest="pgn_dir",
         required=True,
-        help="Directory containing annotated FCE PGN output, scanned recursively.",
+        help="Directory containing annotated PGN output, scanned recursively.",
     )
     parser.add_argument(
         "--output-html",
@@ -620,10 +713,30 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--title",
         dest="title",
-        default="Fundamental Chess Endings Transition Sankey",
-        help="Page and chart title.",
+        default=None,
+        help="Page and chart title. Defaults to a title derived from the catalog name.",
+    )
+    parser.add_argument(
+        "--catalog",
+        dest="catalog",
+        choices=sorted(CATALOGS),
+        default="fce",
+        help="Ending catalog to use. Choices: %(choices)s. Default: fce.",
+    )
+    parser.add_argument(
+        "--show-numbers",
+        dest="show_numbers",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Include ending numbers in node labels. Default: --show-numbers.",
     )
     return parser.parse_args(argv)
+
+
+DEFAULT_TITLES: dict[str, str] = {
+    "fce": "Fundamental Chess Endings Transition Sankey",
+    "100endings": "100 Endgames You Must Know Transition Sankey",
+}
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -631,11 +744,15 @@ def main(argv: list[str] | None = None) -> int:
     if not args.marker_text.strip():
         print("Error: --marker-text must contain at least one non-whitespace character.")
         return 1
+    catalog = load_catalog(args.catalog)
+    title = args.title or DEFAULT_TITLES.get(args.catalog, f"{args.catalog} Transition Sankey")
     return render_fce_sankey(
         pgn_dir=args.pgn_dir,
         output_html=args.output_html,
         marker_text=args.marker_text.strip(),
-        title=args.title,
+        title=title,
+        catalog=catalog,
+        show_numbers=args.show_numbers,
     )
 
 

@@ -8,6 +8,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from reti.annotated_pgn import parse_annotated_pgn
+from reti.fce_metadata import FCE_CATALOG
 from reti.fce_sankey import (
     build_game_key,
     build_sankey_data,
@@ -104,10 +105,11 @@ class TestFceSankey(unittest.TestCase):
             hits_by_game, warnings, skipped_files, parsed_files = collect_hits_from_pgn_dir(
                 str(pgn_root),
                 marker_text="CQL",
+                catalog=FCE_CATALOG,
             )
 
         assert hits_by_game is not None
-        sequences = build_game_sequences(hits_by_game)
+        sequences = build_game_sequences(hits_by_game, FCE_CATALOG)
         self.assertEqual(parsed_files, 4)
         self.assertEqual(skipped_files, 0)
         self.assertEqual(warnings, ())
@@ -129,7 +131,7 @@ class TestFceSankey(unittest.TestCase):
             "g2": ["2-1P", "6-2-0Rr", "2-1P"],
         }
 
-        data = build_sankey_data(game_sequences)
+        data = build_sankey_data(game_sequences, FCE_CATALOG)
 
         self.assertEqual(data.total_games, 2)
         self.assertEqual(data.total_transitions, 8)
@@ -151,7 +153,7 @@ class TestFceSankey(unittest.TestCase):
         self.assertEqual(link_map[("King + Pawn vs King", "End")], 1)
 
     def test_render_sankey_html_includes_plotly_payload(self):
-        data = build_sankey_data({"g1": ["2-1P", "6-2-0Rr"]})
+        data = build_sankey_data({"g1": ["2-1P", "6-2-0Rr"]}, FCE_CATALOG)
         html = render_sankey_html(
             data,
             title="Demo Sankey",
@@ -184,6 +186,7 @@ class TestFceSankey(unittest.TestCase):
                 output_html=str(output_html),
                 marker_text="CQL",
                 title="Recursive Sankey",
+                catalog=FCE_CATALOG,
             )
 
             self.assertEqual(exit_code, 0)

@@ -1,4 +1,4 @@
-;; ending 12: knight 6th rank rook's pawn
+// ending 12: knight 6th rank rook's pawn
 
 cql()
 

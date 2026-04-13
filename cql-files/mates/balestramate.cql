@@ -2,7 +2,7 @@
 
 
 cql()
-⬓{btm mate
+flipcolor{btm mate
 B -> k
 
 square all x in _ <- k

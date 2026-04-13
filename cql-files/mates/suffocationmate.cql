@@ -2,7 +2,7 @@
 
 
 cql()
-⬓{btm mate
+flipcolor{btm mate
 N -> k
 _ <- k == 2
 

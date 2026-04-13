@@ -1,23 +1,9 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from reti.ending_catalog import Ending, EndingCatalog
 
-
-@dataclass(frozen=True)
-class FceEnding:
-    stem: str
-    row_id: str
-    label: str
-    chapter_key: str
-    chapter_label: str
-    color: str
-    specificity_rank: int
-
-    @property
-    def display_label(self) -> str:
-        if self.row_id:
-            return f"{self.row_id} {self.label}"
-        return self.label
+# Backward-compatible alias so existing imports still work.
+FceEnding = Ending
 
 
 CHAPTERS = {
@@ -33,7 +19,7 @@ CHAPTERS = {
     "10": ("Queen vs Pieces", "#BAB0AC"),
 }
 
-_ENDING_ROWS = [
+_ENDING_ROWS: list[tuple[str, str, str, str]] = [
     ("1-4BN", "1.4", "Bishop + Knight vs King", "1"),
     ("2-0Pp", "2", "Pawn Endings", "2"),
     ("2-1P", "", "King + Pawn vs King", "2"),
@@ -100,20 +86,16 @@ SPECIFICITY_ORDER = [
     "10-7QAq",
 ]
 
-_specificity_ranks = {stem: rank for rank, stem in enumerate(SPECIFICITY_ORDER)}
-
-FCE_ENDINGS = tuple(
-    FceEnding(
-        stem=stem,
-        row_id=row_id,
-        label=label,
-        chapter_key=chapter_key,
-        chapter_label=CHAPTERS[chapter_key][0],
-        color=CHAPTERS[chapter_key][1],
-        specificity_rank=_specificity_ranks[stem],
-    )
-    for stem, row_id, label, chapter_key in _ENDING_ROWS
+FCE_CATALOG = EndingCatalog.build(
+    name="fce",
+    ending_rows=_ENDING_ROWS,
+    chapters=CHAPTERS,
+    specificity_order=SPECIFICITY_ORDER,
 )
 
-FCE_ENDINGS_BY_STEM = {ending.stem: ending for ending in FCE_ENDINGS}
-FCE_TABLE_ROWS = tuple((ending.stem, ending.row_id, ending.label) for ending in FCE_ENDINGS)
+# Convenience re-exports used by existing code.
+FCE_ENDINGS = FCE_CATALOG.endings
+FCE_ENDINGS_BY_STEM = FCE_CATALOG.endings_by_stem
+FCE_TABLE_ROWS = tuple(
+    (ending.stem, ending.row_id, ending.label) for ending in FCE_ENDINGS
+)

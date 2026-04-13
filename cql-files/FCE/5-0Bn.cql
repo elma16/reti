@@ -1,4 +1,4 @@
-;; bishop vs knight
+// bishop vs knight
 
 cql()
 

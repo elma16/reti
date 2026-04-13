@@ -1,4 +1,4 @@
-;; n-pled pawns
+// n-pled pawns
 
 cql()
 

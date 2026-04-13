@@ -1,4 +1,4 @@
-;; King and pawn vs. King
+// King and pawn vs. King
 
 cql()
 

@@ -1,4 +1,4 @@
-;; ending 55 R and b/g pawn (5th rank or further)
+// ending 55 R and b/g pawn (5th rank or further)
 
 cql()
 

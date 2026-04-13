@@ -1,4 +1,4 @@
-;; Rook and minor piece vs. Rook and minor piece
+// Rook and minor piece vs. Rook and minor piece
 
 cql()
 

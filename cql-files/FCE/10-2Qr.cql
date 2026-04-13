@@ -1,4 +1,4 @@
-;; Queen vs. Rook (without pawns)
+// Queen vs. Rook (without pawns)
 
 cql()
 

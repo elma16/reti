@@ -1,4 +1,4 @@
-;; endings 16-19: Queen vs 7th rank pawn
+// endings 16-19: Queen vs 7th rank pawn
 
 cql()
 

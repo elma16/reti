@@ -1,7 +1,7 @@
-;; Max hanging pieces per game:
-;; Sorts games by the largest number of hanging pieces in any single position.
-;; A piece is considered hanging if it is attacked by the opponent and not defended by its own side.
-;; Counts both sides’ hanging pieces in each position; keeps the maximum seen in the game.
+// Max hanging pieces per game:
+// Sorts games by the largest number of hanging pieces in any single position.
+// A piece is considered hanging if it is attacked by the opponent and not defended by its own side.
+// Counts both sides’ hanging pieces in each position; keeps the maximum seen in the game.
 
 cql(
   input "path/to/games.pgn"

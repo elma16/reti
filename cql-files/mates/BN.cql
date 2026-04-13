@@ -1,7 +1,7 @@
-;; Bishop and knight mate
+// Bishop and knight mate
 
 cql()
-⬓{btm mate
+flipcolor{btm mate
 B == 1
 N == 1
 [Aa] == 4}

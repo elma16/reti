@@ -1,4 +1,4 @@
-;; Queen vs. King
+// Queen vs. King
 
 cql()
 

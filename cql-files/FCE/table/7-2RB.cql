@@ -1,4 +1,4 @@
-;; Rook vs. Bishop
+// Rook vs. Bishop
 
 cql()
 

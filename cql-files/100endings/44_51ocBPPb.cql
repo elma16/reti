@@ -1,10 +1,10 @@
-;; ending 44-51: Opposite colour bishops
+// ending 44-51: Opposite colour bishops
 
 cql()
 
-;; white light squared bishop and black dark squared bishop or white dark squared bishop and black light squared bishop
+// white light squared bishop and black dark squared bishop or white dark squared bishop and black light squared bishop
 
-⬓(light B == 1 and
+flipcolor(light B == 1 and
  dark B == 0 and
  dark b == 1 and
  light b == 0 and

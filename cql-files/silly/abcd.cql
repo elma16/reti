@@ -1,4 +1,4 @@
 /*check when pawn captures occur*/
 
 cql()
-(P×a) or (p×A)
+(P[x]a) or (p[x]A)

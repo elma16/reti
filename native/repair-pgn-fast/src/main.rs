@@ -4,6 +4,8 @@ use std::io::{self, Write};
 use std::path::PathBuf;
 
 struct FastRewriter {
+    preserve_markup: bool,
+    inspect_only: bool,
     removed_bom: bool,
     invalid_utf8_replaced: usize,
     control_characters_removed: usize,
@@ -30,8 +32,10 @@ struct FastRewriter {
 }
 
 impl FastRewriter {
-    fn new(capacity: usize) -> Self {
+    fn new(capacity: usize, preserve_markup: bool) -> Self {
         Self {
+            preserve_markup,
+            inspect_only: false,
             removed_bom: false,
             invalid_utf8_replaced: 0,
             control_characters_removed: 0,
@@ -112,14 +116,14 @@ impl FastRewriter {
                 return;
             }
 
-            if self.recovery_armed && ch == '[' {
+            if !self.preserve_markup && self.recovery_armed && ch == '[' {
                 self.in_comment = false;
                 self.variation_depth = 0;
                 self.recovery_armed = false;
             }
         }
 
-        if self.skip_line_comment {
+        if !self.preserve_markup && self.skip_line_comment {
             return;
         }
 
@@ -128,37 +132,39 @@ impl FastRewriter {
             return;
         }
 
-        if self.in_comment {
-            if ch == '}' {
-                self.in_comment = false;
-                if self.variation_depth == 0 {
-                    self.recovery_armed = false;
-                }
-            }
-            return;
-        }
-
-        if self.variation_depth > 0 {
-            match ch {
-                '{' => {
-                    self.finish_token();
-                    self.comments_removed += 1;
-                    self.in_comment = true;
-                }
-                '(' => {
-                    self.finish_token();
-                    self.variations_removed += 1;
-                    self.variation_depth += 1;
-                }
-                ')' => {
-                    self.variation_depth -= 1;
+        if !self.preserve_markup {
+            if self.in_comment {
+                if ch == '}' {
+                    self.in_comment = false;
                     if self.variation_depth == 0 {
                         self.recovery_armed = false;
                     }
                 }
-                _ => {}
+                return;
             }
-            return;
+
+            if self.variation_depth > 0 {
+                match ch {
+                    '{' => {
+                        self.finish_token();
+                        self.comments_removed += 1;
+                        self.in_comment = true;
+                    }
+                    '(' => {
+                        self.finish_token();
+                        self.variations_removed += 1;
+                        self.variation_depth += 1;
+                    }
+                    ')' => {
+                        self.variation_depth -= 1;
+                        if self.variation_depth == 0 {
+                            self.recovery_armed = false;
+                        }
+                    }
+                    _ => {}
+                }
+                return;
+            }
         }
 
         if self.line_start {
@@ -171,7 +177,7 @@ impl FastRewriter {
                 return;
             }
 
-            if ch == '%' || ch == ';' {
+            if !self.preserve_markup && (ch == '%' || ch == ';') {
                 self.line_comments_removed += 1;
                 self.skip_line_comment = true;
                 self.leading_whitespace.clear();
@@ -183,22 +189,31 @@ impl FastRewriter {
             self.line_start = false;
         }
 
+        if !self.preserve_markup {
+            match ch {
+                '{' => {
+                    self.finish_token();
+                    self.comments_removed += 1;
+                    self.in_comment = true;
+                    return;
+                }
+                '(' => {
+                    self.finish_token();
+                    self.variations_removed += 1;
+                    self.variation_depth = 1;
+                    return;
+                }
+                ';' => {
+                    self.finish_token();
+                    self.line_comments_removed += 1;
+                    self.skip_line_comment = true;
+                    return;
+                }
+                _ => {}
+            }
+        }
+
         match ch {
-            '{' => {
-                self.finish_token();
-                self.comments_removed += 1;
-                self.in_comment = true;
-            }
-            '(' => {
-                self.finish_token();
-                self.variations_removed += 1;
-                self.variation_depth = 1;
-            }
-            ';' => {
-                self.finish_token();
-                self.line_comments_removed += 1;
-                self.skip_line_comment = true;
-            }
             ' ' | '\t' => {
                 if !self.line_output.is_empty() {
                     self.finish_token();
@@ -239,11 +254,13 @@ impl FastRewriter {
             self.current_game_has_result = false;
         }
 
-        if !self.line_output.is_empty() {
-            self.output.push_str(&self.line_output);
-        }
-        if had_newline {
-            self.output.push('\n');
+        if !self.inspect_only {
+            if !self.line_output.is_empty() {
+                self.output.push_str(&self.line_output);
+            }
+            if had_newline {
+                self.output.push('\n');
+            }
         }
 
         if (self.in_comment || self.variation_depth > 0) && !self.source_line_has_nonspace {
@@ -265,7 +282,7 @@ impl FastRewriter {
         }
 
         self.write_missing_result(false);
-        if self.games_written == 0 && self.saw_nonwhitespace_output {
+        if !self.inspect_only && self.games_written == 0 && self.saw_nonwhitespace_output {
             self.games_written = 1;
         }
 
@@ -314,24 +331,34 @@ impl FastRewriter {
             return;
         }
 
-        if before_new_game {
-            self.output.push_str("*\n\n");
-        } else {
-            self.output.push_str("*\n");
+        if !self.inspect_only {
+            if before_new_game {
+                self.output.push_str("*\n\n");
+            } else {
+                self.output.push_str("*\n");
+            }
         }
         self.current_game_has_result = true;
         self.saw_nonwhitespace_output = true;
     }
 }
 
-fn run(input_path: PathBuf, output_path: PathBuf) -> Result<(), String> {
+fn run(
+    input_path: PathBuf,
+    output_path: Option<PathBuf>,
+    preserve_markup: bool,
+) -> Result<(), String> {
     let bytes = fs::read(&input_path).map_err(|err| format!("read failed: {err}"))?;
     let text = String::from_utf8_lossy(&bytes);
-    let mut rewriter = FastRewriter::new(bytes.len());
+    let capacity = if output_path.is_some() { bytes.len() } else { 0 };
+    let mut rewriter = FastRewriter::new(capacity, preserve_markup);
+    rewriter.inspect_only = output_path.is_none();
     rewriter.feed_text(text.as_ref());
     let rewriter = rewriter.finish();
-    fs::write(&output_path, rewriter.output.as_bytes())
-        .map_err(|err| format!("write failed: {err}"))?;
+    if let Some(path) = output_path {
+        fs::write(&path, rewriter.output.as_bytes())
+            .map_err(|err| format!("write failed: {err}"))?;
+    }
     io::stdout()
         .write_all(rewriter.json_stats().as_bytes())
         .map_err(|err| format!("stdout failed: {err}"))?;
@@ -339,24 +366,40 @@ fn run(input_path: PathBuf, output_path: PathBuf) -> Result<(), String> {
 }
 
 fn main() {
-    let mut args = env::args_os();
-    let _program = args.next();
-    let input_path = match args.next() {
-        Some(value) => PathBuf::from(value),
-        None => {
-            eprintln!("usage: reti-fast-pgn-repair INPUT_PGN OUTPUT_PGN");
+    const USAGE: &str =
+        "usage: reti-fast-pgn-repair [--preserve-markup] INPUT_PGN OUTPUT_PGN\n       reti-fast-pgn-repair --inspect INPUT_PGN";
+    let mut preserve_markup = false;
+    let mut inspect = false;
+    let mut positionals: Vec<PathBuf> = Vec::with_capacity(2);
+
+    for arg in env::args_os().skip(1) {
+        let as_string = arg.to_string_lossy();
+        if as_string == "--preserve-markup" {
+            preserve_markup = true;
+        } else if as_string == "--inspect" {
+            inspect = true;
+        } else if as_string.starts_with("--") {
+            eprintln!("unknown option: {as_string}\n{USAGE}");
             std::process::exit(2);
+        } else {
+            positionals.push(PathBuf::from(arg));
         }
-    };
-    let output_path = match args.next() {
-        Some(value) => PathBuf::from(value),
-        None => {
-            eprintln!("usage: reti-fast-pgn-repair INPUT_PGN OUTPUT_PGN");
-            std::process::exit(2);
-        }
+    }
+
+    let expected = if inspect { 1 } else { 2 };
+    if positionals.len() != expected {
+        eprintln!("{USAGE}");
+        std::process::exit(2);
+    }
+
+    let (input_path, output_path) = if inspect {
+        (positionals.pop().unwrap(), None)
+    } else {
+        let out = positionals.pop().unwrap();
+        (positionals.pop().unwrap(), Some(out))
     };
 
-    if let Err(message) = run(input_path, output_path) {
+    if let Err(message) = run(input_path, output_path, preserve_markup) {
         eprintln!("{message}");
         std::process::exit(1);
     }

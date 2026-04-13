@@ -1,4 +1,4 @@
-;; Rook and bishop vs rook (with pawns)
+// Rook and bishop vs rook (with pawns)
 
 cql()
 

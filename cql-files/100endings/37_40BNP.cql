@@ -1,4 +1,4 @@
-;; endings 37 - 40: Bishop and Knight ending with one pawn.
+// endings 37 - 40: Bishop and Knight ending with one pawn.
 
 cql()
 

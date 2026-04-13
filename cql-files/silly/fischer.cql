@@ -3,7 +3,7 @@
 
 cql()
 
-    ⊢
-     ♗×♟h7 check
-     ♚×h7
-     ♘――g5 check
+    path
+     B[x]ph7 check
+     k[x]h7
+     N--g5 check

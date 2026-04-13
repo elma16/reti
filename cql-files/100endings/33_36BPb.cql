@@ -1,4 +1,4 @@
-;; endings 33 - 36: same coloured bishops B + P vs b.
+// endings 33 - 36: same coloured bishops B + P vs b.
 
 cql()
 

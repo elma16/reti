@@ -1,6 +1,6 @@
 
 
 cql()
-⬓{btm mate
+flipcolor{btm mate
 N -> k
 N == 2}

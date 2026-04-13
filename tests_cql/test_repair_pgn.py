@@ -279,6 +279,41 @@ class TestRepairPgn(unittest.TestCase):
         args = repair_pgn.parse_args(["--pgn", "file.pgn"])
         self.assertEqual(args.mode, repair_pgn.FAST_REPAIR_MODE)
 
+    def test_preserve_markup_keeps_comments_variations_and_line_comments(self):
+        with _python_fast_patch(), tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            source = root / "annotated.pgn"
+            repaired = root / "repaired.pgn"
+            source.write_bytes(
+                b'\xef\xbb\xbf[Event "x"]\n\n'
+                b"% top\n"
+                b"1. e4 { note } e5 ( 1... c5 ) 2. Nf3 \x1f; trailing\n"
+                b"*\n"
+            )
+
+            stats = fast_pgn_repair.rewrite_pgn_fast_python(
+                source, repaired, preserve_markup=True
+            )
+            repaired_text = repaired.read_text(encoding="utf-8")
+
+            self.assertIn("{ note }", repaired_text)
+            self.assertIn("( 1... c5 )", repaired_text)
+            self.assertIn("% top", repaired_text)
+            self.assertIn("; trailing", repaired_text)
+            self.assertTrue(stats.removed_bom)
+            self.assertEqual(stats.control_characters_removed, 1)
+            self.assertEqual(stats.comments_removed, 0)
+            self.assertEqual(stats.variations_removed, 0)
+            self.assertEqual(stats.line_comments_removed, 0)
+            self.assertNotIn("\x1f", repaired_text)
+            self.assertNotIn("\ufeff", repaired_text)
+
+    def test_preserve_markup_rejected_with_strict_mode(self):
+        exit_code = repair_pgn.main(
+            ["--pgn", "missing.pgn", "--mode", "strict", "--preserve-markup"]
+        )
+        self.assertEqual(exit_code, 1)
+
     def test_fast_repair_with_actual_cql_smoke_test_on_malformed_fixture(self):
         cql_binary = Path(__file__).resolve().parents[1] / "bins" / "cql6-2" / "cql"
         if not cql_binary.is_file():

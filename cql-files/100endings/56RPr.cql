@@ -1,4 +1,4 @@
-;; ending 56 : rook and pawn (c,d,e,f)
+// ending 56 : rook and pawn (c,d,e,f)
 
 cql()
 

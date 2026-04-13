@@ -1,8 +1,8 @@
-;; Bad bishop finder (CQL6)
-;; A side has a “bad” bishop if:
-;; - It has a bishop on that color complex.
-;; - Same-color pawns ≥ MinSameColorPawns and exceed opposite-color pawns by Margin.
-;; flipcolor makes it check both sides.
+// Bad bishop finder (CQL6)
+// A side has a “bad” bishop if:
+// - It has a bishop on that color complex.
+// - Same-color pawns ≥ MinSameColorPawns and exceed opposite-color pawns by Margin.
+// flipcolor makes it check both sides.
 
 cql(
   input "path/to/games.pgn"

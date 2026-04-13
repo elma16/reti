@@ -1,4 +1,4 @@
-;; Queen vs. one minor piece
+// Queen vs. one minor piece
 
 cql()
 

@@ -1,4 +1,4 @@
-;; Queen vs two rooks (with or without pawns)
+// Queen vs two rooks (with or without pawns)
 
 cql()
 

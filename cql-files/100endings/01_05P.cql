@@ -1,4 +1,4 @@
-;; endings 1-5: king + pawn vs king.
+// endings 1-5: king + pawn vs king.
 
 cql()
 

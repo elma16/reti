@@ -1,9 +1,9 @@
-;; blind swine mate
+// blind swine mate
 
-;; The blind swine mate pattern's name is attributed to Polish master Dawid Janowski who referred to doubled rooks on a player's 7th rank as "swine"
+// The blind swine mate pattern's name is attributed to Polish master Dawid Janowski who referred to doubled rooks on a player's 7th rank as "swine"
 
 cql()
-⬓{btm mate
+flipcolor{btm mate
 R -> k
 k -> R
 R -> R

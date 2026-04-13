@@ -16,6 +16,11 @@ from pathlib import Path
 
 import chess.pgn as chess_pgn
 
+from reti.fast_pgn_repair import (
+    FastPgnRewriteStats,
+    inspect_pgn_fast,
+    rewrite_pgn_fast,
+)
 from tqdm import tqdm as tqdm_progress
 
 
@@ -258,6 +263,21 @@ def resolve_cql_threads(
     return int(requested_cql_threads)
 
 
+def issues_from_fast_stats(stats: FastPgnRewriteStats) -> list[str]:
+    issues: list[str] = []
+    if stats.removed_bom:
+        issues.append("starts with a UTF-8 BOM")
+    if stats.invalid_utf8_replaced:
+        issues.append(
+            f"contains {stats.invalid_utf8_replaced} invalid UTF-8 replacement character(s)"
+        )
+    if stats.control_characters_removed:
+        issues.append(
+            f"contains {stats.control_characters_removed} control character(s)"
+        )
+    return issues
+
+
 def inspect_pgn_text_compatibility(pgn_path: Path) -> list[str]:
     """
     Find text/byte issues that can make older CQL builds abort on specific PGNs.
@@ -324,30 +344,14 @@ def sanitize_pgn_to_temp(
 ) -> Path:
     """
     Create a sanitized temporary PGN copy without modifying the original file.
+
+    Uses the fast_pgn_repair pipeline with preserve_markup=True so comments and
+    side variations are kept — this is byte-level scrubbing only (BOM, invalid
+    UTF-8, control chars).
     """
     destination = runtime_root / pgn_path.relative_to(pgn_root)
     destination.parent.mkdir(parents=True, exist_ok=True)
-
-    with pgn_path.open("rb") as raw_handle:
-        prefix = raw_handle.read(3)
-        if prefix != b"\xef\xbb\xbf":
-            raw_handle.seek(0)
-
-        text_handle = io.TextIOWrapper(
-            raw_handle,
-            encoding="utf-8",
-            errors="replace",
-            newline="",
-        )
-        with destination.open("w", encoding="utf-8", newline="") as output_handle:
-            for chunk in iter(lambda: text_handle.read(1024 * 1024), ""):
-                cleaned = "".join(
-                    char
-                    for char in chunk
-                    if ord(char) >= 32 or char in "\n\r\t"
-                )
-                output_handle.write(cleaned)
-
+    rewrite_pgn_fast(pgn_path, destination, preserve_markup=True)
     return destination
 
 
@@ -435,7 +439,21 @@ def preflight_pgn_files(
         runtime_pgn_path = pgn_path
         sanitized = False
 
-        text_issues = inspect_pgn_text_compatibility(pgn_path)
+        try:
+            inspect_stats = inspect_pgn_fast(pgn_path)
+        except Exception as exc:
+            inspect_stats = None
+            progress_write(
+                f"Fast inspect failed for {relative_name}, falling back: {exc}"
+            )
+
+        if inspect_stats is not None:
+            text_issues = issues_from_fast_stats(inspect_stats)
+            event_count = inspect_stats.games_written
+        else:
+            text_issues = inspect_pgn_text_compatibility(pgn_path)
+            event_count = count_games_in_pgn(pgn_path)
+
         if text_issues:
             runtime_pgn_path = sanitize_pgn_to_temp(
                 pgn_path,
@@ -448,7 +466,6 @@ def preflight_pgn_files(
                 f"{relative_name}: {'; '.join(text_issues)}"
             )
 
-        event_count = count_games_in_pgn(runtime_pgn_path)
         if event_count == 0:
             results.append(
                 PgnPreflightResult(
@@ -647,6 +664,61 @@ def write_summary_csv(
     return summary_path
 
 
+def merge_outputs_by_cql(
+    results: list[JobResult],
+    cql_inputs: InputCollection,
+    output_dir: Path,
+) -> list[Path]:
+    """Concatenate per-PGN output files into one merged file per CQL script.
+
+    After merging, the individual per-pair output files are removed so the
+    output directory contains only the merged PGNs and summary.csv.
+    """
+    from collections import defaultdict
+
+    by_cql: dict[Path, list[Path]] = defaultdict(list)
+    for result in results:
+        if result.success and result.output_pgn.exists():
+            by_cql[result.cql_path].append(result.output_pgn)
+
+    merged_paths: list[Path] = []
+    all_per_pair_files: list[Path] = []
+
+    for cql_path in cql_inputs.files:
+        output_pgns = by_cql.get(cql_path, [])
+        if not output_pgns:
+            continue
+        all_per_pair_files.extend(output_pgns)
+        merged_name = relative_stem(cql_path, cql_inputs.root)
+        merged_path = output_dir / f"{merged_name}.pgn"
+        merged_path.parent.mkdir(parents=True, exist_ok=True)
+        with merged_path.open("w", encoding="utf-8") as out:
+            for pgn_path in output_pgns:
+                with pgn_path.open("r", encoding="utf-8", errors="replace") as inp:
+                    content = inp.read()
+                    out.write(content)
+                    if content and not content.endswith("\n\n"):
+                        out.write("\n\n" if not content.endswith("\n") else "\n")
+        total_games = count_games_in_pgn(merged_path)
+        print(f"Merged {len(output_pgns)} file(s) into {merged_path} ({total_games} game(s))")
+        merged_paths.append(merged_path)
+
+    # Clean up per-pair output files and empty directories
+    removed_dirs: set[Path] = set()
+    for per_pair in all_per_pair_files:
+        if per_pair.exists():
+            removed_dirs.add(per_pair.parent)
+            per_pair.unlink()
+    for directory in sorted(removed_dirs, key=lambda p: len(p.parts), reverse=True):
+        try:
+            if directory != output_dir and directory.exists() and not any(directory.iterdir()):
+                directory.rmdir()
+        except OSError:
+            pass
+
+    return merged_paths
+
+
 def build_job_specs(
     prepared_pgns: list[PgnPreflightResult],
     pgn_inputs: InputCollection,
@@ -679,12 +751,24 @@ def build_job_specs(
     return job_specs
 
 
+def _count_games_for_specs(
+    job_specs: list[JobSpec],
+) -> dict[Path, int]:
+    """Pre-count games per source PGN (deduplicated across CQL scripts)."""
+    counts: dict[Path, int] = {}
+    for spec in job_specs:
+        if spec.source_pgn_path not in counts:
+            counts[spec.source_pgn_path] = count_games_in_pgn(spec.source_pgn_path)
+    return counts
+
+
 def run_job_matrix(
     cql_bin_path: Path,
     job_specs: list[JobSpec],
     *,
     jobs: str | int,
     cql_threads: str | int,
+    game_progress: bool = False,
 ) -> list[JobResult]:
     total_jobs = len(job_specs)
     worker_count = resolve_worker_count(jobs, total_jobs)
@@ -694,15 +778,44 @@ def run_job_matrix(
         f"CQL threads per process: {effective_cql_threads}..."
     )
 
-    progress = tqdm_progress(
-        total=total_jobs,
-        desc="CQL jobs",
-        unit="job",
-        dynamic_ncols=sys.stderr.isatty(),
-        file=sys.stderr,
-    )
+    game_counts: dict[Path, int] = {}
+    if game_progress:
+        print("Counting games for progress bar...")
+        game_counts = _count_games_for_specs(job_specs)
+        total_games = sum(
+            game_counts.get(spec.source_pgn_path, 0) for spec in job_specs
+        )
+        progress = tqdm_progress(
+            total=total_games,
+            desc="CQL jobs",
+            unit="game",
+            dynamic_ncols=sys.stderr.isatty(),
+            file=sys.stderr,
+        )
+    else:
+        progress = tqdm_progress(
+            total=total_jobs,
+            desc="CQL jobs",
+            unit="job",
+            dynamic_ncols=sys.stderr.isatty(),
+            file=sys.stderr,
+        )
 
     indexed_results: list[tuple[int, JobResult]] = []
+
+    def _on_job_done(job_spec: JobSpec, result: JobResult) -> None:
+        indexed_results.append((job_spec.job_index, result))
+        if game_progress:
+            progress.update(game_counts.get(job_spec.source_pgn_path, 0))
+        else:
+            progress.update(1)
+        if not result.success:
+            progress_write(
+                f"FAILED job {job_spec.job_index}/{total_jobs}: "
+                f"{job_spec.pair_label}: {describe_returncode(result.returncode)}"
+            )
+            if result.stderr.strip():
+                progress_write(result.stderr.strip())
 
     if worker_count == 1:
         for job_spec in job_specs:
@@ -715,16 +828,7 @@ def run_job_matrix(
                 job_spec.output_pgn,
                 cql_threads=effective_cql_threads,
             )
-            indexed_results.append((job_spec.job_index, result))
-            progress.update(1)
-
-            if not result.success:
-                progress_write(
-                    f"FAILED job {job_spec.job_index}/{total_jobs}: "
-                    f"{job_spec.pair_label}: {describe_returncode(result.returncode)}"
-                )
-                if result.stderr.strip():
-                    progress_write(result.stderr.strip())
+            _on_job_done(job_spec, result)
 
         progress.close()
         indexed_results.sort(key=lambda item: item[0])
@@ -748,16 +852,7 @@ def run_job_matrix(
             job_spec = future_to_spec[future]
             progress.set_postfix_str(format_progress_label(job_spec.pair_label))
             result = future.result()
-            indexed_results.append((job_spec.job_index, result))
-            progress.update(1)
-
-            if not result.success:
-                progress_write(
-                    f"FAILED job {job_spec.job_index}/{total_jobs}: "
-                    f"{job_spec.pair_label}: {describe_returncode(result.returncode)}"
-                )
-                if result.stderr.strip():
-                    progress_write(result.stderr.strip())
+            _on_job_done(job_spec, result)
 
     progress.close()
     indexed_results.sort(key=lambda item: item[0])
@@ -775,6 +870,7 @@ def run_cql_analysis(
     skip_pgn_preflight: bool = False,
     smoke_test_pgns: bool = False,
     strict_pgn_parse: bool = False,
+    game_progress: bool = False,
 ) -> tuple[list[JobResult], InputCollection, InputCollection] | None:
     cql_bin_path = resolve_cql_binary(cql_binary)
     if cql_bin_path is None:
@@ -825,6 +921,7 @@ def run_cql_analysis(
             job_specs,
             jobs=jobs,
             cql_threads=cql_threads,
+            game_progress=game_progress,
         )
 
     return results, pgn_inputs, cql_inputs
@@ -945,6 +1042,24 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--game-progress",
+        dest="game_progress",
+        action="store_true",
+        help=(
+            "Show progress in games instead of jobs. Pre-counts games in each "
+            "PGN so the progress bar reflects actual game throughput."
+        ),
+    )
+    parser.add_argument(
+        "--merge-output",
+        dest="merge_output",
+        action="store_true",
+        help=(
+            "After all jobs finish, merge output PGNs into one file per CQL "
+            "script instead of one file per PGN/CQL pair."
+        ),
+    )
+    parser.add_argument(
         "legacy_args",
         nargs="*",
         help=argparse.SUPPRESS,
@@ -1005,6 +1120,7 @@ def main() -> int:
         skip_pgn_preflight=args.skip_pgn_preflight,
         smoke_test_pgns=args.smoke_test_pgns,
         strict_pgn_parse=args.strict_pgn_parse,
+        game_progress=args.game_progress,
     )
 
     if result is None:
@@ -1013,6 +1129,10 @@ def main() -> int:
         return 1
 
     results, pgn_inputs, cql_inputs = result
+
+    if args.merge_output:
+        merge_outputs_by_cql(results, cql_inputs, output_directory)
+
     summary_csv = write_summary_csv(
         results, output_directory, pgn_inputs.root, cql_inputs.root
     )

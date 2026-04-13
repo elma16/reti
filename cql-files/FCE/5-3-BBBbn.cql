@@ -1,4 +1,4 @@
-;; Two bishop vs two knights
+// Two bishop vs two knights
 
 cql()
 

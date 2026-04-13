@@ -1,4 +1,4 @@
-;; rook and pawns vs pawns
+// rook and pawns vs pawns
 
 cql()
 
