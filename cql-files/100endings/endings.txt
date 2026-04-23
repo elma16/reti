@@ -1,0 +1,123 @@
+1. Basic endings
+Ending 1 The rule of the square
+Ending 2 The pawn is on the 6th rank 
+Ending 3 Key squares
+Ending 4 The rook's pawn, Defending king in front of the pawn 
+Ending 5 Imprisoning the stronger side's king 
+Ending 6 Rook vs. Bishop. The wrong corner 
+Ending 7 Rook vs. Bishop. The right comer
+Ending 8 Rook vs. Knight. At the edge of the board
+Ending 9 Rook vs. Knight. In the corner 
+
+3. Knight vs. Pawn
+Ending 10 Knight vs. 7th-rank pawn
+Ending 11 The knight’s pawn
+Ending 12 The 6th-rank rook’s pawn
+Ending 13 The 7th-rank rook’s pawn
+Ending 14 King + Knight checkmate
+Ending 15 ‘The knight's dumb square
+
+4. Queen vs, Pawn 
+Ending 16 Queen vs. 7th-rank pawn
+Ending 17 Queen vs. 7th-rank rook’s pawn
+Ending 18 Queen vs. 7th-rank bishop’s pawn
+Ending 19 A too-frequent trick
+Ending 20 Queen vs. Queen
+
+5. Rook vs. Pawn
+Ending 21 Kings do not push. Just counting
+Ending 22. Defending king on the 3rd rank cut off along a rank
+Ending 23 Strong king behind the pawn 
+Ending 24 Stronger side’s king on one side 
+Ending 25 The rook in front of the pawn
+Ending 26 Special themes with a knight’s pawn 
+Ending 27 The rook’s pawn, Pushing from the rear
+Ending 28 The rook’s pawn, Lateral push
+Ending 29 The pawn wins against the rook
+
+6. Rook vs. 2 Pawns
+Ending 30 Kings play no part
+Ending 31 Both kings play a part
+Ending 32 Only the defending king plays a part
+
+7. Same-coloured bishops: Bishop + Pawn vs. Bishop 
+Ending 33 Driving off the defending bishop 
+Ending 34 In the rear of the pawn
+Ending 35 The short diagonals
+Ending 36 Frontal defence
+
+8. Bishop vs. Knight: one pawn on the board
+Ending 37 Central pawn
+Ending 38 The rook’s pawn
+Ending 39 ‘The pawn is on the 7th rank 
+Ending 40 Unstable position of the controlling knight
+
+9. Opposte-coloured bishops: Bishop + 2 pawns vs. Bishop
+Ending 41 Pawns on the 6th rank. 
+Ending 42 Pawns on Sth rank or behind.
+Ending 43 A very special pair of pawns. The cage 
+Ending 44 Pawns separated by just one file. 
+Ending 45 Controlling both pawns along the same diagonal
+Ending 46 ‘The winning procedure'
+Ending 47 Knight’s and central pawn.
+Ending 48 Central and rook’s pawns 
+Ending 49 Bishop's and knight's pawns. 
+Ending 50 The atacking bishop controls the promotion square of the knight's pawn 
+Ending 51 Central and rook’s pawns 
+
+10. Rook + Pawn vs. Rook 123
+Ending 52 The Philidor Position 
+Ending 53. Lucena Position. The bridge 
+Ending 54 The long side 
+Ending 55 The knight's pawn. First-rank defence
+Ending 56 Central or bishop pawns. Kling and Horwitz (K&H) defensive technique
+Ending 57 Central 6th-rank pawn, Rook with distant effectiveness
+Ending 58 Central 6th-rank pawn. Rook without distant effectiveness
+Ending 59 Cutting off along one file 
+Ending 60 Defending king cut off by two files. Grigoievs combined method
+Ending 61 King cut off along two files vs. long side. Mating themes
+Ending 62 Perfect Cut along a rank
+Ending 63 Imperfect Cut along a rank 
+Ending 64 Apparent Cut along a rank 
+Ending 65 Pawn on the 7th rank. Attacking rook in front of the pawn 
+Ending 66 Pawn on the 6th rank. The Vancura Defence
+Ending 67 The king is in front of the pawn and the pawn is on the 7th rank. 
+Ending 68 The rook and the king support the pawn
+
+11. Rook + two Pawns vs. Rook
+Ending 69 Central pawns
+Ending 70 Knight's pawns
+Ending 71 Defending king cut off on the back rank
+Ending 72 Bishop's pawn on Sth rank 
+Ending 73 The defensive procedure
+Ending 74 Blocked connected pawns
+Ending 75 Attacking rook stuck in front of the 7th-rank pawn 
+Ending 76 Vancura Defence against 2 pawns
+
+12. Pawn endings
+Ending 77 Doubled pawns
+Ending 78 Isolated pawns
+Ending 79 Blocked pawns. Key squares
+Ending 80 Less advanced (or rook’s) blocked pawns.
+Ending 81 Pawns on adjacent files
+Ending 82 Passed pawns. Dual-purpose king manoeuvres
+Ending 83. Rook’s pawns and one distant passed pawn
+Ending 84 The passed pawn is central and near
+Ending 85 A passed Bishop's pawn on the same wing
+Ending 86 The defending side has moved his pawn. Triangulation
+Ending 87 _Knight’s and rook’s pawn against rook’s pawn
+Ending 88 King against 2 passed pawns
+Ending 89 Protected passed pawns
+Ending 90 Distant passed pawns
+Ending 91 Doubled pawns
+Ending 92 Breakthroughs when the king is far
+
+13. Other material relations
+Ending 93 Checkmating with Bishop and Knight
+Ending 94 The king is on the edge
+Ending 95 ‘The king is far from the edge. Cochrane Defence
+Ending 96 Second-rank defence
+Ending 97 Rook + 6th-rank bishop's pawn
+Ending 98 Rook +rook's pawn vs. Bishop
+Ending 99 Queen vs. Rook + Pawns
+Ending 100 Queen vs. Rook + Rook's Pawn

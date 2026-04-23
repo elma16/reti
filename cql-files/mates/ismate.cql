@@ -1,3 +1,0 @@
-cql()
-
-flipcolor{btm mate}
