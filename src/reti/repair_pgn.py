@@ -6,7 +6,6 @@ import functools
 import io
 import os
 import shutil
-import signal
 import subprocess
 import sys
 import tempfile
@@ -18,40 +17,25 @@ import chess.pgn as chess_pgn
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from reti.common.pgn_discovery import (
+    discover_pgn_files,
+    format_pgn_display_path,
+)
+from reti.common.progress import (
+    format_progress_label,
+    make_terminal_safe,
+    progress_write,
+)
+from reti.common.subprocess_helpers import (
+    describe_returncode,
+    resolve_executable,
+)
 from reti.fast_pgn_repair import FastPgnRewriteStats, rewrite_pgn_fast
 from tqdm import tqdm as tqdm_progress
 
 FAST_REPAIR_MODE = "fast"
 STRICT_REPAIR_MODE = "strict"
 REPAIR_MODES = (FAST_REPAIR_MODE, STRICT_REPAIR_MODE)
-
-
-def progress_write(message: str) -> None:
-    tqdm_progress.write(make_terminal_safe(message))
-
-
-def make_terminal_safe(text: str) -> str:
-    safe_parts: list[str] = []
-    for char in text:
-        codepoint = ord(char)
-        if char in "\n\r\t":
-            safe_parts.append(char)
-        elif codepoint < 32 or codepoint == 127:
-            safe_parts.append(f"\\x{codepoint:02x}")
-        else:
-            safe_parts.append(char)
-    return "".join(safe_parts)
-
-
-def format_progress_label(text: str, *, max_length: int = 80) -> str:
-    safe = make_terminal_safe(text).replace("\n", " ").replace("\r", " ").replace(
-        "\t", " "
-    )
-    if len(safe) <= max_length:
-        return safe
-    head = max(10, max_length // 2 - 2)
-    tail = max(10, max_length - head - 3)
-    return f"{safe[:head]}...{safe[-tail:]}"
 
 
 @dataclass(frozen=True)
@@ -82,66 +66,11 @@ class PgnRepairResult:
     smoke_test_message: str | None
 
 
-def describe_returncode(returncode: int) -> str:
-    if returncode >= 0:
-        return f"return code {returncode}"
-
-    signal_number = -returncode
-    try:
-        signal_name = signal.Signals(signal_number).name
-    except ValueError:
-        signal_name = f"SIG{signal_number}"
-    return f"terminated by signal {signal_number} ({signal_name})"
-
-
 def resolve_cql_binary(cql_binary: str) -> Path | None:
-    candidate = Path(cql_binary).expanduser()
-    if candidate.is_file():
-        return candidate
-
-    on_path = shutil.which(cql_binary)
-    if on_path:
-        return Path(on_path)
-
-    print(f"Error: CQL binary not found: '{cql_binary}'")
-    return None
-
-
-def discover_pgn_files(location: str) -> list[Path] | None:
-    path = Path(location).expanduser()
-
-    if path.is_file():
-        if path.suffix.lower() != ".pgn":
-            print(f"Error: '{location}' is not a .pgn file.")
-            return None
-        return [path]
-
-    if path.is_dir():
-        files = sorted(
-            (
-                item
-                for item in path.rglob("*")
-                if item.is_file() and item.suffix.lower() == ".pgn"
-            ),
-            key=lambda item: str(item.relative_to(path)),
-        )
-        if not files:
-            print(f"Error: No .pgn files found under '{location}'.")
-            return None
-        return files
-
-    print(f"Error: '{location}' is not a valid file or directory.")
-    return None
-
-
-def format_pgn_display_path(pgn_path: Path, root: Path | None) -> str:
-    if root is None:
-        return pgn_path.name
-
-    try:
-        return str(pgn_path.relative_to(root))
-    except ValueError:
-        return pgn_path.name
+    resolved = resolve_executable(cql_binary)
+    if resolved is None:
+        print(f"Error: CQL binary not found: '{cql_binary}'")
+    return resolved
 
 
 def sanitize_pgn_to_path(source_path: Path, destination_path: Path) -> TextSanitizationStats:
@@ -616,19 +545,16 @@ def main(argv: list[str] | None = None) -> int:
     if args.preserve_markup and args.mode != FAST_REPAIR_MODE:
         print("Error: --preserve-markup is only supported with --mode fast.")
         return 1
-    pgn_files = discover_pgn_files(args.pgn_location)
-    if pgn_files is None:
+    discovery = discover_pgn_files(args.pgn_location)
+    if discovery is None:
         return 1
+    pgn_files, pgn_root = discovery
 
     cql_binary = None
     if args.cql_binary:
         cql_binary = resolve_cql_binary(args.cql_binary)
         if cql_binary is None:
             return 1
-
-    pgn_root = Path(args.pgn_location).expanduser()
-    if not pgn_root.is_dir():
-        pgn_root = None
 
     backup_suffix = None if args.no_backup else args.backup_suffix
 

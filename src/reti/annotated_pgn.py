@@ -8,6 +8,23 @@ from pathlib import Path
 import chess
 import chess.pgn as chess_pgn
 
+from reti.common.pgn_discovery import (
+    discover_pgn_files,
+    format_pgn_display_path,
+)
+
+__all__ = [
+    "AnnotatedPosition",
+    "ParsedAnnotatedGame",
+    "comment_matches_marker",
+    "discover_pgn_files",
+    "fast_iter_annotated_pgn",
+    "format_pgn_display_path",
+    "iter_annotated_pgn",
+    "parse_annotated_pgn",
+    "side_name",
+]
+
 
 @dataclass(frozen=True)
 class AnnotatedPosition:
@@ -27,43 +44,6 @@ class ParsedAnnotatedGame:
     parse_errors: tuple[str, ...]
     move_uci_sequence: tuple[str, ...]
     positions: tuple[AnnotatedPosition, ...]
-
-
-def discover_pgn_files(location: str) -> tuple[list[Path], Path | None] | None:
-    path = Path(location).expanduser()
-
-    if path.is_file():
-        if path.suffix.lower() != ".pgn":
-            print(f"Error: '{location}' is not a .pgn file.")
-            return None
-        return [path], None
-
-    if path.is_dir():
-        files = sorted(
-            (
-                item
-                for item in path.rglob("*")
-                if item.is_file() and item.suffix.lower() == ".pgn"
-            ),
-            key=lambda item: str(item.relative_to(path)),
-        )
-        if not files:
-            print(f"Error: No .pgn files found under '{location}'.")
-            return None
-        return files, path
-
-    print(f"Error: '{location}' is not a valid file or directory.")
-    return None
-
-
-def format_pgn_display_path(pgn_path: Path, root: Path | None) -> str:
-    if root is None:
-        return pgn_path.name
-
-    try:
-        return str(pgn_path.relative_to(root))
-    except ValueError:
-        return pgn_path.name
 
 
 def side_name(turn: bool) -> str:
