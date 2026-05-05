@@ -1,16 +1,8 @@
-// Max consecutive promotions (CQL6)
-// Orders games by the longest streak of consecutive promotions (either color).
+// Max consecutive promotions: orders games by the longest streak of
+// consecutive promotion moves.
 
-cql(
-  input "path/to/games.pgn"
-  output "output/max-consecutive-promotions.pgn"
-  quiet
-)
+cql(quiet)
 
-flipcolor
-
-MinPromotions = 3   // minimum streak length to keep
-
-MinPromotions<=sort "max consecutive promotions"
-  path nestban title "consecutive promotions" verbose
-    -- [Pp]--=[QRBNqrnb]+
+sort "max consecutive promotions"
+line
+  --> move promote [QRBNqrbn] {2 32}

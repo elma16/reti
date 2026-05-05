@@ -1,5 +1,10 @@
+// Check, then king move, then mate (king walked into a mating net).
+
 cql()
 
-line --> (move to _ from [Aa]) attacks [Kk]
-     --> move to _ from [Kk]
-     --> mate
+flipcolor {
+    line
+      --> check
+      --> move from K
+      --> mate
+}

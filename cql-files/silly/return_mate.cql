@@ -1,23 +1,15 @@
-// Return-to-start checkmates:
-// The mating move is made by a non-king, non-pawn piece that returns to its original square.
-// - Works for either color (flipcolor).
-// - Requires the piece to have left its start square earlier (start square empty just before mate).
-// BROKEN
+// Return-to-starting-square mate: the mating move puts a non-king,
+// non-pawn piece back on its standard starting square.
 
-cql(
-  input "path/to/games.pgn"
-  output "output/return-to-start-mates.pgn"
-  quiet
-)
+cql()
 
-flipcolor
-
-[Aa]M = [QRNB] {
-  Start = M              // remember original square of the mating piece
-  line
-    --> move from M      // piece leaves its start square at least once
-    --> move {0,}        // any intervening play
-    --> Start&~M         // start square currently not occupied by that piece
-    --> move from M to Start mate
-  comment("Return-to-start mate by " typename M " on " Start)
+flipcolor {
+    mate
+    (move from N to b1) or
+    (move from N to g1) or
+    (move from B to c1) or
+    (move from B to f1) or
+    (move from R to a1) or
+    (move from R to h1) or
+    (move from Q to d1)
 }

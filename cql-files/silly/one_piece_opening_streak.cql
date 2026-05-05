@@ -1,19 +1,10 @@
-// Same-piece opening streak (CQL6)
-// Finds games where one physical piece is moved more than N times in a row
-// (counting consecutive moves by the same side) during the opening.
+// Same-piece opening streak: a single piece is moved multiple times
+// in a row by its side during the opening (first 12 full moves).
 
-cql()
+cql(quiet)
 
-flipcolor
-
-streak_threshold = 3     // "more than N" moves
-opening_move_limit = 12  // opening window in full moves
-
-piece Repeater in [Aa] {
-  streak_threshold < sort "one-piece opening streak"
-    {
-      line singlecolor quiet
-        --> (move from Repeater and movenumber <= opening_move_limit)+
-    }
-  comment("One piece moved more than N times in a row in the opening")
+piece $Repeater in [Aa] {
+    sort "one-piece opening streak"
+    line singlecolor
+      --> (move from $Repeater and movenumber <= 12) {3 12}
 }

@@ -1,17 +1,17 @@
-// Rook homerun (consecutive rook moves to all four corners in a fixed order).
+// Rook homerun: a single rook visits all four corners in order
+// a1, h1, h8, a8 (with arbitrary play between visits).
 
-cql(
-  input "path/to/games.pgn"
-  output "output/rook-homeruns.pgn"
-  quiet
-)
+cql(quiet)
 
-flipcolor
-
-path focus R piecepath nestban
-  -- to a1
-  -- to h1
-  -- to h8
-  -- to a8
-sort "rook homerun length" pathcount
-comment("Rook homerun via corners a1-h1-h8-a8")
+flipcolor {
+    piece $r in R {
+        line
+          --> move from $r to a1
+          --> move {0 200}
+          --> move from $r to h1
+          --> move {0 200}
+          --> move from $r to h8
+          --> move {0 200}
+          --> move from $r to a8
+    }
+}

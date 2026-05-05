@@ -1,24 +1,11 @@
-// Most-visited square (CQL6)
-// Counts visits (to or from) for every square in a game and ranks by the max.
+// Most-visited square (per game).
+//
+// Sort games by the longest streak of moves that all touch the same
+// square — ranks games where one square is the focal point of play.
 
-cql(
-  input "path/to/games.pgn"
-  output "output/most-visited-squares.pgn"
-  quiet
-)
+cql(quiet)
 
-flipcolor
-
-MaxVisits = 0
-BestSquare = a1
-
-find all {
-  V[element].
-  Visits = find count { move to V } + find count { move from V }
-  MaxVisits < Visits
-  MaxVisits = Visits
-  BestSquare = V
+sort "max same-square visits"
+square $sq in [Aa_] {
+    line --> (move to $sq or move from $sq) {3 200}
 }
-
-sort "max square visits" MaxVisits
-comment("Most-visited square: " BestSquare " visited " MaxVisits " times")

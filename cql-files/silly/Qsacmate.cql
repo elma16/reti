@@ -5,7 +5,7 @@ Reminicent of the game reti - tartakower vienna 1910
 
 cql()
 
-flipcolor flip{
+flipcolor {
 line quiet 
   --> move from Q to [a_] 
   --> move from a to Q

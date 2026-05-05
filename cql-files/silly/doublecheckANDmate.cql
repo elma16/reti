@@ -1,14 +1,8 @@
-// what proportion of double checks are also checkmates?
+// Double check that is also checkmate.
 
 cql()
 
 flipcolor {
-    if #(A -> k) >= 2 {
-        persistent double_check += 1
-        if mate {
-            persistent double_check_mate += 1
-        }
-    }
+    (A attacks k) >= 2
+    mate
 }
-
-false

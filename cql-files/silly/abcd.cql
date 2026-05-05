@@ -1,4 +1,7 @@
-/*check when pawn captures occur*/
+// Pawn capture detector: a pawn captured a piece on the move just played.
 
 cql()
-(P[x]a) or (p[x]A)
+
+flipcolor {
+    move from P capture a
+}

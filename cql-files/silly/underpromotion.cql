@@ -1,14 +1,8 @@
-// Underpromotion finder (CQL6)
-// Matches any pawn promotion that is NOT to a queen (i.e., to a rook, bishop, or knight).
-// Works for either color via flipcolor.
+// Underpromotion: any pawn promotion that is NOT to a queen
+// (i.e., to a rook, bishop, or knight).
 
-cql(
-  input "path/to/games.pgn"
-  output "output/underpromotions.pgn"
-  quiet
-)
+cql(quiet)
 
-flipcolor
-
-path title "underpromotion" verbose
-  P--=[RBN]
+flipcolor {
+    move promote [RBN]
+}

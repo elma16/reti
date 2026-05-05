@@ -1,5 +1,8 @@
-
+// Double check: at least two enemy pieces attack the side-to-move's king.
 
 cql()
-flipcolor (A -> k) >= 2
-//(R attacks k) and (B attacks k)
+
+flipcolor {
+    check
+    (A attacks k) >= 2
+}

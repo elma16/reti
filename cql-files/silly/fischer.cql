@@ -1,9 +1,7 @@
-
-
+// "Fischer" Greek-gift sequence: Bxh7+ Kxh7 Ng5+
 
 cql()
 
-    path
-     B[x]ph7 check
-     k[x]h7
-     N--g5 check
+line --> move to h7 from B capture p
+     --> move capture B
+     --> move to g5 from N

@@ -1,38 +1,23 @@
-// Bad bishop finder (CQL6)
-// A side has a “bad” bishop if:
-// - It has a bishop on that color complex.
-// - Same-color pawns ≥ MinSameColorPawns and exceed opposite-color pawns by Margin.
-// flipcolor makes it check both sides.
+// Bad bishop:
+// A side has a bishop on a colour complex (light or dark squares) where
+// many of its own pawns sit, restricting the bishop's mobility.
+// Heuristic: the side has at least 4 pawns on the bishop's colour AND
+// at least 2 more there than on the opposite colour.
 
-cql(
-  input "path/to/games.pgn"
-  output "output/bad-bishops.pgn"
-  quiet
-)
+cql(quiet)
 
-flipcolor
-
-MinSameColorPawns = 4
-Margin = 2
-
-{
-  HasLightB = find count { s[element]. s&light s&B }
-  HasLightB >= 1
-  LightP = find count { s[element]. s&light s&P }
-  DarkP  = find count { s[element]. s&dark  s&P }
-  LightP >= MinSameColorPawns
-  LightP >= DarkP + Margin
-  sort "bad bishop (light-squared)" LightP
-  comment("Bad light bishop: pawns light=" LightP " dark=" DarkP)
-}
-or
-{
-  HasDarkB = find count { s[element]. s&dark s&B }
-  HasDarkB >= 1
-  DarkP  = find count { s[element]. s&dark  s&P }
-  LightP = find count { s[element]. s&light s&P }
-  DarkP >= MinSameColorPawns
-  DarkP >= LightP + Margin
-  sort "bad bishop (dark-squared)" DarkP
-  comment("Bad dark bishop: pawns dark=" DarkP " light=" LightP)
+flipcolor {
+    {
+        #(light B) >= 1
+        #(light P) >= 4
+        #(light P) >= #(dark P) + 2
+        comment("Bad light-squared bishop: " #(light P) " light vs " #(dark P) " dark pawns")
+    }
+    or
+    {
+        #(dark B) >= 1
+        #(dark P) >= 4
+        #(dark P) >= #(light P) + 2
+        comment("Bad dark-squared bishop: " #(dark P) " dark vs " #(light P) " light pawns")
+    }
 }

@@ -1,19 +1,13 @@
-// Double-attacked mate finder (CQL6)
-// Finds mates where the mating move steps onto a square attacked at least twice by the opponent.
-// Works for either color via flipcolor.
-// BROKEN
+// Double-attacked mate: a mating move where some attacking piece sits
+// on a square attacked by at least two opposing pieces (a piece walked
+// into multiple attacks but still delivered mate).
 
-cql(
-  input "path/to/games.pgn"
-  output "output/double-attacked-mates.pgn"
-  quiet
-)
+cql()
 
-flipcolor
-
-[Aa]M = --(from)
-move from M mate
-AttackerCount = find count { X[element]. a->to }
-AttackerCount >= 2
-sort "double-attacked mate" AttackerCount
-comment("Mating move walked into " AttackerCount " opponent attacks on " to)
+flipcolor {
+    mate
+    piece $p in A {
+        $dest = $p
+        parent: (a attacks $dest) >= 2
+    }
+}

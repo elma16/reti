@@ -1,16 +1,8 @@
-// Max consecutive captures (CQL6)
-// Orders games by the longest streak of consecutive captures (either color).
+// Max consecutive captures: orders games by the longest streak of
+// consecutive capturing moves (either side).
 
-cql(
-  input "path/to/games.pgn"
-  output "output/max-consecutive-captures.pgn"
-  quiet
-)
+cql(quiet)
 
-flipcolor
-
-MinCaptures = 3   // minimum streak length to keep
-
-MinCaptures<=sort "max consecutive captures"
-  path nestban title "consecutive captures" verbose
-    -- move capture [Aa]+
+sort "max consecutive captures"
+line
+  --> move capture [Aa] {3 100}
