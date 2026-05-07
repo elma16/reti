@@ -1,8 +1,0 @@
-[package]
-name = "reti-fast-pgn-repair"
-version = "0.1.0"
-edition = "2021"
-
-[[bin]]
-name = "reti-fast-pgn-repair"
-path = "src/main.rs"

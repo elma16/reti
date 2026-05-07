@@ -10,8 +10,8 @@ the command line.
 ## Repository layout
 
 - `cql-files/`: the main script collections, including the FCE material
-- `src/reti/repair_pgn.py`: one-time in-place PGN repair and normalization before CQL runs
-- `src/reti/fast_pgn_repair.py`: fast lexical PGN repair path with optional native acceleration
+- `src/reti/pgn_cli.py`: one-time in-place PGN repair and normalization before CQL runs
+- `src/reti/pgn_utils.py`: fast lexical PGN repair / utility wrapper around the native `reti-pgn-utils` binary
 - `src/reti/analyse_cql.py`: batch CLI runner for `pgn|dir x cql|dir` matrix execution
 - `src/reti/export_cql_positions.py`: exports `{CQL}`-annotated PGN positions to an evaluated CSV
 - `src/reti/fce_sankey.py`: core logic for building an interactive FCE transition Sankey
@@ -23,7 +23,7 @@ the command line.
 - `docs/export_cql_positions.md`: detailed documentation for exporting annotated positions to CSV
 - `docs/fce_sankey.md`: workflow for turning annotated FCE PGN output into a public static Sankey page
 - `docs/fce_table.md`: workflow for building the curated FCE table subset and rendering the final table
-- `docs/repair_pgn.md`: one-time PGN repair workflow for CQL-unfriendly databases
+- `docs/pgn_cli.md`: one-time PGN repair workflow for CQL-unfriendly databases
 
 ## Install
 
@@ -67,13 +67,13 @@ Detailed usage, output layout, and examples are in
 If a PGN makes CQL abort, repair it once in place before analysis:
 
 ```bash
-python src/reti/repair_pgn.py \
+python src/reti/pgn_cli.py \
   --pgn ~/Downloads/LumbrasGigaBase_OTB_1900-1949.pgn \
   --cql-bin ./bins/cql6-2/cql
 ```
 
 That now defaults to a fast CQL-safe lexical rewrite, optionally backed by the
-native Rust helper under `native/repair-pgn-fast/` when you build it with Cargo.
+native Rust helper under `native/pgn-utils/` when you build it with Cargo.
 It only replaces the original file if the repaired temp copy passes a CQL smoke
 test. If you want the rewrite to finish as quickly as possible, omit
 `--cql-bin`. If you need the older canonical python-chess normalization, add
@@ -86,15 +86,15 @@ pass the directory path to `--pgn`. Building the native Rust accelerator first
 is recommended for large databases:
 
 ```bash
-cargo build --release --manifest-path native/repair-pgn-fast/Cargo.toml
-python src/reti/repair_pgn.py --pgn lumbra-gigabase/ --no-backup
+cargo build --release --manifest-path native/pgn-utils/Cargo.toml
+python src/reti/pgn_cli.py --pgn lumbra-gigabase/ --no-backup
 ```
 
 This uses `--mode fast` (the default), which is the fastest option and produces
 CQL-safe output. The native accelerator is detected automatically when
 available. Use `--no-backup` to avoid doubling disk usage on large databases.
 
-Full details are in [docs/repair_pgn.md](docs/repair_pgn.md).
+Full details are in [docs/pgn_cli.md](docs/pgn_cli.md).
 
 If you already have PGNs containing `{CQL}` move comments, export those marked
 positions to CSV like this:
@@ -110,7 +110,7 @@ python src/reti/export_cql_positions.py \
 For marked positions with 5 pieces or fewer, the exporter uses Syzygy. For
 larger positions, it uses Stockfish for a configurable fixed time budget per
 position. The CSV includes the source PGN, ending label from the PGN filename,
-move context, FEN, and raw evaluation fields. Do not run `repair_pgn.py` on
+move context, FEN, and raw evaluation fields. Do not run `pgn_cli.py` on
 these annotated PGNs first: the repair step deliberately strips comments.
 Full details are in [docs/export_cql_positions.md](docs/export_cql_positions.md).
 

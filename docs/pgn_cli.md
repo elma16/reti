@@ -1,7 +1,7 @@
 # Repair PGN In Place
 
 If CQL aborts on a PGN because of control bytes, invalid UTF-8, malformed
-comments, or other parser-hostile formatting, use `src/reti/repair_pgn.py`
+comments, or other parser-hostile formatting, use `src/reti/pgn_cli.py`
 once before running the normal CQL analysis.
 
 The repair step:
@@ -20,7 +20,7 @@ keeps a backup of the original file next to the repaired PGN.
 ## Command
 
 ```bash
-python src/reti/repair_pgn.py --pgn PGN_INPUT [--cql-bin CQL_BINARY]
+python src/reti/pgn_cli.py --pgn PGN_INPUT [--cql-bin CQL_BINARY]
 ```
 
 Arguments:
@@ -41,17 +41,17 @@ Optional flags:
 If you build the Rust helper with:
 
 ```bash
-cargo build --release --manifest-path native/repair-pgn-fast/Cargo.toml
+cargo build --release --manifest-path native/pgn-utils/Cargo.toml
 ```
 
-then `repair_pgn.py` auto-detects it and uses that accelerator for `--mode fast`.
+then `pgn_cli.py` auto-detects it and uses that accelerator for `--mode fast`.
 
 ## Recommended usage
 
 For a one-off repair of a large database that you want CQL to accept:
 
 ```bash
-python src/reti/repair_pgn.py \
+python src/reti/pgn_cli.py \
   --pgn ~/Downloads/LumbrasGigaBase_OTB_1900-1949.pgn \
   --cql-bin ./bins/cql6-2/cql
 ```
@@ -64,7 +64,7 @@ The script lets CQL print its own progress during that step.
 If you want the old python-chess normalization path instead:
 
 ```bash
-python src/reti/repair_pgn.py \
+python src/reti/pgn_cli.py \
   --pgn ~/Downloads/LumbrasGigaBase_OTB_1900-1949.pgn \
   --mode strict
 ```
@@ -72,7 +72,7 @@ python src/reti/repair_pgn.py \
 If you do not want to keep a backup copy:
 
 ```bash
-python src/reti/repair_pgn.py \
+python src/reti/pgn_cli.py \
   --pgn ~/Downloads/LumbrasGigaBase_OTB_1900-1949.pgn \
   --cql-bin ./bins/cql6-2/cql \
   --no-backup
@@ -81,7 +81,7 @@ python src/reti/repair_pgn.py \
 If you want to repair a whole directory of PGNs:
 
 ```bash
-python src/reti/repair_pgn.py \
+python src/reti/pgn_cli.py \
   --pgn path/to/pgn_dir \
   --cql-bin ./bins/cql6-2/cql
 ```
@@ -120,5 +120,5 @@ If you want the repair to finish without the extra CQL validation pass, omit
 For a quick local comparison of fast vs strict repair on the Lumbras backup:
 
 ```bash
-python scripts/benchmark_repair_pgn.py --build-native
+python scripts/benchmark_pgn_cli.py --build-native
 ```

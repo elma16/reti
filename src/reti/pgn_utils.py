@@ -256,15 +256,15 @@ def _repo_root() -> Path:
 
 def _native_binary_name() -> str:
     if os.name == "nt":
-        return "reti-fast-pgn-repair.exe"
-    return "reti-fast-pgn-repair"
+        return "reti-pgn-utils.exe"
+    return "reti-pgn-utils"
 
 
-def find_fast_repair_binary() -> Path | None:
-    if os.environ.get("RETI_FAST_PGN_REPAIR_NO_NATIVE") == "1":
+def find_pgn_utils_binary() -> Path | None:
+    if os.environ.get("RETI_PGN_UTILS_NO_NATIVE") == "1":
         return None
 
-    explicit = os.environ.get("RETI_FAST_PGN_REPAIR_BIN")
+    explicit = os.environ.get("RETI_PGN_UTILS_BIN")
     if explicit:
         candidate = Path(explicit).expanduser()
         if candidate.is_file():
@@ -273,13 +273,13 @@ def find_fast_repair_binary() -> Path | None:
     repo_root = _repo_root()
     binary_name = _native_binary_name()
     for candidate in (
-        repo_root / "native" / "repair-pgn-fast" / "target" / "release" / binary_name,
-        repo_root / "native" / "repair-pgn-fast" / "target" / "debug" / binary_name,
+        repo_root / "native" / "pgn-utils" / "target" / "release" / binary_name,
+        repo_root / "native" / "pgn-utils" / "target" / "debug" / binary_name,
     ):
         if candidate.is_file():
             return candidate
 
-    for name in (binary_name, "repair-pgn-fast"):
+    for name in (binary_name, "pgn-utils"):
         on_path = shutil.which(name)
         if on_path:
             return Path(on_path)
@@ -369,7 +369,7 @@ def inspect_pgn_fast(source_path: Path) -> FastPgnRewriteStats:
     Scan a PGN and return the same stats rewrite_pgn_fast would produce, without
     writing an output file. Uses the Rust helper when available.
     """
-    binary_path = find_fast_repair_binary()
+    binary_path = find_pgn_utils_binary()
     if binary_path is not None:
         try:
             return _inspect_pgn_fast_native(source_path, binary_path)
@@ -398,7 +398,7 @@ def rewrite_pgn_fast(
     *,
     preserve_markup: bool = False,
 ) -> FastPgnRewriteStats:
-    binary_path = find_fast_repair_binary()
+    binary_path = find_pgn_utils_binary()
     if binary_path is not None:
         try:
             return _rewrite_pgn_fast_native(

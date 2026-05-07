@@ -201,7 +201,7 @@ python src/reti/analyse_cql.py \
 - If preflight reports that it is using a sanitized temporary copy, that copy
   exists only for the current run; the source PGN on disk is not modified.
 - If you want to normalize a problematic PGN once and then reuse that repaired
-  file for future analyses, run `src/reti/repair_pgn.py` first.
+  file for future analyses, run `src/reti/pgn_cli.py` first.
 - If you want to rerun the same batch and compare outputs, use a fresh output
   directory rather than sharing one between experiments.
 - Negative subprocess return codes mean CQL was terminated by a signal. For

@@ -63,7 +63,7 @@ class Cql6Backend(CqlBackend):
 
     Uses ``-i / -o`` for input/output and ``-threads N`` for thread count. The
     smoke-test variant uses the longer ``-input / -output`` spellings (matches
-    the historical repair_pgn.py path) and accepts ``-lineincrement``.
+    the historical pgn_cli.py path) and accepts ``-lineincrement``.
     """
 
     def build_run_command(

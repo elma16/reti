@@ -26,7 +26,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--python",
         default=sys.executable,
-        help="Python interpreter to use for invoking repair_pgn.py.",
+        help="Python interpreter to use for invoking pgn_cli.py.",
     )
     parser.add_argument(
         "--build-native",
@@ -55,7 +55,7 @@ def _tail_summary(output: str) -> str:
 
 
 def _build_native_helper(repo_root: Path) -> None:
-    manifest = repo_root / "native" / "repair-pgn-fast" / "Cargo.toml"
+    manifest = repo_root / "native" / "pgn-utils" / "Cargo.toml"
     subprocess.run(
         ["cargo", "build", "--release", "--manifest-path", str(manifest)],
         check=True,
@@ -70,14 +70,14 @@ def _benchmark_case(
     cql_binary: str | None,
     python_binary: str,
 ) -> tuple[float, subprocess.CompletedProcess[str]]:
-    with tempfile.TemporaryDirectory(prefix="repair_pgn_bench_") as tmpdir:
+    with tempfile.TemporaryDirectory(prefix="pgn_cli_bench_") as tmpdir:
         tmp_root = Path(tmpdir)
         working_copy = tmp_root / f"{source_backup.stem}.{mode}.pgn"
         shutil.copy2(source_backup, working_copy)
 
         command = [
             python_binary,
-            str(repo_root / "src" / "reti" / "repair_pgn.py"),
+            str(repo_root / "src" / "reti" / "pgn_cli.py"),
             "--pgn",
             str(working_copy),
             "--mode",

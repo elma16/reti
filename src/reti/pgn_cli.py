@@ -30,7 +30,7 @@ from reti.common.subprocess_helpers import (
     describe_returncode,
     resolve_executable,
 )
-from reti.fast_pgn_repair import FastPgnRewriteStats, rewrite_pgn_fast
+from reti.pgn_utils import FastPgnRewriteStats, rewrite_pgn_fast
 from tqdm import tqdm as tqdm_progress
 
 FAST_REPAIR_MODE = "fast"

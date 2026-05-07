@@ -88,6 +88,6 @@ python src/reti/export_cql_positions.py \
   --stockfish-bin /path/to/stockfish
 ```
 
-Do not run `repair_pgn.py` on the annotated PGNs before this step. The repair
+Do not run `pgn_cli.py` on the annotated PGNs before this step. The repair
 workflow is intentionally CQL-safe and removes comments, so it would also remove
 the `{CQL}` markers you want to export.

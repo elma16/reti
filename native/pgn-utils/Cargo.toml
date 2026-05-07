@@ -1,0 +1,21 @@
+[package]
+name = "reti-pgn-utils"
+version = "0.2.0"
+edition = "2021"
+
+[lib]
+name = "reti_pgn_utils"
+path = "src/lib.rs"
+
+[[bin]]
+name = "reti-pgn-utils"
+path = "src/main.rs"
+
+[dependencies]
+indicatif = "0.17"
+xxhash-rust = { version = "0.8", features = ["xxh3"] }
+shakmaty = "0.27"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1

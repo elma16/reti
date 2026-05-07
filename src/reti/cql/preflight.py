@@ -22,7 +22,7 @@ from reti.cql.backend import CqlBackend
 from reti.common.pgn_discovery import InputCollection, format_relative
 from reti.common.progress import format_progress_label, progress_write
 from reti.common.subprocess_helpers import describe_returncode
-from reti.fast_pgn_repair import (
+from reti.pgn_utils import (
     FastPgnRewriteStats,
     inspect_pgn_fast,
     rewrite_pgn_fast,
