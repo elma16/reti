@@ -93,3 +93,45 @@ ready for GitHub Pages or any other static host.
 - The Sankey reads the annotated PGN outputs directly, not `summary.csv`.
 - Rebuild `cql-files/FCE/table/` whenever you make changes to the broader
   `cql-files/FCE/` corpus and want the curated subset to stay in sync.
+
+## Compressed marker run
+
+If you want one annotated PGN per source PGN instead of one PGN per
+`(source PGN, ending)` pair, build the combined marker script:
+
+```bash
+python scripts/build_fce_combined_marker_cql.py --force
+```
+
+By default this writes `cql-files/FCE/combined/fce-table-markers.cql` with:
+
+- the 30 canonical FCE table rows
+- non-duplicate auxiliary sub-counts, such as no-pawn `8.1`/`8.2`/`10.2`
+  and connected-pawn `6.2 A2`
+- duplicate alias scripts omitted, so `8-1RNr` and `8-1RNrPp` do not both
+  mark the same position
+
+Run that single script over the PGN directory:
+
+```bash
+python src/reti/analyse_cql.py \
+  --pgn path/to/pgn_dir \
+  --cql-bin path/to/cql \
+  --scripts cql-files/FCE/combined/fce-table-markers.cql \
+  --jobs 1 \
+  -o output/fce-table-marked
+```
+
+Because `--scripts` is a single `.cql` file, the runner writes one output PGN
+per input PGN, under:
+
+```text
+output/fce-table-marked/<source-pgn-stem>/fce-table-markers.pgn
+```
+
+Matched positions are commented as `{<stem>}`, for example `{10-2Qr}`. This
+layout avoids storing the same source game once per ending file. It does not
+make overlapping endings exclusive; if two FCE branches match the same
+position, the PGN can contain both marker comments. Downstream counting should
+either count those marker comments directly or apply the FCE specificity order
+when an exclusive per-position label is required.

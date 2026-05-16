@@ -107,8 +107,11 @@ pub fn run_concat(opts: ConcatOptions) -> io::Result<ConcatStats> {
         games_written: 0,
         duplicates_removed: 0,
     };
-    let mut seen_hashes: Option<std::collections::HashSet<u64>> =
-        if opts.dedup { Some(Default::default()) } else { None };
+    let mut seen_hashes: Option<std::collections::HashSet<u64>> = if opts.dedup {
+        Some(Default::default())
+    } else {
+        None
+    };
 
     for path in &files {
         let file_size = fs::metadata(path)?.len();
@@ -286,8 +289,8 @@ fn write_game_normalized<W: Write>(bytes: &[u8], out: &mut W) -> io::Result<()> 
 }
 
 pub fn run_subcommand(args: &[OsString]) -> Result<(), String> {
-    let parsed =
-        crate::cli::parse(args, &["clean", "dedup"], &["output", "o"]).map_err(|e| e.to_string())?;
+    let parsed = crate::cli::parse(args, &["clean", "dedup"], &["output", "o"])
+        .map_err(|e| e.to_string())?;
     let output = parsed
         .get_kv("output")
         .or_else(|| parsed.get_kv("o"))

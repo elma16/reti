@@ -47,6 +47,21 @@ TABLE_TARGETS = [
     "10-7-1Qbrr",
 ]
 
+# Auxiliary scripts are useful for FCE parenthetical sub-counts, but they are
+# not part of the 30 canonical table rows. Keep them reproducible without
+# adding them to manifest.csv, which remains the canonical-row manifest.
+TABLE_AUXILIARY_TARGETS = [
+    "6-2-2RPPrConnected",
+    "8-1RNrNoPawns",
+    "8-1RNrPp",
+    "8-2RBrNoPawns",
+    "8-2RBrPp",
+    "10-2QrNoPawns",
+    "10-2QrPp",
+    "10-7-1QbrrNoPawns",
+    "10-7-1QbrrPp",
+]
+
 # Explicit source overrides for the curated table rows. Some rows map to
 # differently named scripts, and some table rows intentionally use the broader
 # inclusive script rather than the pawnless split.
@@ -64,6 +79,12 @@ SOURCE_OVERRIDES = {
     "10-7-1Qbrr": "10-7-1QbrrPp",
 }
 
+AUXILIARY_SOURCE_OVERRIDES = {
+    "8-1RNrNoPawns": "8-1RNr",
+    "8-2RBrNoPawns": "8-2RBr",
+    "10-2QrNoPawns": "10-2Qr",
+}
+
 
 @dataclass(frozen=True)
 class Resolution:
@@ -77,8 +98,13 @@ def normalize_name(value: str) -> str:
     return "".join(ch.lower() for ch in value if ch.isalnum())
 
 
-def resolve_source(target: str, available: dict[str, Path]) -> Resolution:
-    override = SOURCE_OVERRIDES.get(target)
+def resolve_source(
+    target: str,
+    available: dict[str, Path],
+    *,
+    overrides: dict[str, str] | None = None,
+) -> Resolution:
+    override = (overrides or {}).get(target)
     if override and override in available:
         return Resolution(target=target, source=override, mode="override", score=1.0)
 
@@ -132,13 +158,21 @@ def build_subset(source_dir: Path, output_dir: Path, dry_run: bool) -> list[Reso
     if not available:
         raise SystemExit(f"No .cql files found in {source_dir}")
 
-    resolutions = [resolve_source(target, available) for target in TABLE_TARGETS]
+    canonical_resolutions = [
+        resolve_source(target, available, overrides=SOURCE_OVERRIDES)
+        for target in TABLE_TARGETS
+    ]
+    auxiliary_resolutions = [
+        resolve_source(target, available, overrides=AUXILIARY_SOURCE_OVERRIDES)
+        for target in TABLE_AUXILIARY_TARGETS
+    ]
+    resolutions = canonical_resolutions + auxiliary_resolutions
 
     if dry_run:
         return resolutions
 
     output_dir.mkdir(parents=True, exist_ok=True)
-    target_names = set(TABLE_TARGETS)
+    target_names = set(TABLE_TARGETS) | set(TABLE_AUXILIARY_TARGETS)
     for stale_file in output_dir.glob("*.cql"):
         if stale_file.stem not in target_names:
             stale_file.unlink()
@@ -155,7 +189,24 @@ def build_subset(source_dir: Path, output_dir: Path, dry_run: bool) -> list[Reso
             fieldnames=["target", "source", "mode", "score"],
         )
         writer.writeheader()
-        for resolution in resolutions:
+        for resolution in canonical_resolutions:
+            writer.writerow(
+                {
+                    "target": resolution.target,
+                    "source": resolution.source,
+                    "mode": resolution.mode,
+                    "score": f"{resolution.score:.3f}",
+                }
+            )
+
+    auxiliary_manifest_path = output_dir / "auxiliary_manifest.csv"
+    with auxiliary_manifest_path.open("w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(
+            f,
+            fieldnames=["target", "source", "mode", "score"],
+        )
+        writer.writeheader()
+        for resolution in auxiliary_resolutions:
             writer.writerow(
                 {
                     "target": resolution.target,
@@ -202,8 +253,12 @@ def main() -> int:
         )
 
     if not args.dry_run:
-        print(f"\nWrote {len(resolutions)} curated table scripts to {args.output_dir}")
-        print(f"Manifest: {args.output_dir / 'manifest.csv'}")
+        print(
+            f"\nWrote {len(TABLE_TARGETS)} canonical and "
+            f"{len(TABLE_AUXILIARY_TARGETS)} auxiliary table scripts to {args.output_dir}"
+        )
+        print(f"Canonical manifest: {args.output_dir / 'manifest.csv'}")
+        print(f"Auxiliary manifest: {args.output_dir / 'auxiliary_manifest.csv'}")
 
     return 0
 

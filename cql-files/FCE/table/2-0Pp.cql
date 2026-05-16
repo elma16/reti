@@ -2,4 +2,4 @@
 
 cql()
 
-[Pp] >= 0 and [QqRrBbNn] == 0
+[Pp] >= 1 and [QqRrBbNn] == 0

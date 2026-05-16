@@ -2,3 +2,5 @@
 4k3/8/8/3p4/3P4/8/8/4K3 w - - 0 1
 # negative (single tweak, should not match)
 4k3/8/8/3p4/3P4/8/8/4K1N1 w - - 0 1
+# negative (bare kings are not pawn endings)
+4k3/8/8/8/8/8/8/4K3 w - - 0 1

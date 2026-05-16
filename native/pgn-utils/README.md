@@ -7,7 +7,7 @@ Python wrapper does not need to change.
 
 ## What it does
 
-The binary exposes four subcommands plus a backwards-compatible legacy form:
+The binary exposes subcommands plus a backwards-compatible legacy form:
 
 - `clean` — line-by-line lexical rewrite (the original behaviour). Strips
   BOM, replaces invalid UTF-8 with `?`, drops control characters other than
@@ -24,6 +24,9 @@ The binary exposes four subcommands plus a backwards-compatible legacy form:
 - `lint` — report (does **not** fix) structural, header-consistency, and
   move-legality issues. Move legality is checked by replaying SAN moves with
   the `shakmaty` engine. Exits with status 2 if any issues are found.
+- `source-totals` — stream source PGNs once, count `[Event ...]` game
+  headers, classify Lumbras buckets as `otb` / `online`, and write a stable
+  JSON denominator artifact for snapshot rebuilds.
 
 A progress bar is printed to stderr by default; pass `--no-progress` to
 silence it (it also disappears automatically when stderr is not a TTY).
@@ -54,6 +57,7 @@ The new subcommand form, for direct human use:
 | `reti-pgn-utils concat -o OUT [--clean] [--dedup] INPUTS...` | concatenate files / directories into one PGN |
 | `reti-pgn-utils dedup -o OUT INPUT` | drop duplicate games by movetext |
 | `reti-pgn-utils lint [--json] INPUT` | report issues (exit 2 on any) |
+| `reti-pgn-utils source-totals -o OUT INPUTS...` | count games per source PGN once |
 
 All three forms must print a single JSON object on stdout with these fields:
 
@@ -99,6 +103,7 @@ src/
   dedup.rs      streaming game dedup with xxh3-64 hashing
   lint.rs       structural / consistency / shakmaty legality checks
   pgn_split.rs  shared streaming game splitter and movetext normalizer
+  source_totals.rs  one-time source denominator JSON builder
 tests/cli.rs    end-to-end regression tests for legacy + new subcommands
 ```
 

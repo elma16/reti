@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import csv
 import unittest
 from pathlib import Path
 
@@ -33,22 +34,33 @@ class TestFceTableReference(unittest.TestCase):
 
         return rows
 
+    def _canonical_table_targets(self) -> list[str]:
+        manifest_path = self.repo_root / "cql-files" / "FCE" / "table" / "manifest.csv"
+        with manifest_path.open(newline="", encoding="utf-8") as handle:
+            return [row["target"] for row in csv.DictReader(handle)]
+
     def test_readme_row_count_matches_curated_fce_table(self) -> None:
         readme_rows = self._readme_table_rows()
         curated_table_dir = self.repo_root / "cql-files" / "FCE" / "table"
-        curated_cql_files = sorted(curated_table_dir.glob("*.cql"))
+        canonical_targets = self._canonical_table_targets()
 
         self.assertGreater(
             len(readme_rows), 0, "README FCE markdown table has no data rows."
         )
         self.assertGreater(
-            len(curated_cql_files), 0, "cql-files/FCE/table has no curated .cql files."
+            len(canonical_targets), 0, "cql-files/FCE/table manifest has no rows."
         )
         self.assertEqual(
             len(readme_rows),
-            len(curated_cql_files),
-            "README FCE markdown row count must match the number of curated FCE table scripts.",
+            len(canonical_targets),
+            "README FCE markdown row count must match the canonical FCE table manifest.",
         )
+        missing = [
+            target
+            for target in canonical_targets
+            if not (curated_table_dir / f"{target}.cql").exists()
+        ]
+        self.assertEqual(missing, [], "Canonical FCE table scripts are missing.")
 
 
 if __name__ == "__main__":

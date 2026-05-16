@@ -62,10 +62,7 @@ pub fn run_dedup(
 /// Read games from `reader`, write unique games to `writer`. Pulled out of
 /// `run_dedup` so the unit tests can exercise it without touching the
 /// filesystem.
-pub fn dedup_stream<R: io::BufRead, W: Write>(
-    reader: R,
-    writer: &mut W,
-) -> io::Result<DedupStats> {
+pub fn dedup_stream<R: io::BufRead, W: Write>(reader: R, writer: &mut W) -> io::Result<DedupStats> {
     let mut seen: HashSet<u64> = HashSet::new();
     let mut stats = DedupStats::default();
 
@@ -152,7 +149,8 @@ mod tests {
 
     #[test]
     fn dedup_normalizes_comments_and_variations() {
-        let pgn = b"[Event \"a\"]\n\n1. e4 {good} e5 1-0\n\n[Event \"b\"]\n\n1. e4 (1. d4) e5 1-0\n";
+        let pgn =
+            b"[Event \"a\"]\n\n1. e4 {good} e5 1-0\n\n[Event \"b\"]\n\n1. e4 (1. d4) e5 1-0\n";
         let mut out = Vec::new();
         let stats = dedup_stream(Cursor::new(pgn), &mut out).unwrap();
         // Both reduce to "e4 e5" -> duplicates.

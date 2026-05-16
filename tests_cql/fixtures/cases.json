@@ -106,6 +106,9 @@
     "fce-table-10-7-1Qbrr": {
       "fen": "FCE/table/10-7-1Qbrr.txt"
     },
+    "fce-table-10-7-1QbrrNoPawns": {
+      "fen": "FCE/table/10-7-1QbrrNoPawns.txt"
+    },
     "fce-table-10-7-1QbrrPp": {
       "fen": "FCE/table/10-7-1QbrrPp.txt"
     },
@@ -147,6 +150,9 @@
     },
     "fce-table-6-2-2RPPr": {
       "fen": "FCE/table/6-2-2RPPr.txt"
+    },
+    "fce-table-6-2-2RPPrConnected": {
+      "fen": "FCE/table/6-2-2RPPrConnected.txt"
     },
     "fce-table-6-3RRrr": {
       "fen": "FCE/table/6-3RRrr.txt"
@@ -485,9 +491,15 @@
     },
     {
       "cql": "cql-files/FCE/table/10-2Qr.cql",
+      "dataset": "fce-table-10-2QrPp",
+      "expected": 1,
+      "id": "FCE table 10-2Qr: pawns allowed +fen / -fen"
+    },
+    {
+      "cql": "cql-files/FCE/table/10-2QrNoPawns.cql",
       "dataset": "fce-table-10-2Qr",
       "expected": 1,
-      "id": "FCE table 10-2Qr: +fen / -fen"
+      "id": "FCE table 10-2QrNoPawns: +fen / -fen"
     },
     {
       "cql": "cql-files/FCE/table/10-2QrPp.cql",
@@ -521,9 +533,15 @@
     },
     {
       "cql": "cql-files/FCE/table/10-7-1Qbrr.cql",
-      "dataset": "fce-table-10-7-1Qbrr",
+      "dataset": "fce-table-10-7-1QbrrPp",
       "expected": 1,
-      "id": "FCE table 10-7-1Qbrr: +fen / -fen"
+      "id": "FCE table 10-7-1Qbrr: pawns allowed +fen / -fen"
+    },
+    {
+      "cql": "cql-files/FCE/table/10-7-1QbrrNoPawns.cql",
+      "dataset": "fce-table-10-7-1QbrrNoPawns",
+      "expected": 1,
+      "id": "FCE table 10-7-1QbrrNoPawns: +fen / -fen"
     },
     {
       "cql": "cql-files/FCE/table/10-7-1QbrrPp.cql",
@@ -552,7 +570,7 @@
     {
       "cql": "cql-files/FCE/table/3-1Np.cql",
       "dataset": "fce-table-3-1Np",
-      "expected": 1,
+      "expected": 2,
       "id": "FCE table 3-1Np: +fen / -fen"
     },
     {
@@ -564,7 +582,7 @@
     {
       "cql": "cql-files/FCE/table/4-1Bp.cql",
       "dataset": "fce-table-4-1Bp",
-      "expected": 1,
+      "expected": 2,
       "id": "FCE table 4-1Bp: +fen / -fen"
     },
     {
@@ -610,6 +628,12 @@
       "id": "FCE table 6-2-2RPPr: +fen / -fen"
     },
     {
+      "cql": "cql-files/FCE/table/6-2-2RPPrConnected.cql",
+      "dataset": "fce-table-6-2-2RPPrConnected",
+      "expected": 1,
+      "id": "FCE table 6-2-2RPPrConnected: +fen / -fen"
+    },
+    {
       "cql": "cql-files/FCE/table/6-3RRrr.cql",
       "dataset": "fce-table-6-3RRrr",
       "expected": 1,
@@ -629,9 +653,15 @@
     },
     {
       "cql": "cql-files/FCE/table/8-1RNr.cql",
+      "dataset": "fce-table-8-1RNrPp",
+      "expected": 1,
+      "id": "FCE table 8-1RNr: pawns allowed +fen / -fen"
+    },
+    {
+      "cql": "cql-files/FCE/table/8-1RNrNoPawns.cql",
       "dataset": "fce-table-8-1RNr",
       "expected": 1,
-      "id": "FCE table 8-1RNr: +fen / -fen"
+      "id": "FCE table 8-1RNrNoPawns: +fen / -fen"
     },
     {
       "cql": "cql-files/FCE/table/8-1RNrPp.cql",
@@ -641,9 +671,15 @@
     },
     {
       "cql": "cql-files/FCE/table/8-2RBr.cql",
+      "dataset": "fce-table-8-2RBrPp",
+      "expected": 1,
+      "id": "FCE table 8-2RBr: pawns allowed +fen / -fen"
+    },
+    {
+      "cql": "cql-files/FCE/table/8-2RBrNoPawns.cql",
       "dataset": "fce-table-8-2RBr",
       "expected": 1,
-      "id": "FCE table 8-2RBr: +fen / -fen"
+      "id": "FCE table 8-2RBrNoPawns: +fen / -fen"
     },
     {
       "cql": "cql-files/FCE/table/8-2RBrPp.cql",

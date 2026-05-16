@@ -325,7 +325,8 @@ mod tests {
 
     #[test]
     fn header_extraction() {
-        let pgn = b"[Event \"x\"]\n[White \"Alice\"]\n[Black \"Bob\"]\n[Result \"1-0\"]\n\n1. e4 1-0\n";
+        let pgn =
+            b"[Event \"x\"]\n[White \"Alice\"]\n[Black \"Bob\"]\n[Result \"1-0\"]\n\n1. e4 1-0\n";
         let games = split_all(pgn);
         assert_eq!(games[0].header("White").as_deref(), Some("Alice"));
         assert_eq!(games[0].header("Black").as_deref(), Some("Bob"));

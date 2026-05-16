@@ -3,5 +3,4 @@
 
 cql()
 
-flipcolor (B == 1 and p >= 1 and [QqRrbNnP] == 0)
-
+flipcolor (B == 1 and p >= 1 and [QqRrbNn] == 0)

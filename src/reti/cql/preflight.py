@@ -208,118 +208,129 @@ def preflight_pgn_files(
         smoke_script = runtime_root / "smoke_check.cql"
         smoke_script.write_text("cql() check\n", encoding="utf-8")
 
+    pgn_sizes = {
+        pgn_path: pgn_path.stat().st_size if pgn_path.exists() else 0
+        for pgn_path in pgn_inputs.files
+    }
+    total_bytes = sum(pgn_sizes.values())
     progress = tqdm_progress(
-        pgn_inputs.files,
-        total=len(pgn_inputs.files),
+        total=total_bytes,
         desc="PGN preflight",
-        unit="pgn",
+        unit="B",
+        unit_scale=True,
         dynamic_ncols=sys.stderr.isatty(),
         file=sys.stderr,
     )
-    for index, pgn_path in enumerate(progress, start=1):
-        relative_name = format_relative(pgn_path, pgn_inputs.root)
-        progress.set_postfix_str(format_progress_label(relative_name))
-        runtime_pgn_path = pgn_path
-        sanitized = False
+    try:
+        for index, pgn_path in enumerate(pgn_inputs.files, start=1):
+            relative_name = format_relative(pgn_path, pgn_inputs.root)
+            progress.set_postfix_str(format_progress_label(relative_name))
+            runtime_pgn_path = pgn_path
+            sanitized = False
 
-        try:
-            inspect_stats = inspect_pgn_fast(pgn_path)
-        except Exception as exc:
-            inspect_stats = None
-            progress_write(
-                f"Fast inspect failed for {relative_name}, falling back: {exc}"
-            )
+            try:
+                inspect_stats = inspect_pgn_fast(pgn_path)
+            except Exception as exc:
+                inspect_stats = None
+                progress_write(
+                    f"Fast inspect failed for {relative_name}, falling back: {exc}"
+                )
 
-        if inspect_stats is not None:
-            text_issues = issues_from_fast_stats(inspect_stats)
-            event_count = inspect_stats.games_written
-        else:
-            text_issues = inspect_pgn_text_compatibility(pgn_path)
-            event_count = count_games_in_pgn(pgn_path)
+            if inspect_stats is not None:
+                text_issues = issues_from_fast_stats(inspect_stats)
+                event_count = inspect_stats.games_written
+            else:
+                text_issues = inspect_pgn_text_compatibility(pgn_path)
+                event_count = count_games_in_pgn(pgn_path)
 
-        if text_issues:
-            runtime_pgn_path = sanitize_pgn_to_temp(
-                pgn_path,
-                pgn_inputs.root,
-                runtime_root / "sanitized-pgns",
-            )
-            sanitized = True
-            progress_write(
-                "Using sanitized temporary copy for "
-                f"{relative_name}: {'; '.join(text_issues)}"
-            )
+            if text_issues:
+                runtime_pgn_path = sanitize_pgn_to_temp(
+                    pgn_path,
+                    pgn_inputs.root,
+                    runtime_root / "sanitized-pgns",
+                )
+                sanitized = True
+                progress_write(
+                    "Using sanitized temporary copy for "
+                    f"{relative_name}: {'; '.join(text_issues)}"
+                )
 
-        if event_count == 0:
+            if event_count == 0:
+                results.append(
+                    PgnPreflightResult(
+                        pgn_path=pgn_path,
+                        runtime_pgn_path=runtime_pgn_path,
+                        success=False,
+                        sanitized=sanitized,
+                        message="no [Event] tags found; file does not look like an export PGN",
+                    )
+                )
+                progress_write(
+                    f"FAILED preflight: {relative_name}: "
+                    "no [Event] tags found; file does not look like an export PGN"
+                )
+                progress.update(pgn_sizes[pgn_path])
+                continue
+
+            if strict_pgn_parse:
+                parse_error = validate_pgn_with_python_parser(runtime_pgn_path)
+                if parse_error:
+                    results.append(
+                        PgnPreflightResult(
+                            pgn_path=pgn_path,
+                            runtime_pgn_path=runtime_pgn_path,
+                            success=False,
+                            sanitized=sanitized,
+                            message=parse_error,
+                        )
+                    )
+                    progress_write(f"FAILED preflight: {relative_name}: {parse_error}")
+                    progress.update(pgn_sizes[pgn_path])
+                    continue
+
+            if smoke_test_pgns:
+                assert smoke_script is not None
+                smoke_output = runtime_root / f"smoke-{index}.pgn"
+                returncode, stdout, stderr = smoke_test_pgn_with_cql(
+                    backend,
+                    runtime_pgn_path,
+                    smoke_script,
+                    smoke_output,
+                )
+                if returncode != 0:
+                    detail = describe_returncode(returncode)
+                    extra = first_nonempty_line(stderr) or first_nonempty_line(stdout)
+                    message = f"CQL smoke test failed ({detail})"
+                    if extra:
+                        message += f": {extra}"
+                    results.append(
+                        PgnPreflightResult(
+                            pgn_path=pgn_path,
+                            runtime_pgn_path=runtime_pgn_path,
+                            success=False,
+                            sanitized=sanitized,
+                            message=message,
+                        )
+                    )
+                    progress_write(f"FAILED preflight: {relative_name}: {message}")
+                    progress.update(pgn_sizes[pgn_path])
+                    continue
+
+            ok_message = f"OK ({event_count} game(s) by [Event] count)"
+            if sanitized:
+                ok_message += "; using sanitized temporary copy"
             results.append(
                 PgnPreflightResult(
                     pgn_path=pgn_path,
                     runtime_pgn_path=runtime_pgn_path,
-                    success=False,
+                    success=True,
                     sanitized=sanitized,
-                    message="no [Event] tags found; file does not look like an export PGN",
+                    message=ok_message,
                 )
             )
-            progress_write(
-                f"FAILED preflight: {relative_name}: "
-                "no [Event] tags found; file does not look like an export PGN"
-            )
-            continue
-
-        if strict_pgn_parse:
-            parse_error = validate_pgn_with_python_parser(runtime_pgn_path)
-            if parse_error:
-                results.append(
-                    PgnPreflightResult(
-                        pgn_path=pgn_path,
-                        runtime_pgn_path=runtime_pgn_path,
-                        success=False,
-                        sanitized=sanitized,
-                        message=parse_error,
-                    )
-                )
-                progress_write(f"FAILED preflight: {relative_name}: {parse_error}")
-                continue
-
-        if smoke_test_pgns:
-            assert smoke_script is not None
-            smoke_output = runtime_root / f"smoke-{index}.pgn"
-            returncode, stdout, stderr = smoke_test_pgn_with_cql(
-                backend,
-                runtime_pgn_path,
-                smoke_script,
-                smoke_output,
-            )
-            if returncode != 0:
-                detail = describe_returncode(returncode)
-                extra = first_nonempty_line(stderr) or first_nonempty_line(stdout)
-                message = f"CQL smoke test failed ({detail})"
-                if extra:
-                    message += f": {extra}"
-                results.append(
-                    PgnPreflightResult(
-                        pgn_path=pgn_path,
-                        runtime_pgn_path=runtime_pgn_path,
-                        success=False,
-                        sanitized=sanitized,
-                        message=message,
-                    )
-                )
-                progress_write(f"FAILED preflight: {relative_name}: {message}")
-                continue
-
-        ok_message = f"OK ({event_count} game(s) by [Event] count)"
-        if sanitized:
-            ok_message += "; using sanitized temporary copy"
-        results.append(
-            PgnPreflightResult(
-                pgn_path=pgn_path,
-                runtime_pgn_path=runtime_pgn_path,
-                success=True,
-                sanitized=sanitized,
-                message=ok_message,
-            )
-        )
-    progress.close()
+            progress.update(pgn_sizes[pgn_path])
+    finally:
+        progress.close()
 
     failures = [result for result in results if not result.success]
     if failures:

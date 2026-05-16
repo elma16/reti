@@ -38,6 +38,7 @@ _dummy_tqdm.write = lambda message: None
 sys.modules.setdefault("tqdm", types.SimpleNamespace(tqdm=_dummy_tqdm))
 
 import reti.analyse_cql as analyse_cql
+import reti.cql.preflight as preflight_module
 
 
 class TestAnalyseCqlPreflight(unittest.TestCase):
@@ -102,6 +103,58 @@ class TestAnalyseCqlPreflight(unittest.TestCase):
         self.assertEqual(len(results), 1)
         self.assertFalse(results[0].success)
         self.assertIn("no [Event] tags", results[0].message)
+
+    def test_preflight_progress_is_weighted_by_pgn_bytes(self):
+        class RecordingProgress:
+            def __init__(self, iterable=None, **kwargs):
+                self.iterable = iterable
+                self.kwargs = kwargs
+                self.updates: list[int] = []
+
+            def __iter__(self):
+                if self.iterable is None:
+                    return iter(())
+                return iter(self.iterable)
+
+            def update(self, value: int = 1) -> None:
+                self.updates.append(value)
+
+            def set_postfix_str(self, _: str) -> None:
+                return None
+
+            def close(self) -> None:
+                return None
+
+        progress_instances: list[RecordingProgress] = []
+
+        def recording_tqdm(iterable=None, **kwargs):
+            progress = RecordingProgress(iterable=iterable, **kwargs)
+            progress_instances.append(progress)
+            return progress
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            small = root / "small.pgn"
+            large = root / "large.pgn"
+            small.write_text('[Event "small"]\n\n*\n', encoding="utf-8")
+            large.write_text('[Event "large"]\n\n' + "1. e4 e5 " * 200 + "*\n", encoding="utf-8")
+            small_size = small.stat().st_size
+            large_size = large.stat().st_size
+            runtime_root = root / "runtime"
+
+            with mock.patch.object(preflight_module, "tqdm_progress", recording_tqdm):
+                results = analyse_cql.preflight_pgn_files(
+                    analyse_cql.InputCollection(root=root, files=[small, large]),
+                    Path("/fake/cql"),
+                    runtime_root,
+                )
+
+        self.assertTrue(all(result.success for result in results))
+        self.assertEqual(len(progress_instances), 1)
+        progress = progress_instances[0]
+        self.assertEqual(progress.kwargs["total"], small_size + large_size)
+        self.assertEqual(progress.kwargs["unit"], "B")
+        self.assertEqual(progress.updates, [small_size, large_size])
 
     @mock.patch("reti.analyse_cql.subprocess.run")
     def test_run_cql_job_uses_explicit_cql_threads(self, run_mock):

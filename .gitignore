@@ -14,6 +14,7 @@ cql-bin/
 src/reti.egg-info/
 build/
 native/**/target/
+reti-site/target/
 data/
 tests_cql/.generated/
 
@@ -35,3 +36,4 @@ cql-files/*
 !cql-files/silly/**/*.cql
 !cql-files/100endings/**/*.cql
 !cql-files/FCE/table/manifest.csv
+!cql-files/FCE/table/auxiliary_manifest.csv

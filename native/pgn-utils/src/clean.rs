@@ -471,15 +471,9 @@ pub fn run_clean(
 /// Subcommand entry: parses subcommand-specific args off the supplied list.
 ///
 /// Returns the path to write the output to (Some) or None if `--inspect`.
-pub fn run_subcommand(
-    args: &[std::ffi::OsString],
-) -> Result<(), String> {
-    let parsed = crate::cli::parse(
-        args,
-        &["preserve-markup", "inspect"],
-        &["input", "output"],
-    )
-    .map_err(|e| e.to_string())?;
+pub fn run_subcommand(args: &[std::ffi::OsString]) -> Result<(), String> {
+    let parsed = crate::cli::parse(args, &["preserve-markup", "inspect"], &["input", "output"])
+        .map_err(|e| e.to_string())?;
 
     let preserve = parsed.has_flag("preserve-markup");
     let inspect = parsed.has_flag("inspect");

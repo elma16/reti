@@ -15,9 +15,7 @@ use std::fs::{self, File};
 use std::io::{self, BufRead, BufReader, Write};
 use std::path::{Path, PathBuf};
 
-use shakmaty::{
-    fen::Fen, san::SanPlus, CastlingMode, Chess, EnPassantMode, Position,
-};
+use shakmaty::{fen::Fen, san::SanPlus, CastlingMode, Chess, EnPassantMode, Position};
 
 use crate::pgn_split::{normalize_movetext, Game, GameSplitter};
 use crate::progress::ProgressReporter;
@@ -95,11 +93,7 @@ fn escape_json_string(s: &str) -> String {
     out
 }
 
-pub fn run_lint(
-    input_path: &Path,
-    json: bool,
-    show_progress: bool,
-) -> io::Result<LintReport> {
+pub fn run_lint(input_path: &Path, json: bool, show_progress: bool) -> io::Result<LintReport> {
     let total_bytes = fs::metadata(input_path)?.len();
     let progress = ProgressReporter::bytes(total_bytes, "lint", show_progress);
 
@@ -143,7 +137,10 @@ fn check_game(idx: usize, game: &Game, issues: &mut Vec<LintIssue>) {
     // 1. Seven Tag Roster presence.
     for tag in STR_TAGS {
         if game.header(tag).is_none() {
-            push("missing-tag", format!("missing required header [{tag} ...]"));
+            push(
+                "missing-tag",
+                format!("missing required header [{tag} ...]"),
+            );
         }
     }
 
@@ -380,11 +377,11 @@ fn check_move_legality(game: &Game, normalized: &[u8]) -> Option<String> {
                 return Some(format!(
                     "ply {} (\"{tok}\"): not a legal move in position {}",
                     i + 1,
-                    Fen(pos.into_setup(EnPassantMode::Legal))
+                    Fen::from_position(&pos, EnPassantMode::Legal)
                 ))
             }
         };
-        pos = match pos.play(&mv) {
+        pos = match pos.play(mv) {
             Ok(p) => p,
             Err(_) => {
                 return Some(format!(
@@ -445,7 +442,11 @@ mod tests {
     fn passes_a_clean_game() {
         let pgn = b"[Event \"x\"]\n[Site \"x\"]\n[Date \"2024.01.01\"]\n[Round \"1\"]\n[White \"a\"]\n[Black \"b\"]\n[Result \"1-0\"]\n\n1. e4 e5 2. Nf3 Nc6 1-0\n";
         let report = lint(pgn);
-        assert!(report.issues.is_empty(), "unexpected issues: {:?}", report.issues);
+        assert!(
+            report.issues.is_empty(),
+            "unexpected issues: {:?}",
+            report.issues
+        );
     }
 
     #[test]

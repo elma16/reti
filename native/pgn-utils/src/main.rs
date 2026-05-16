@@ -18,7 +18,9 @@ use std::env;
 use std::ffi::OsString;
 use std::process::ExitCode;
 
-use reti_pgn_utils::{clean, concat, dedup, lint};
+use reti_pgn_utils::{
+    clean, concat, dedup, fce_combined_markers, fce_markers, fce_syzygy, lint, source_totals,
+};
 
 const USAGE: &str = "\
 usage: reti-pgn-utils <SUBCOMMAND> [options]
@@ -29,7 +31,17 @@ subcommands:
   clean   rewrite a PGN file (strips markup, normalizes whitespace, etc.)
   concat  concatenate one or more PGN files / directories into one
   dedup   drop duplicate games by normalized movetext
+  fce-combined-markers
+          export facts from combined FCE {stem}-marked PGNs
+  fce-combined-samples
+          sample first-marker board examples from combined FCE PGNs
+  fce-markers
+          export {CQL}-marked positions from FCE output PGNs as JSONL
+  fce-syzygy-eval
+          evaluate pending FCE SQLite rows with Syzygy WDL tables
   lint    report (does not fix) structural / consistency / legality issues
+  source-totals
+          count source PGN games and write reusable denominator JSON
 
 global flags (any subcommand):
   --no-progress   disable the stderr progress bar
@@ -52,7 +64,14 @@ fn dispatch(args: &[OsString]) -> Result<i32, String> {
         Some("clean") => clean::run_subcommand(&args[1..]).map(|_| 0),
         Some("concat") => concat::run_subcommand(&args[1..]).map(|_| 0),
         Some("dedup") => dedup::run_subcommand(&args[1..]).map(|_| 0),
+        Some("fce-combined-markers") => fce_combined_markers::run_subcommand(&args[1..]).map(|_| 0),
+        Some("fce-combined-samples") => {
+            fce_combined_markers::run_samples_subcommand(&args[1..]).map(|_| 0)
+        }
+        Some("fce-markers") => fce_markers::run_subcommand(&args[1..]).map(|_| 0),
+        Some("fce-syzygy-eval") => fce_syzygy::run_subcommand(&args[1..]).map(|_| 0),
         Some("lint") => lint::run_subcommand(&args[1..]),
+        Some("source-totals") => source_totals::run_subcommand(&args[1..]).map(|_| 0),
         Some("--help") | Some("-h") | Some("help") => {
             println!("{USAGE}");
             Ok(0)

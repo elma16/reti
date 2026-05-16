@@ -1,0 +1,10 @@
+target,source,mode,score
+6-2-2RPPrConnected,6-2-2RPPrConnected,exact,1.000
+8-1RNrNoPawns,8-1RNr,override,1.000
+8-1RNrPp,8-1RNrPp,exact,1.000
+8-2RBrNoPawns,8-2RBr,override,1.000
+8-2RBrPp,8-2RBrPp,exact,1.000
+10-2QrNoPawns,10-2Qr,override,1.000
+10-2QrPp,10-2QrPp,exact,1.000
+10-7-1QbrrNoPawns,10-7-1QbrrNoPawns,exact,1.000
+10-7-1QbrrPp,10-7-1QbrrPp,exact,1.000
