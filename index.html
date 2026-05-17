@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fundamental Chess Endings in Lumbra's Gigabase</title>
+  <script>
+    try {
+      const theme = localStorage.getItem("fce-theme");
+      if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme;
+    } catch (error) {}
+  </script>
+  <link rel="stylesheet" href="fce.css">
+</head>
+<body>
+<main>
+  <header class="page-head">
+    <div class="header-main">
+      <div>
+        <h1>Reproducing the <cite>Fundamental Chess Endings</cite> Statistics Table using FOSS</h1>
+        <p class="byline">Date: 2026-05-16 | Author: Elliott Macneil</p>
+      </div>
+      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle light and dark mode">
+        <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.8 6.8 0 0 0 9.8 9.8z"></path></svg>
+        <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>
+      </button>
+    </div>
+  </header>
+  <!-- FCE_INTRO_START -->
+  <section class="article-intro" aria-labelledby="intro-title">
+    <h2 id="intro-title">Introduction</h2>
+    <p>In Karsten Müller and Frank Lamprecht's classic work <cite>Fundamental Chess Endings</cite>, they give a table showing how often each ending from selected chapters occurs in practical games.<sup><a href="#ref-fce">1</a></sup> A simplified version of this table is available on Wikipedia.<sup><a href="#ref-wikipedia">2</a></sup> To produce the original table in 2001, Müller and Lamprecht used ChessBase and that year's Mega Database, containing about 1.7 million games. Later on in the book, they used analysis engines Fritz 6 and Nimzo 8, with five-piece tablebases for positions that were already solved. Much of that software stack was proprietary.</p>
+  </section>
+  <section class="article-section prose-section" aria-labelledby="motivation-title">
+    <h2 id="motivation-title">Motivation</h2>
+    <p>The chess software landscape looks very different in 2026. At time of writing, Stockfish 18 is the leading free and open-source chess engine,<sup><a href="#ref-stockfish">3</a></sup> and the majority of the top engines are also open source.<sup><a href="#ref-ccrl">4</a></sup> Large collections of games are also easier to obtain through aggregators such as Lumbra's Gigabase.<sup><a href="#ref-lumbra">5</a></sup> Five-piece tablebases are still useful, but complete seven-piece tablebases are now standard, though running one locally would require significant computational resources.</p>
+    <p>I wanted to see how far the original Müller-Lamprecht analysis could be reproduced and extended using FOSS tools.</p>
+    <p>For copyright reasons I am not reproducing the original table here in full. The public Wikipedia summary is linked for context, and this page focuses on my recomputed Gigabase statistics.</p>
+  </section>
+  <section class="article-section prose-section" aria-labelledby="methodology-title">
+    <h2 id="methodology-title">Methodology</h2>
+    <p>I downloaded roughly 17 million games from Lumbra's Gigabase: about 10 million over-the-board (OTB) games and about 7 million high-level online games. This is roughly an order of magnitude larger than the database used for the original table. The OTB and Online labels follow the Lumbra source buckets in the downloaded PGNs; I do not apply an additional rating filter in this page.</p>
+    <p>The next problem is locating and categorising the endings. This project uses Chess Query Language 6.1, originally developed by Costeff and Stiller,<sup><a href="#ref-cql">6</a></sup> further enhanced with Gamble's CQLi 1.0.6 implementation.<sup><a href="#ref-cqli">7</a></sup> The CQL scripts, preprocessing code, and static-site renderer are available in the accompanying GitHub repository.<sup><a href="#ref-reti">8</a></sup> CQL is a powerful language for filtering chess positions; the filters used here are deliberately simple queries. In this page, a marker is the comment inserted into an annotated PGN when CQL finds a position matching one of the FCE ending categories. A first-marker position is the first such position for a given game and ending.</p>
+    <p>I was also interested in how often tablebase evaluations line up with the final result of the game. For that reason, every qualifying first-marker position with five pieces or fewer is evaluated with local Syzygy WDL 3-4-5 tablebase files,<sup><a href="#ref-syzygy">9</a></sup> probed by Rust code using shakmaty and shakmaty-syzygy.<sup><a href="#ref-shakmaty">10</a></sup> Many FCE rows contain more than five pieces at the first marker, so the tablebase columns are intentionally blank when no five-piece-or-fewer first-marker positions qualify. Some example games are provided for context, and clicking on the position takes you to Lichess analysis, so you can analyse/play with an engine if you wish.<sup><a href="#ref-lichess">11</a></sup></p>
+  </section>
+    <!-- FCE_INTRO_END -->
+  <section class="article-section table-section" aria-labelledby="table-title">
+    <h2 id="table-title">Table</h2>
+    <!-- FCE_TABLE_SUMMARY_START -->
+        <p>The table below is interactive. Changing the corpus or minimum half-move setting updates the incidence counts, percentages, tablebase summaries, and sampled examples.</p>
+    <ul class="section-summary">
+          <li><strong>Games</strong> counts qualifying ending incidences: one game can count once for each ending.</li>
+          <li><strong>Corpus %</strong> divides that row by all games in the selected corpus; <strong>matched share %</strong> divides it by all counted ending incidences.</li>
+          <li><strong>TB WDL</strong> uses Syzygy WDL for qualifying first-marker positions with five pieces or fewer.</li>
+          <li><strong>Actual result</strong> is scored from the named material side, not from White or Black.</li>
+        </ul>
+      <!-- FCE_TABLE_SUMMARY_END -->
+    <div class="controls">
+      <div class="control-group"><strong>Corpus</strong> <span class="seg" id="view-controls"></span></div>
+      <div class="control-group"><strong>Minimum half-moves</strong> <span class="seg" id="threshold-controls"></span></div>
+    </div>
+    <div class="metrics" id="metrics"></div>
+    <div class="table-wrap">
+      <table id="ending-table">
+        <thead></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- FCE_RESULTS_START -->
+  <section class="article-section prose-section" aria-labelledby="results-title">
+    <h2 id="results-title">Results and Discussion</h2>
+    <p>There are several interesting features. The broad agreement of my statistics with Müller and Lamprecht is very surprising. Some of these numbers might make sense because of relative "order" one ending flows into another (explored a bit later on in the transition section), but this seems to suggest a rough underlying distribution to high-level chess games.</p>
+    <p>My first hypothesis is that this distribution might not hold if broad rating categories are considered. Perhaps it might be more random? My second hypothesis is that the choice of opening somewhat influences the distribution of the ending. Depending on which ending is chosen, certain pieces are more likely to be exchanged, which increases the likelihood of a complementary ending occurring. These are just thoughts, and I've not explored them much since.</p>
+    <p>Considering the table again, some statistics are interesting. For example, the row "8.2a Rook + Bishop vs Rook without pawns" can show a higher practical win rate than the tablebase result alone would suggest, which is plausible because this ending is easy for humans to mishandle. What I was not expecting is how huge the gap between tablebase and reality is! On the other hand, I was also surprised by the practical win rate for king, bishop and knight versus king: it is theoretically won, but still non-trivial to execute over the board. Switching the corpus from OTB (generally longer time controls) to online (generally shorter time controls), we see a drop in conversion rate, which is expected.</p>
+  </section>
+    <!-- FCE_RESULTS_END -->
+
+  <section class="article-section transition-section" aria-labelledby="transition-title">
+    <h2 id="transition-title">Transitions</h2>
+    <!-- FCE_TRANSITION_COPY_START -->
+        <p>An extension to the original analysis is counting consecutive first-marker transitions between endings, rather than estimating literal transition probabilities. For each game, the qualifying endings are ordered by the first ply at which their qualifying run appears; the Sankey diagram counts adjacent pairs in that sequence. This makes it a descriptive view of observed co-occurrence and order, not a causal model.</p>
+      <!-- FCE_TRANSITION_COPY_END -->
+    <div class="controls sankey-controls">
+      <div class="control-group"><strong>Corpus</strong> <span class="seg" id="sankey-view-controls"></span></div>
+      <div class="control-group"><strong>Minimum half-moves</strong> <span class="seg" id="sankey-threshold-controls"></span></div>
+      <div class="control-group"><strong>Links shown</strong> <span class="seg" id="sankey-limit-controls"></span></div>
+    </div>
+    <div class="metrics" id="sankey-metrics"></div>
+    <section class="sankey-panel" aria-labelledby="sankey-title">
+      <div class="sankey-panel-head">
+        <div>
+          <h3 id="sankey-title">Top Consecutive Transitions</h3>
+          <p id="sankey-subtitle"></p>
+        </div>
+      </div>
+      <div class="sankey-wrap">
+        <svg id="sankey-svg" class="sankey-svg" role="img" aria-labelledby="transition-title sankey-subtitle"></svg>
+      </div>
+    </section>
+  </section>
+
+  <!-- FCE_CONCLUSION_START -->
+  <section class="article-section prose-section" aria-labelledby="conclusion-title">
+    <h2 id="conclusion-title">Conclusion</h2>
+    <p>The fact that this project was possible at all makes me happy. In the process of writing this down, further ideas emerged. I would be happy to hear any of yours if this was of interest to you.</p>
+  </section>
+    <!-- FCE_CONCLUSION_END -->
+
+  <!-- FCE_REFERENCES_START -->
+  <section class="references-section" aria-labelledby="references-title">
+    <h2 id="references-title">References</h2>
+    <ol class="references" aria-label="References">
+      <li id="ref-fce">Karsten Müller and Frank Lamprecht. <a href="https://books.google.co.uk/books/about/Fundamental_Chess_Endings.html?id=HfwEAAAACAAJ&amp;redir_esc=y" target="_blank" rel="noopener noreferrer"><cite>Fundamental Chess Endings</cite></a>. Gambit, 2001.</li>
+      <li id="ref-wikipedia">Wikipedia. <a href="https://en.wikipedia.org/wiki/Chess_endgame#Frequency_table" target="_blank" rel="noopener noreferrer">"Chess endgame", frequency table</a>.</li>
+      <li id="ref-stockfish">The Stockfish team. <a href="https://stockfishchess.org/blog/2026/stockfish-18/" target="_blank" rel="noopener noreferrer">Stockfish 18</a>. Free and open-source chess engine release page.</li>
+      <li id="ref-ccrl">Computer Chess Rating Lists. <a href="https://computerchess.org.uk/4040/rating_list_all.html" target="_blank" rel="noopener noreferrer">CCRL 40/15 rating list, all engines</a>. Used as a contemporary engine-strength reference.</li>
+      <li id="ref-lumbra">Lumbra's Gigabase. <a href="https://lumbrasgigabase.com/en/" target="_blank" rel="noopener noreferrer">Free chess game database for Scid and PGN</a>. PGN export used as the game corpus.</li>
+      <li id="ref-cql">Gady Costeff and Lewis Stiller. <a href="https://www.gadycosteff.com/cql-6-1/" target="_blank" rel="noopener noreferrer">Chess Query Language 6.1 documentation</a>.</li>
+      <li id="ref-cqli">Robert Gamble. <a href="https://cql64.com/" target="_blank" rel="noopener noreferrer">CQLi</a>. Version 1.0.6 used for the combined marker run.</li>
+      <li id="ref-reti">Elliott Macneil. <a href="https://github.com/elma16/reti" target="_blank" rel="noopener noreferrer">Reti project source repository</a>. CQL scripts, Rust preprocessing code, and static-site renderer.</li>
+      <li id="ref-syzygy">Ronald de Man. <a href="https://www.chessprogramming.org/Syzygy_Bases" target="_blank" rel="noopener noreferrer">Syzygy endgame tablebases</a>. Local 3-4-5-piece WDL files used for tablebase outcomes.</li>
+      <li id="ref-shakmaty">Niklas Fiekas. <a href="https://github.com/niklasf/shakmaty" target="_blank" rel="noopener noreferrer">shakmaty</a> 0.28 and <a href="https://github.com/niklasf/shakmaty-syzygy" target="_blank" rel="noopener noreferrer">shakmaty-syzygy</a> 0.26. Rust crates used for move replay, FEN handling, and Syzygy probing.</li>
+      <li id="ref-lichess">Lichess. <a href="https://lichess.org/analysis" target="_blank" rel="noopener noreferrer">Analysis board</a> and <a href="https://lichess.org/source" target="_blank" rel="noopener noreferrer">open-source project information</a>. Used for outbound position-analysis links.</li>
+    </ol>
+  </section>
+    <!-- FCE_REFERENCES_END -->
+</main>
+<script src="snapshot.js"></script>
+<script src="sampled_examples.js"></script>
+<script src="fce-app.js"></script>
+<script src="sankey.js"></script>
+<script src="fce-sankey.js"></script>
+</body>
+</html>
