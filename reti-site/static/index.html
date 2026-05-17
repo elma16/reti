@@ -40,17 +40,45 @@
     <p>I am not reproducing the original published table in full here. The public Wikipedia summary is linked for context, and the dashboard focuses on my recomputed Gigabase statistics. The broad agreement with Müller and Lamprecht is interesting in itself. One hypothesis is that opening choice influences which pieces are exchanged, which in turn changes the distribution of endings that arise; that remains a useful direction for later analysis, but it is not part of this published dashboard.</p>
     <p>Clicking on an ending expands additional statistics and sampled games. At most 32 games are sampled for each selected corpus, threshold, and ending; if fewer qualify, all available games are shown. Clicking on a board opens the position on a Lichess analysis board, so you can inspect it with current engines and tablebases. The fact that this is now possible with open tools and public data is the main point of the project.</p>
   </section>
-  <div class="controls">
-    <div class="control-group"><strong>Corpus</strong> <span class="seg" id="view-controls"></span></div>
-    <div class="control-group"><strong>Minimum half-moves</strong> <span class="seg" id="threshold-controls"></span></div>
-  </div>
-  <div class="metrics" id="metrics"></div>
-  <div class="table-wrap">
-    <table id="ending-table">
-      <thead></thead>
-      <tbody></tbody>
-    </table>
-  </div>
+  <section class="article-section table-section" aria-labelledby="table-title">
+    <h2 id="table-title">Ending Incidence and Outcomes</h2>
+    <p>The main table gives the incidence of each FCE ending under the selected corpus and persistence threshold. The tablebase and practical result columns use the same qualifying game-ending set, so changing either control changes both incidence and outcome summaries.</p>
+    <div class="controls">
+      <div class="control-group"><strong>Corpus</strong> <span class="seg" id="view-controls"></span></div>
+      <div class="control-group"><strong>Minimum half-moves</strong> <span class="seg" id="threshold-controls"></span></div>
+    </div>
+    <div class="metrics" id="metrics"></div>
+    <div class="table-wrap">
+      <table id="ending-table">
+        <thead></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="article-section transition-section" aria-labelledby="transition-title">
+    <h2 id="transition-title">Consecutive Ending Transitions</h2>
+    <p>This diagram uses the same precomputed first-run facts as the table, but asks a different question: when a game qualifies for several FCE endings, which ending first appears immediately before another?</p>
+    <div class="controls sankey-controls">
+      <div class="control-group"><strong>Corpus</strong> <span class="seg" id="sankey-view-controls"></span></div>
+      <div class="control-group"><strong>Minimum half-moves</strong> <span class="seg" id="sankey-threshold-controls"></span></div>
+      <div class="control-group"><strong>Links shown</strong> <span class="seg" id="sankey-limit-controls"></span></div>
+    </div>
+    <div class="metrics" id="sankey-metrics"></div>
+    <section class="sankey-panel" aria-labelledby="sankey-title">
+      <div class="sankey-panel-head">
+        <div>
+          <h3 id="sankey-title">Top Consecutive Transitions</h3>
+          <p id="sankey-subtitle"></p>
+        </div>
+      </div>
+      <div class="sankey-wrap">
+        <svg id="sankey-svg" class="sankey-svg" role="img" aria-labelledby="transition-title sankey-subtitle"></svg>
+      </div>
+    </section>
+    <p class="section-note"><a href="sankey.html">Open the transition diagram on its own page</a>.</p>
+  </section>
+
   <section class="references-section" aria-labelledby="references-title">
     <h2 id="references-title">References</h2>
     <ol class="references" aria-label="References">
@@ -69,5 +97,7 @@
 <script src="snapshot.js"></script>
 <script src="sampled_examples.js"></script>
 <script src="fce-app.js"></script>
+<script src="sankey.js"></script>
+<script src="fce-sankey.js"></script>
 </body>
 </html>

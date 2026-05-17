@@ -1,5 +1,9 @@
+(() => {
 const sankeyData = window.FCE_SANKEY;
-if (!sankeyData) { throw new Error('FCE Sankey data was not loaded.'); }
+if (!sankeyData) {
+  console.warn('FCE Sankey data was not loaded.');
+  return;
+}
 
 let activeView = sankeyData.controls.defaultView || 'all';
 let activeThreshold = sankeyData.controls.defaultThreshold || '1';
@@ -25,12 +29,16 @@ function updateThemeToggle() {
   button.dataset.activeTheme = theme;
   button.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
 }
-document.getElementById('theme-toggle')?.addEventListener('click', () => {
-  const next = activeTheme() === 'dark' ? 'light' : 'dark';
-  document.documentElement.dataset.theme = next;
-  try { localStorage.setItem('fce-theme', next); } catch (error) {}
-  updateThemeToggle();
-});
+const themeButton = document.getElementById('theme-toggle');
+if (themeButton && themeButton.dataset.fceThemeBound !== '1') {
+  themeButton.dataset.fceThemeBound = '1';
+  themeButton.addEventListener('click', () => {
+    const next = activeTheme() === 'dark' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem('fce-theme', next); } catch (error) {}
+    updateThemeToggle();
+  });
+}
 updateThemeToggle();
 
 function currentThresholdPayload() {
@@ -263,3 +271,4 @@ window.addEventListener('resize', () => {
   window.clearTimeout(window.__fceSankeyResize);
   window.__fceSankeyResize = window.setTimeout(drawSankey, 120);
 });
+})();

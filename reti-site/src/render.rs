@@ -220,6 +220,8 @@ mod tests {
         assert!(html.contains("<script src=\"snapshot.js\"></script>"));
         assert!(html.contains("<script src=\"sampled_examples.js\"></script>"));
         assert!(html.contains("<script src=\"fce-app.js\"></script>"));
+        assert!(html.contains("<script src=\"sankey.js\"></script>"));
+        assert!(html.contains("<script src=\"fce-sankey.js\"></script>"));
         assert!(!html.contains("id=\"snapshot-data\""));
         assert!(!html.contains("<style>"));
         assert!(!html.contains("window.FCE_SNAPSHOT="));
@@ -257,6 +259,7 @@ mod tests {
         assert!(app.contains("const sampleManifest = window.FCE_SAMPLED_EXAMPLES_MANIFEST"));
         assert!(app.contains("function requestSampleLoad(stem)"));
         assert!(app.contains("document.createElement('script')"));
+        assert!(app.contains("themeButton.dataset.fceThemeBound = '1';"));
         assert!(!app.contains("document.getElementById('snapshot-data')"));
         assert!(!app.contains("const sampledExamples = window.FCE_SAMPLED_EXAMPLES"));
     }
@@ -329,6 +332,9 @@ mod tests {
         let html = asset("sankey.html");
         let css = asset("fce.css");
         let app = asset("fce-sankey.js");
+        assert!(app.starts_with("(() => {"));
+        assert!(app.contains("console.warn('FCE Sankey data was not loaded.');"));
+        assert!(app.contains("themeButton.dataset.fceThemeBound = '1';"));
         assert!(app.contains("const width = 1480;"));
         assert!(app.contains("const labelGutter = 390;"));
         assert!(app.contains("pctText(Number(link.count || 0), totalTransitions)"));
@@ -356,10 +362,13 @@ mod tests {
         assert!(html.contains("Date: 2026-05-16 | Author: Elliott Macneil"));
         assert!(!html.contains("Fundamental Chess Endings snapshot"));
         assert!(html.contains("Methodology and Scope"));
+        assert!(html.contains("Ending Incidence and Outcomes"));
+        assert!(html.contains("Consecutive Ending Transitions"));
         assert!(html.contains("current build does not run Stockfish evaluations"));
         assert!(html.contains("<section class=\"references-section\""));
         assert!(html.contains("<h2 id=\"references-title\">References</h2>"));
         assert!(html.find("<div class=\"table-wrap\">") < html.find("<section class=\"references-section\""));
+        assert!(html.find("id=\"transition-title\"") < html.find("<section class=\"references-section\""));
         assert!(html.contains("id=\"ref-fce\""));
         assert!(html.contains("id=\"ref-reti\""));
         assert!(

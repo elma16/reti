@@ -39,12 +39,16 @@ function updateThemeToggle() {
   button.dataset.activeTheme = theme;
   button.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
 }
-document.getElementById('theme-toggle')?.addEventListener('click', () => {
-  const next = activeTheme() === 'dark' ? 'light' : 'dark';
-  document.documentElement.dataset.theme = next;
-  try { localStorage.setItem('fce-theme', next); } catch (error) {}
-  updateThemeToggle();
-});
+const themeButton = document.getElementById('theme-toggle');
+if (themeButton && themeButton.dataset.fceThemeBound !== '1') {
+  themeButton.dataset.fceThemeBound = '1';
+  themeButton.addEventListener('click', () => {
+    const next = activeTheme() === 'dark' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem('fce-theme', next); } catch (error) {}
+    updateThemeToggle();
+  });
+}
 updateThemeToggle();
 function outcomeBar(payload, totalKey='totalPositions') {
   const win = Number(payload?.sideWins || 0);
