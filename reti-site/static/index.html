@@ -17,9 +17,8 @@
   <header class="page-head">
     <div class="header-main">
       <div>
-        <p class="eyebrow">Fundamental Chess Endings snapshot</p>
         <h1>Reproducing the <cite>Fundamental Chess Endings</cite> Statistics Table using FOSS</h1>
-        <p class="byline">Elliott Macneil · 2026-05-16</p>
+        <p class="byline">Date: 2026-05-16 | Author: Elliott Macneil</p>
         <nav class="page-nav" aria-label="Site views">
           <a class="active" href="index.html">Statistics table</a>
           <a href="sankey.html">Ending transitions</a>
@@ -40,17 +39,6 @@
     <p>I was also interested in how often tablebase evaluations line up with the final result of the game. For that reason, every qualifying first marker position with five pieces or fewer is evaluated with Syzygy WDL. The current build does not run Stockfish evaluations: the engine comparison is left to Lichess analysis when you click through to a position. For each game-ending pair, the tablebase statistics use the first matching position, not every matching position in the game. For example, the row "8.2a Rook + Bishop vs Rook without pawns" can show a higher practical win rate than the tablebase result alone would suggest, which is plausible because this ending is easy for humans to mishandle. I was also surprised by the practical win rate for bishop and knight versus king: it is theoretically won, but still non-trivial over the board. Switching the corpus from OTB to Online gives a quick way to compare longer and shorter practical time-control environments.</p>
     <p>I am not reproducing the original published table in full here. The public Wikipedia summary is linked for context, and the dashboard focuses on my recomputed Gigabase statistics. The broad agreement with Müller and Lamprecht is interesting in itself. One hypothesis is that opening choice influences which pieces are exchanged, which in turn changes the distribution of endings that arise; that remains a useful direction for later analysis, but it is not part of this published dashboard.</p>
     <p>Clicking on an ending expands additional statistics and sampled games. At most 32 games are sampled for each selected corpus, threshold, and ending; if fewer qualify, all available games are shown. Clicking on a board opens the position on a Lichess analysis board, so you can inspect it with current engines and tablebases. The fact that this is now possible with open tools and public data is the main point of the project.</p>
-    <ol class="references" aria-label="References">
-      <li id="ref-fce">Karsten Müller and Frank Lamprecht, <a href="https://books.google.co.uk/books/about/Fundamental_Chess_Endings.html?id=HfwEAAAACAAJ&amp;redir_esc=y" target="_blank" rel="noopener noreferrer"><cite>Fundamental Chess Endings</cite></a>.</li>
-      <li id="ref-wikipedia"><a href="https://en.wikipedia.org/wiki/Chess_endgame#Frequency_table" target="_blank" rel="noopener noreferrer">Wikipedia, "Chess endgame", frequency table</a>.</li>
-      <li id="ref-lumbra"><a href="https://lumbrasgigabase.com/en/" target="_blank" rel="noopener noreferrer">Lumbra's Gigabase</a>.</li>
-      <li id="ref-lichess"><a href="https://lichess.org/" target="_blank" rel="noopener noreferrer">Lichess</a>.</li>
-      <li id="ref-pgnmentor"><a href="https://www.pgnmentor.com/files.html" target="_blank" rel="noopener noreferrer">PGNMentor PGN files</a>.</li>
-      <li id="ref-twic"><a href="https://theweekinchess.com/" target="_blank" rel="noopener noreferrer">The Week in Chess</a>.</li>
-      <li id="ref-cql"><a href="https://www.gadycosteff.com/cql-6-1/" target="_blank" rel="noopener noreferrer">Chess Query Language 6.1</a>.</li>
-      <li id="ref-cqli"><a href="https://cql64.com/" target="_blank" rel="noopener noreferrer">CQLi</a>.</li>
-      <li id="ref-reti"><a href="https://github.com/elma16/reti" target="_blank" rel="noopener noreferrer">Reti GitHub repository</a>.</li>
-    </ol>
   </section>
   <div class="controls">
     <div class="control-group"><strong>Corpus</strong> <span class="seg" id="view-controls"></span></div>
@@ -63,6 +51,20 @@
       <tbody></tbody>
     </table>
   </div>
+  <section class="references-section" aria-labelledby="references-title">
+    <h2 id="references-title">References</h2>
+    <ol class="references" aria-label="References">
+      <li id="ref-fce">Karsten Müller and Frank Lamprecht, <a href="https://books.google.co.uk/books/about/Fundamental_Chess_Endings.html?id=HfwEAAAACAAJ&amp;redir_esc=y" target="_blank" rel="noopener noreferrer"><cite>Fundamental Chess Endings</cite></a>.</li>
+      <li id="ref-wikipedia"><a href="https://en.wikipedia.org/wiki/Chess_endgame#Frequency_table" target="_blank" rel="noopener noreferrer">Wikipedia, "Chess endgame", frequency table</a>.</li>
+      <li id="ref-lumbra"><a href="https://lumbrasgigabase.com/en/" target="_blank" rel="noopener noreferrer">Lumbra's Gigabase</a>.</li>
+      <li id="ref-lichess"><a href="https://lichess.org/" target="_blank" rel="noopener noreferrer">Lichess</a>.</li>
+      <li id="ref-pgnmentor"><a href="https://www.pgnmentor.com/files.html" target="_blank" rel="noopener noreferrer">PGNMentor PGN files</a>.</li>
+      <li id="ref-twic"><a href="https://theweekinchess.com/" target="_blank" rel="noopener noreferrer">The Week in Chess</a>.</li>
+      <li id="ref-cql"><a href="https://www.gadycosteff.com/cql-6-1/" target="_blank" rel="noopener noreferrer">Chess Query Language 6.1</a>.</li>
+      <li id="ref-cqli"><a href="https://cql64.com/" target="_blank" rel="noopener noreferrer">CQLi</a>.</li>
+      <li id="ref-reti"><a href="https://github.com/elma16/reti" target="_blank" rel="noopener noreferrer">Reti GitHub repository</a>.</li>
+    </ol>
+  </section>
 </main>
 <script src="snapshot.js"></script>
 <script src="sampled_examples.js"></script>

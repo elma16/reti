@@ -343,8 +343,8 @@ mod tests {
     #[test]
     fn static_theme_icon_button_is_centered() {
         let css = asset("fce.css");
-        assert!(css.contains(".theme-toggle { flex:0 0 auto; width:38px; height:38px; display:grid; place-items:center; padding:0;"));
-        assert!(css.contains(".theme-icon { display:block; width:19px; height:19px;"));
+        assert!(css.contains(".theme-toggle { flex:0 0 auto; width:34px; height:34px; display:grid; place-items:center; padding:0;"));
+        assert!(css.contains(".theme-icon { display:block; width:17px; height:17px;"));
     }
 
     #[test]
@@ -353,9 +353,13 @@ mod tests {
         assert!(html.contains(
             "Reproducing the <cite>Fundamental Chess Endings</cite> Statistics Table using FOSS"
         ));
-        assert!(html.contains("Elliott Macneil · 2026-05-16"));
+        assert!(html.contains("Date: 2026-05-16 | Author: Elliott Macneil"));
+        assert!(!html.contains("Fundamental Chess Endings snapshot"));
         assert!(html.contains("Methodology and Scope"));
         assert!(html.contains("current build does not run Stockfish evaluations"));
+        assert!(html.contains("<section class=\"references-section\""));
+        assert!(html.contains("<h2 id=\"references-title\">References</h2>"));
+        assert!(html.find("<div class=\"table-wrap\">") < html.find("<section class=\"references-section\""));
         assert!(html.contains("id=\"ref-fce\""));
         assert!(html.contains("id=\"ref-reti\""));
         assert!(
