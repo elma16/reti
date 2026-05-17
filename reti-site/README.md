@@ -315,6 +315,24 @@ reti-site/target/release/reti-site render-snapshot \
   --output-html "$OUT_DIR/index.html"
 ```
 
+The main article prose and references can be edited in Markdown instead of raw
+HTML:
+
+```text
+reti-site/content/index.md
+```
+
+After editing it, update the static page template:
+
+```bash
+python3 scripts/render_fce_article_markdown.py
+```
+
+Then rerun `render-snapshot` as above. The Markdown renderer only updates the
+article copy, table explainer bullets, results/discussion copy, transition
+explainer, conclusion, title/byline, and references; it does not touch the
+interactive table or Sankey markup.
+
 For the fastest local iteration, you can also edit the generated
 `index.html`, `sankey.html`, `openings.html`, `fce.css`, `fce-app.js`,
 `fce-sankey.js`, or `fce-openings.js` directly in the output directory and

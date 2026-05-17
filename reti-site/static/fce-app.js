@@ -92,7 +92,7 @@ function rowHtml(row, stats) {
   const w = stats?.tablebaseWdl || {};
   const actual = stats?.actualResult || {};
   const label = rowDisplayLabel(row);
-  return `<tr class="${row.isAux ? 'aux' : ''}" data-stem="${esc(row.stem)}" tabindex="0"><td>${esc(row.rowId || '')}</td><td>${row.isAux ? '↳ ' : ''}${esc(label)}</td><td class="num">${fmtInt(stats?.quantity)}</td><td class="num">${fmtPct(stats?.percentage)}</td><td class="num">${fmtPct(stats?.matchedShare)}</td><td class="num">${fmtInt(w.totalPositions)}</td><td>${outcomeBar(w,'totalPositions')}</td><td>${outcomeBar(actual,'totalGames')}</td></tr>`;
+  return `<tr class="${row.isAux ? 'aux' : ''}" data-stem="${esc(row.stem)}" tabindex="0"><td>${esc(row.rowId || '')}</td><td>${esc(label)}</td><td class="num">${fmtInt(stats?.quantity)}</td><td class="num">${fmtPct(stats?.percentage)}</td><td class="num">${fmtPct(stats?.matchedShare)}</td><td class="num">${fmtInt(w.totalPositions)}</td><td>${outcomeBar(w,'totalPositions')}</td><td>${outcomeBar(actual,'totalGames')}</td></tr>`;
 }
 function rowDisplayLabel(row) {
   if (!row.isAux) return row.label;
@@ -247,9 +247,9 @@ function outcomeCounts(payload, totalKey, row) {
   rows.push(['Total', payload?.[totalKey] || 0]);
   return rows;
 }
-function statsPanel(title, payload, totalKey, note, row) {
+function statsPanel(title, payload, totalKey, row) {
   const counts = outcomeCounts(payload || {}, totalKey, row);
-  return `<section class="detail-panel"><h4>${esc(title)}</h4><div class="detail-stat-grid">${counts.map(([k,v]) => `<div class="detail-stat"><span>${esc(k)}</span><strong>${fmtInt(v)}</strong></div>`).join('')}</div><p class="detail-note">${esc(note)}</p></section>`;
+  return `<section class="detail-panel"><h4>${esc(title)}</h4><div class="detail-stat-grid">${counts.map(([k,v]) => `<div class="detail-stat"><span>${esc(k)}</span><strong>${fmtInt(v)}</strong></div>`).join('')}</div></section>`;
 }
 function tbResultMatrix(w) {
   const rows = w?.resultCrosstab?.rows || [];
@@ -259,23 +259,20 @@ function tbResultMatrix(w) {
     ? [['draw','Draw'], ['decisive','Decisive']]
     : [['win','Win'], ['draw','Draw'], ['loss','Loss']];
   if (hasUnknown) columns.push(['unknown', 'Unknown']);
-  const subtitle = hasDecisive
-    ? 'Rows show the Syzygy result; columns show the final game result, counted over tablebase-position occurrence rows. This symmetric ending has no named material side, so decisive means either side won.'
-    : 'Rows show the Syzygy result; columns show the final game result from the named-material side perspective, counted over tablebase-position occurrence rows.';
   if (!rows.length) return '';
   const label = key => ({win:'TB win', draw:'TB draw', loss:'TB loss', decisive:'TB decisive', unknown:'TB unknown'}[key] || key);
   const header = columns.map(([, title]) => `<th class="num">${esc(title)}</th>`).join('');
   const body = rows.map(row => `<tr><th>${esc(label(row.tbOutcome))}</th>${columns.map(([key]) => `<td class="num">${fmtInt(row[key])}</td>`).join('')}<td class="num">${fmtInt(row.total)}</td></tr>`).join('');
-  return `<section class="detail-panel matrix-panel"><h4>Tablebase vs Final Result</h4><p class="detail-subtitle">${esc(subtitle)}</p><div class="matrix-wrap"><table class="matrix"><thead><tr><th>Tablebase</th>${header}<th class="num">Total</th></tr></thead><tbody>${body}</tbody></table></div></section>`;
+  return `<section class="detail-panel matrix-panel"><h4>Tablebase vs Final Result</h4><div class="matrix-wrap"><table class="matrix"><thead><tr><th>TB</th>${header}<th class="num">Total</th></tr></thead><tbody>${body}</tbody></table></div></section>`;
 }
 function detailStats(row, stats) {
   const actual = stats?.actualResult || {};
   const w = stats?.tablebaseWdl || {};
   const hasTablebase = Number(w?.totalPositions || 0) > 0;
   return `<div class="detail-panels">${
-    statsPanel('Actual result', actual, 'totalGames', 'Final PGN result for every qualifying game-ending incidence.', row)
+    statsPanel('Actual result', actual, 'totalGames', row)
   }${
-    hasTablebase ? statsPanel('Tablebase WDL', w, 'totalPositions', 'Syzygy WDL over <=5-piece first-marker occurrence rows. Repeated FENs are probed once internally but counted per game-ending occurrence here.', row) : ''
+    hasTablebase ? statsPanel('Tablebase WDL', w, 'totalPositions', row) : ''
   }${hasTablebase ? tbResultMatrix(w) : ''}</div>`;
 }
 function exampleCard(example) {

@@ -287,6 +287,8 @@ mod tests {
         assert!(app.contains("if (!rows.length) return '';"));
         assert!(app.contains("hasTablebase ? statsPanel('Tablebase WDL'"));
         assert!(app.contains("${hasTablebase ? tbResultMatrix(w) : ''}"));
+        assert!(!app.contains("Final PGN result for every qualifying game-ending incidence."));
+        assert!(!app.contains("Rows show the Syzygy result; columns show the final game result"));
         assert!(app.contains("const columns = hasDecisive"));
         assert!(app.contains("? [['draw','Draw'], ['decisive','Decisive']]"));
         assert!(app.contains(": [['win','Win'], ['draw','Draw'], ['loss','Loss']]"));
@@ -316,14 +318,15 @@ mod tests {
         assert!(!html.contains("id=\"opening-filter\""));
         assert!(!app.contains("activeOpening"));
         assert!(!html.contains("openings.html"));
-        assert!(html.contains("not part of this published dashboard"));
+        assert!(html.contains("the choice of opening somewhat influences the distribution of the ending"));
         assert!(app.contains("Matched share %"));
         assert!(!html.contains("Total Corpus %"));
         assert!(!app.contains("Matched share total"));
         assert!(app.contains(
             "const boardWord = Number(payload.sampled || 0) === 1 ? 'board' : 'boards';"
         ));
-        assert!(html.contains("At most 32 games are sampled for each selected corpus, threshold, and ending; if fewer qualify, all available games are shown."));
+        assert!(html.contains("Some example games are provided for context"));
+        assert!(!app.contains("↳"));
         assert!(!app.contains("board(s)"));
     }
 
@@ -361,20 +364,61 @@ mod tests {
         ));
         assert!(html.contains("Date: 2026-05-16 | Author: Elliott Macneil"));
         assert!(!html.contains("Fundamental Chess Endings snapshot"));
-        assert!(html.contains("Methodology and Scope"));
-        assert!(html.contains("Ending Incidence and Outcomes"));
-        assert!(html.contains("Consecutive Ending Transitions"));
-        assert!(html.contains("current build does not run Stockfish evaluations"));
+        assert!(!html.contains("Statistics table</a>"));
+        assert!(!html.contains("Ending transitions</a>"));
+        assert!(!html.contains("Open the transition diagram on its own page"));
+        assert!(html.contains("Introduction"));
+        assert!(html.contains("Motivation"));
+        assert!(html.contains("Methodology"));
+        assert!(html.contains("Results and Discussion"));
+        assert!(html.contains("Conclusion"));
+        assert!(html.contains("accompanying GitHub repository"));
+        assert!(html.contains("Reti project source repository"));
+        assert!(html.contains("CCRL 40/15 rating list, all engines"));
+        assert!(html.contains("CQLi 1.0.6 implementation"));
+        assert!(html.contains("local Syzygy WDL 3-4-5 tablebase files"));
+        assert!(html.contains("a marker is the comment inserted into an annotated PGN"));
+        assert!(html.contains("A first-marker position is the first such position"));
+        assert!(html.contains("tablebase columns are intentionally blank"));
+        assert!(html.contains("shakmaty-syzygy"));
+        assert!(html.contains("<h2 id=\"table-title\">Table</h2>"));
+        assert!(html.contains("The table below is interactive"));
+        assert!(html.contains("<ul class=\"section-summary\">"));
+        assert!(html.contains("<strong>Games</strong> counts qualifying ending incidences"));
+        assert!(html.contains("<strong>Actual result</strong> is scored from the named material side"));
+        assert!(html.contains("<h2 id=\"transition-title\">Transitions</h2>"));
+        assert!(html.contains("consecutive first-marker transitions between endings"));
+        assert!(html.contains("not a causal model"));
+        assert!(html.contains("Stockfish 18 is the leading free and open-source chess engine"));
         assert!(html.contains("<section class=\"references-section\""));
         assert!(html.contains("<h2 id=\"references-title\">References</h2>"));
+        assert!(html.find("id=\"motivation-title\"") < html.find("id=\"methodology-title\""));
+        assert!(html.find("id=\"methodology-title\"") < html.find("<div class=\"table-wrap\">"));
+        assert!(html.find("<div class=\"table-wrap\">") < html.find("id=\"results-title\""));
+        assert!(html.find("id=\"results-title\"") < html.find("id=\"transition-title\""));
+        assert!(html.find("id=\"transition-title\"") < html.find("id=\"conclusion-title\""));
+        assert!(html.find("id=\"conclusion-title\"") < html.find("<section class=\"references-section\""));
         assert!(html.find("<div class=\"table-wrap\">") < html.find("<section class=\"references-section\""));
         assert!(html.find("id=\"transition-title\"") < html.find("<section class=\"references-section\""));
         assert!(html.contains("id=\"ref-fce\""));
+        assert!(html.contains("id=\"ref-stockfish\""));
+        assert!(html.contains("id=\"ref-ccrl\""));
         assert!(html.contains("id=\"ref-reti\""));
+        assert!(html.contains("id=\"ref-syzygy\""));
+        assert!(html.contains("id=\"ref-shakmaty\""));
+        assert!(html.contains("id=\"ref-lichess\""));
+        assert!(!html.contains("id=\"ref-pgnmentor\""));
+        assert!(!html.contains("id=\"ref-twic\""));
         assert!(
             html.contains("https://books.google.co.uk/books/about/Fundamental_Chess_Endings.html")
         );
         assert!(html.contains("https://en.wikipedia.org/wiki/Chess_endgame#Frequency_table"));
+        assert!(html.contains("https://stockfishchess.org/blog/2026/stockfish-18/"));
+        assert!(html.contains("https://computerchess.org.uk/4040/rating_list_all.html"));
+        assert!(html.contains("https://www.gadycosteff.com/cql-6-1/"));
+        assert!(html.contains("https://cql64.com/"));
+        assert!(html.contains("https://www.chessprogramming.org/Syzygy_Bases"));
+        assert!(html.contains("https://github.com/niklasf/shakmaty"));
         assert!(!html.contains("Sources and Comparison Notes"));
     }
 

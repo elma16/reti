@@ -141,7 +141,7 @@ pub fn build_fce_tablebase(config: BuildConfig) -> SiteResult<BuildResult> {
         let db = Db::open(&db_path, false)?;
         ensure_indexes(&db)?;
         drop(db);
-        log_phase("Evaluating unique first-marker <=5-man FENs with Rust Syzygy");
+        log_phase("Evaluating unique first-marker <=5-piece FENs with Rust Syzygy");
         run_syzygy_eval(
             &pgn_utils_bin,
             &db_path,

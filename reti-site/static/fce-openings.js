@@ -266,7 +266,7 @@ function renderTable() {
   const head = document.querySelector('#opening-table thead');
   const body = document.querySelector('#opening-table tbody');
   head.innerHTML = `<tr><th data-sort="sortIndex">ID</th><th data-sort="label">Ending</th><th class="num" data-sort="quantity">Games</th><th class="num" data-sort="percentage">Opening corpus %</th><th class="num" data-sort="matchedShare">Opening matched share %</th><th data-sort="actualWinPct">Actual result</th></tr>`;
-  body.innerHTML = sortedRows().map(({row, stats}) => `<tr class="${row.isAux ? 'aux' : ''}"><td>${esc(row.rowId || '')}</td><td>${row.isAux ? '↳ ' : ''}${esc(rowDisplayLabel(row))}</td><td class="num">${fmtInt(stats.quantity)}</td><td class="num">${fmtPct(stats.percentage)}</td><td class="num">${fmtPct(stats.matchedShare)}</td><td>${outcomeBar(stats.actualResult,'totalGames')}</td></tr>`).join('');
+  body.innerHTML = sortedRows().map(({row, stats}) => `<tr class="${row.isAux ? 'aux' : ''}"><td>${esc(row.rowId || '')}</td><td>${esc(rowDisplayLabel(row))}</td><td class="num">${fmtInt(stats.quantity)}</td><td class="num">${fmtPct(stats.percentage)}</td><td class="num">${fmtPct(stats.matchedShare)}</td><td>${outcomeBar(stats.actualResult,'totalGames')}</td></tr>`).join('');
   bindSorting();
 }
 

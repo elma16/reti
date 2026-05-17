@@ -277,7 +277,7 @@ pub fn build_snapshot(
         }),
         methodology: serde_json::json!({
             "countingSemantics": "first run per game and FCE ending stem",
-            "tablebasePositionFiltering": "first <=5-man marker position per game and FCE stem",
+            "tablebasePositionFiltering": "first <=5-piece marker position per game and FCE stem",
             "thresholdSemantics": "the active threshold filters by first-run half-move length",
             "actualResultSemantics": "final PGN result from the material-side perspective for every qualifying game-ending incidence",
             "symmetricSemantics": "symmetric endings have no named material side; decisive results are counted separately from draws",
