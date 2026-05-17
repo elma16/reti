@@ -71,7 +71,9 @@ pub fn base_manifest(
     source_totals_json: &Path,
     syzygy_dirs: &[std::path::PathBuf],
     pgn_utils_bin: &Path,
+    opening_catalog_csv: Option<&Path>,
     thresholds: &[u32],
+    sample_size: usize,
     tablebase_threshold: u32,
 ) -> SiteResult<Value> {
     let syzygy: Vec<Value> = syzygy_dirs
@@ -105,6 +107,7 @@ pub fn base_manifest(
             "annotatedRunDir": annotated_run_dir.to_string_lossy(),
             "sourceTotalsJson": source_totals_json.to_string_lossy(),
             "thresholds": thresholds,
+            "sampleSize": sample_size,
             "tablebaseThreshold": tablebase_threshold,
             "countingSemantics": "first-run-per-game-stem",
             "positionSelection": "first-marker-per-game-stem",
@@ -121,6 +124,14 @@ pub fn base_manifest(
             "pgnUtilsBin": file_signature(pgn_utils_bin, false).ok(),
         }
     });
+    if let Some(path) = opening_catalog_csv {
+        if path.is_file() {
+            manifest["settings"]["openingCatalogCsv"] =
+                Value::String(path.to_string_lossy().into_owned());
+            manifest["inputs"]["openingCatalogCsv"] =
+                serde_json::to_value(file_signature(path, true)?)?;
+        }
+    }
     let fp = fingerprint(&manifest)?;
     manifest["fingerprint"] = Value::String(fp);
     Ok(manifest)

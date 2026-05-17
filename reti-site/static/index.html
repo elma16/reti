@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fundamental Chess Endings in Lumbra's Gigabase</title>
+  <script>
+    try {
+      const theme = localStorage.getItem("fce-theme");
+      if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme;
+    } catch (error) {}
+  </script>
+  <link rel="stylesheet" href="fce.css">
+</head>
+<body>
+<main>
+  <header class="page-head">
+    <div class="header-main">
+      <div>
+        <p class="eyebrow">Fundamental Chess Endings snapshot</p>
+        <h1>Reproducing the <cite>Fundamental Chess Endings</cite> Statistics Table using FOSS</h1>
+        <p class="byline">Elliott Macneil · 2026-05-16</p>
+        <nav class="page-nav" aria-label="Site views">
+          <a class="active" href="index.html">Statistics table</a>
+          <a href="sankey.html">Ending transitions</a>
+        </nav>
+      </div>
+      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle light and dark mode">
+        <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.8 6.8 0 0 0 9.8 9.8z"></path></svg>
+        <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>
+      </button>
+    </div>
+  </header>
+  <section class="article-intro" aria-labelledby="intro-title">
+    <h2 id="intro-title">Methodology and Scope</h2>
+    <p>In Karsten Müller and Frank Lamprecht's classic work <cite>Fundamental Chess Endings</cite>, they give a table showing how often each ending from selected chapters occurs.<sup><a href="#ref-fce">1</a></sup> A simplified version of this table is available on Wikipedia.<sup><a href="#ref-wikipedia">2</a></sup> To produce the original table in 2001, Müller and Lamprecht used ChessBase and that year's Mega Database, containing about 1.7 million games. Their analysis used Fritz 6 and Nimzo 8, with five-man tablebases for positions that were already solved.</p>
+    <p>The chess software landscape looks very different in 2026. Stockfish 18 is one of the strongest available engines, and it is free and open-source software. FOSS chess tools are now ordinary rather than exceptional. Large collections of games are also easier to obtain through aggregators such as Lumbra's Gigabase,<sup><a href="#ref-lumbra">3</a></sup> whose own source list includes material from Lichess,<sup><a href="#ref-lichess">4</a></sup> PGNMentor,<sup><a href="#ref-pgnmentor">5</a></sup> TWIC,<sup><a href="#ref-twic">6</a></sup> and many other sources. Five-man tablebases are still useful, but complete seven-piece tablebases are now standard, and selected larger tablebase projects exist for more specialised cases.</p>
+    <p>I wanted to see how far the original Müller-Lamprecht analysis could be reproduced and extended using FOSS tools. I downloaded roughly 17 million games from Lumbra's Gigabase: about 10 million over-the-board games and about 7 million high-level online games. This is roughly an order of magnitude larger than the database used for the original table.</p>
+    <p>The next problem is locating and categorising the endings. This project uses Chess Query Language, originally developed by Gady Costeff and Lewis Stiller,<sup><a href="#ref-cql">7</a></sup> via Robert Gamble's CQLi implementation.<sup><a href="#ref-cqli">8</a></sup> The CQL scripts used to generate the annotated PGN files are in the Reti GitHub repository.<sup><a href="#ref-reti">9</a></sup> CQL is a powerful language for filtering chess positions; the filters used here are deliberately simple material-pattern queries.</p>
+    <p>I was also interested in how often tablebase evaluations line up with the final result of the game. For that reason, every qualifying first marker position with five pieces or fewer is evaluated with Syzygy WDL. The current build does not run Stockfish evaluations: the engine comparison is left to Lichess analysis when you click through to a position. For each game-ending pair, the tablebase statistics use the first matching position, not every matching position in the game. For example, the row "8.2a Rook + Bishop vs Rook without pawns" can show a higher practical win rate than the tablebase result alone would suggest, which is plausible because this ending is easy for humans to mishandle. I was also surprised by the practical win rate for bishop and knight versus king: it is theoretically won, but still non-trivial over the board. Switching the corpus from OTB to Online gives a quick way to compare longer and shorter practical time-control environments.</p>
+    <p>I am not reproducing the original published table in full here. The public Wikipedia summary is linked for context, and the dashboard focuses on my recomputed Gigabase statistics. The broad agreement with Müller and Lamprecht is interesting in itself. One hypothesis is that opening choice influences which pieces are exchanged, which in turn changes the distribution of endings that arise; that remains a useful direction for later analysis, but it is not part of this published dashboard.</p>
+    <p>Clicking on an ending expands additional statistics and sampled games. At most 32 games are sampled for each selected corpus, threshold, and ending; if fewer qualify, all available games are shown. Clicking on a board opens the position on a Lichess analysis board, so you can inspect it with current engines and tablebases. The fact that this is now possible with open tools and public data is the main point of the project.</p>
+    <ol class="references" aria-label="References">
+      <li id="ref-fce">Karsten Müller and Frank Lamprecht, <a href="https://books.google.co.uk/books/about/Fundamental_Chess_Endings.html?id=HfwEAAAACAAJ&amp;redir_esc=y" target="_blank" rel="noopener noreferrer"><cite>Fundamental Chess Endings</cite></a>.</li>
+      <li id="ref-wikipedia"><a href="https://en.wikipedia.org/wiki/Chess_endgame#Frequency_table" target="_blank" rel="noopener noreferrer">Wikipedia, "Chess endgame", frequency table</a>.</li>
+      <li id="ref-lumbra"><a href="https://lumbrasgigabase.com/en/" target="_blank" rel="noopener noreferrer">Lumbra's Gigabase</a>.</li>
+      <li id="ref-lichess"><a href="https://lichess.org/" target="_blank" rel="noopener noreferrer">Lichess</a>.</li>
+      <li id="ref-pgnmentor"><a href="https://www.pgnmentor.com/files.html" target="_blank" rel="noopener noreferrer">PGNMentor PGN files</a>.</li>
+      <li id="ref-twic"><a href="https://theweekinchess.com/" target="_blank" rel="noopener noreferrer">The Week in Chess</a>.</li>
+      <li id="ref-cql"><a href="https://www.gadycosteff.com/cql-6-1/" target="_blank" rel="noopener noreferrer">Chess Query Language 6.1</a>.</li>
+      <li id="ref-cqli"><a href="https://cql64.com/" target="_blank" rel="noopener noreferrer">CQLi</a>.</li>
+      <li id="ref-reti"><a href="https://github.com/elma16/reti" target="_blank" rel="noopener noreferrer">Reti GitHub repository</a>.</li>
+    </ol>
+  </section>
+  <div class="controls">
+    <div class="control-group"><strong>Corpus</strong> <span class="seg" id="view-controls"></span></div>
+    <div class="control-group"><strong>Minimum half-moves</strong> <span class="seg" id="threshold-controls"></span></div>
+  </div>
+  <div class="metrics" id="metrics"></div>
+  <div class="table-wrap">
+    <table id="ending-table">
+      <thead></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</main>
+<script src="snapshot.js"></script>
+<script src="sampled_examples.js"></script>
+<script src="fce-app.js"></script>
+</body>
+</html>

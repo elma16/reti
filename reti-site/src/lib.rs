@@ -3,8 +3,11 @@ pub mod catalog;
 pub mod cli;
 pub mod csv_export;
 pub mod manifest;
+pub mod opening_page;
+pub mod openings;
 pub mod pipeline;
 pub mod render;
+pub mod sankey;
 pub mod source;
 pub mod sqlite;
 

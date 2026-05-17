@@ -573,6 +573,54 @@ fn fce_combined_samples_exports_threshold_views() {
 }
 
 #[test]
+fn fce_combined_openings_exports_eco_distribution() {
+    let dir = tmpdir("fce-combined-openings");
+    let otb = dir.join("LumbrasGigaBase_OTB_test");
+    let online = dir.join("LumbrasGigaBase_Online_test");
+    fs::create_dir_all(&otb).unwrap();
+    fs::create_dir_all(&online).unwrap();
+    fs::write(
+        otb.join("fce-table-markers.pgn"),
+        b"[Event \"otb\"]\n[Site \"s\"]\n[Date \"2026.05.15\"]\n[Round \"1\"]\n[White \"Alice\"]\n[Black \"Bob\"]\n[Result \"1-0\"]\n[ECO \"B90a\"]\n[FEN \"8/8/8/8/8/2k5/8/N3K2B w - - 0 1\"]\n\n1. Ke2 {1-4BN} Kd4 {1-4BN} 1-0\n",
+    )
+    .unwrap();
+    fs::write(
+        online.join("fce-table-markers.pgn"),
+        b"[Event \"online\"]\n[Site \"s\"]\n[Date \"2026.05.15\"]\n[Round \"1\"]\n[White \"Carol\"]\n[Black \"Dan\"]\n[Result \"1/2-1/2\"]\n[ECO \"C42\"]\n[FEN \"8/8/8/8/8/2k5/8/N3K2B w - - 0 1\"]\n\n1. Ke2 {1-4BN} Kd4 {1-4BN} 1/2-1/2\n",
+    )
+    .unwrap();
+    let output = dir.join("openings.json");
+
+    let (stdout, stderr, code) = run(&[
+        "fce-combined-openings",
+        "--no-progress",
+        "--relative-to",
+        dir.to_str().unwrap(),
+        "--known-stems",
+        "1-4BN",
+        "--thresholds",
+        "1,2",
+        "-o",
+        output.to_str().unwrap(),
+        dir.to_str().unwrap(),
+    ]);
+    assert_eq!(code, 0, "stderr: {stderr}");
+    assert_eq!(
+        json_field(&stdout, "opening_rows_seen").as_deref(),
+        Some("4")
+    );
+
+    let written = fs::read_to_string(&output).unwrap();
+    assert!(written.contains("\"kind\":\"fce-opening-ending-counts\""));
+    assert!(written.contains("\"B90\""));
+    assert!(written.contains("\"C42\""));
+    assert!(written.contains("\"matchedRows\":1"));
+    assert!(written.contains("\"sideWins\":1"));
+    assert!(written.contains("\"sideDraws\":1"));
+    assert!(written.contains("\"online\""));
+}
+
+#[test]
 fn source_totals_counts_games_per_source_file() {
     let dir = tmpdir("source-totals");
     let corpus = dir.join("corpus");

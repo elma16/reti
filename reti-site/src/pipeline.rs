@@ -9,7 +9,9 @@ use crate::catalog;
 use crate::cli::BuildConfig;
 use crate::csv_export;
 use crate::manifest::{base_manifest, fingerprint, manifest_matches};
+use crate::openings::OpeningCatalog;
 use crate::render;
+use crate::sankey;
 use crate::source::{load_source_totals, load_summary};
 use crate::sqlite::Db;
 use crate::{SiteError, SiteResult};
@@ -36,6 +38,11 @@ pub fn build_fce_tablebase(config: BuildConfig) -> SiteResult<BuildResult> {
             .to_path_buf(),
     };
     let pgn_utils_bin = absolutize(&config.pgn_utils_bin)?;
+    let opening_catalog_csv = config
+        .opening_catalog_csv
+        .as_ref()
+        .map(|path| absolutize(path))
+        .transpose()?;
     let syzygy_dirs: Vec<PathBuf> = config
         .syzygy_dirs
         .iter()
@@ -51,18 +58,37 @@ pub fn build_fce_tablebase(config: BuildConfig) -> SiteResult<BuildResult> {
         &source_totals_json,
         &syzygy_dirs,
         &pgn_utils_bin,
+        opening_catalog_csv.as_deref(),
         &config.thresholds,
+        config.sample_size,
         config.tablebase_threshold,
     )?;
+    let opening_catalog = match opening_catalog_csv.as_deref() {
+        Some(path) => OpeningCatalog::load_optional(path)?,
+        None => OpeningCatalog::default(),
+    };
 
     log_phase("Checking output manifest");
     if output_dir.exists() && !config.force {
-        if manifest_matches(&output_dir.join("manifest.json"), &manifest)
-            && output_dir.join("snapshot.json").is_file()
+        let manifest_ok = manifest_matches(&output_dir.join("manifest.json"), &manifest);
+        let core_artifacts_ok = output_dir.join("snapshot.json").is_file()
             && output_dir.join("evaluations.sqlite3").is_file()
-            && output_dir.join("index.html").is_file()
-        {
+            && site_artifacts_complete(&output_dir);
+        let samples_ok = sample_artifacts_complete(&output_dir);
+        if manifest_ok && core_artifacts_ok && samples_ok {
             return Ok(result(output_dir, true));
+        }
+        if manifest_ok && core_artifacts_ok && !samples_ok {
+            return Err(SiteError::new(format!(
+                "{} has matching core artifacts but missing sampled example sidecars; use --force or choose a new output dir",
+                output_dir.display()
+            )));
+        }
+        if manifest_ok && !core_artifacts_ok {
+            return Err(SiteError::new(format!(
+                "{} has a matching manifest but is missing one or more core artifacts; use --force, rerun render-snapshot/sankey-js, or choose a new output dir",
+                output_dir.display()
+            )));
         }
         return Err(SiteError::new(format!(
             "{} already exists with a different manifest; use --force or choose a new output dir",
@@ -92,15 +118,16 @@ pub fn build_fce_tablebase(config: BuildConfig) -> SiteResult<BuildResult> {
 
     let committed = (|| -> SiteResult<()> {
         let db_path = temp_dir.join("evaluations.sqlite3");
+        let known_stems = catalog::known_stems()
+            .into_iter()
+            .collect::<Vec<_>>()
+            .join(",");
         log_phase("Streaming combined marker PGNs into SQLite with Rust");
         let ingest_stats = run_marker_ingest(
             &pgn_utils_bin,
             &annotated_run_dir,
             &db_path,
-            &catalog::known_stems()
-                .into_iter()
-                .collect::<Vec<_>>()
-                .join(","),
+            &known_stems,
             &fingerprint(&manifest)?[..16],
             config.tablebase_threshold,
             !config.no_progress,
@@ -139,6 +166,7 @@ pub fn build_fce_tablebase(config: BuildConfig) -> SiteResult<BuildResult> {
             snapshot_id,
             generated_at(),
             &source_totals,
+            &opening_catalog,
             &config.thresholds,
         )?;
         log_phase("Writing snapshot JSON, CSV exports, and HTML");
@@ -152,7 +180,26 @@ pub fn build_fce_tablebase(config: BuildConfig) -> SiteResult<BuildResult> {
             &snapshot,
             &temp_dir.join("tablebase_wdl_by_view_threshold.csv"),
         )?;
-        fs::write(temp_dir.join("index.html"), render::render_html(&snapshot)?)?;
+        render::write_site(&snapshot, &temp_dir.join("index.html"))?;
+        sankey::write_sankey_js(&db, &temp_dir.join("sankey.js"), &config.thresholds)?;
+        log_phase(&format!(
+            "Sampling up to {} example boards per corpus/threshold/ending",
+            config.sample_size
+        ));
+        run_sample_export(
+            &pgn_utils_bin,
+            &annotated_run_dir,
+            &temp_dir.join("sampled_examples.json"),
+            &known_stems,
+            &config.thresholds,
+            config.sample_size,
+            !config.no_progress,
+        )?;
+        log_phase("Splitting sampled examples into lazy-loaded JS chunks");
+        render::write_samples_js(
+            &temp_dir.join("sampled_examples.json"),
+            &temp_dir.join("sampled_examples.js"),
+        )?;
         Ok(())
     })();
 
@@ -224,6 +271,41 @@ fn run_syzygy_eval(
         cmd.arg("--no-progress");
     }
     let _stats = run_command_json(cmd, "Syzygy evaluation")?;
+    Ok(())
+}
+
+fn run_sample_export(
+    pgn_utils_bin: &Path,
+    annotated_run_dir: &Path,
+    output_json: &Path,
+    known_stems: &str,
+    thresholds: &[u32],
+    sample_size: usize,
+    show_progress: bool,
+) -> SiteResult<()> {
+    let thresholds_arg = thresholds
+        .iter()
+        .map(u32::to_string)
+        .collect::<Vec<_>>()
+        .join(",");
+    let mut cmd = Command::new(pgn_utils_bin);
+    cmd.arg("fce-combined-samples")
+        .arg("--relative-to")
+        .arg(annotated_run_dir)
+        .arg("--known-stems")
+        .arg(known_stems)
+        .arg("--thresholds")
+        .arg(thresholds_arg)
+        .arg("--sample-size")
+        .arg(sample_size.to_string())
+        .arg("--force")
+        .arg("-o")
+        .arg(output_json);
+    if !show_progress {
+        cmd.arg("--no-progress");
+    }
+    cmd.arg(annotated_run_dir);
+    let _stats = run_command_json(cmd, "sampled example export")?;
     Ok(())
 }
 
@@ -349,6 +431,22 @@ fn result(output_dir: PathBuf, up_to_date: bool) -> BuildResult {
     }
 }
 
+fn sample_artifacts_complete(output_dir: &Path) -> bool {
+    output_dir.join("sampled_examples.json").is_file()
+        && output_dir.join("sampled_examples.js").is_file()
+        && output_dir.join("sampled_examples").is_dir()
+}
+
+fn site_artifacts_complete(output_dir: &Path) -> bool {
+    output_dir.join("index.html").is_file()
+        && output_dir.join("sankey.html").is_file()
+        && output_dir.join("snapshot.js").is_file()
+        && output_dir.join("sankey.js").is_file()
+        && output_dir.join("fce.css").is_file()
+        && output_dir.join("fce-app.js").is_file()
+        && output_dir.join("fce-sankey.js").is_file()
+}
+
 fn absolutize(path: &Path) -> SiteResult<PathBuf> {
     if path.is_absolute() {
         Ok(path.to_path_buf())
@@ -420,5 +518,46 @@ mod tests {
         assert!(validate_marker_ingest_stats(&stats, 2, 10).is_ok());
         assert!(validate_marker_ingest_stats(&stats, 3, 10).is_err());
         assert!(validate_marker_ingest_stats(&stats, 2, 11).is_err());
+    }
+
+    #[test]
+    fn sample_artifacts_must_include_manifest_json_and_chunks() {
+        let base =
+            std::env::temp_dir().join(format!("reti-site-sample-artifacts-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&base);
+        fs::create_dir_all(&base).unwrap();
+
+        assert!(!sample_artifacts_complete(&base));
+        fs::write(base.join("sampled_examples.json"), "{}").unwrap();
+        fs::write(base.join("sampled_examples.js"), "").unwrap();
+        assert!(!sample_artifacts_complete(&base));
+        fs::create_dir_all(base.join("sampled_examples")).unwrap();
+        assert!(sample_artifacts_complete(&base));
+
+        let _ = fs::remove_dir_all(&base);
+    }
+
+    #[test]
+    fn site_artifacts_include_static_frontend_files() {
+        let base = std::env::temp_dir().join(format!(
+            "reti-site-frontend-artifacts-{}",
+            std::process::id()
+        ));
+        let _ = fs::remove_dir_all(&base);
+        fs::create_dir_all(&base).unwrap();
+
+        assert!(!site_artifacts_complete(&base));
+        fs::write(base.join("index.html"), "").unwrap();
+        fs::write(base.join("sankey.html"), "").unwrap();
+        fs::write(base.join("snapshot.js"), "").unwrap();
+        fs::write(base.join("sankey.js"), "").unwrap();
+        fs::write(base.join("fce.css"), "").unwrap();
+        assert!(!site_artifacts_complete(&base));
+        fs::write(base.join("fce-app.js"), "").unwrap();
+        assert!(!site_artifacts_complete(&base));
+        fs::write(base.join("fce-sankey.js"), "").unwrap();
+        assert!(site_artifacts_complete(&base));
+
+        let _ = fs::remove_dir_all(&base);
     }
 }

@@ -9,10 +9,11 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::ffi::{CStr, CString, OsString};
 use std::fs::{self, File};
-use std::io::{self, BufWriter, Write};
+use std::io::{self, BufWriter, IsTerminal, Write};
 use std::os::raw::{c_char, c_int, c_void};
 use std::path::{Path, PathBuf};
 use std::ptr;
+use std::time::Instant;
 
 use pgn_reader::{BufferedReader, Outcome, RawComment, RawTag, SanPlus, Skip, Visitor};
 use shakmaty::fen::Fen;
@@ -50,7 +51,21 @@ options:
   --relative-to DIR       store output_pgn paths relative to DIR
   --known-stems LIST      comma/whitespace separated FCE stems to recognize
   --thresholds LIST       comma separated run thresholds (default: 1,2,5,10,20)
-  --sample-size N         maximum examples per view/threshold/stem (default: 60)
+  --sample-size N         maximum examples per view/threshold/stem (default: 32)
+  --limit-files N         process at most N input PGN files
+  --limit-games N         process at most N games total
+  --allow-parse-errors    write rows from clean games and exit 0 despite errors
+  --force                 replace an existing output file
+  --no-progress           disable the stderr progress bar";
+
+const OPENINGS_USAGE: &str = "\
+usage: reti-pgn-utils fce-combined-openings [options] INPUT_PGN_OR_DIR...
+
+options:
+  -o, --output PATH       write opening aggregate JSON to PATH
+  --relative-to DIR       store output_pgn paths relative to DIR
+  --known-stems LIST      comma/whitespace separated FCE stems to recognize
+  --thresholds LIST       comma separated run thresholds (default: 1,2,5,10,20)
   --limit-files N         process at most N input PGN files
   --limit-games N         process at most N games total
   --allow-parse-errors    write rows from clean games and exit 0 despite errors
@@ -108,6 +123,29 @@ pub struct CombinedSampleStats {
     pub parse_errors: usize,
 }
 
+#[derive(Debug, Clone)]
+pub struct CombinedOpeningOptions {
+    pub inputs: Vec<PathBuf>,
+    pub output: PathBuf,
+    pub relative_to: Option<PathBuf>,
+    pub known_stems: BTreeSet<String>,
+    pub thresholds: Vec<usize>,
+    pub limit_files: Option<usize>,
+    pub limit_games: Option<usize>,
+    pub allow_parse_errors: bool,
+    pub force: bool,
+    pub show_progress: bool,
+}
+
+#[derive(Debug, Default, Clone, Copy)]
+pub struct CombinedOpeningStats {
+    pub files_processed: usize,
+    pub bytes_in: u64,
+    pub games_read: usize,
+    pub opening_rows_seen: usize,
+    pub parse_errors: usize,
+}
+
 impl CombinedSampleStats {
     fn to_json(self) -> String {
         format!(
@@ -116,6 +154,19 @@ impl CombinedSampleStats {
             self.bytes_in,
             self.games_read,
             self.samples_seen,
+            self.parse_errors,
+        )
+    }
+}
+
+impl CombinedOpeningStats {
+    fn to_json(self) -> String {
+        format!(
+            "{{\"mode\":\"combined-opening-stats\",\"files_processed\":{},\"bytes_in\":{},\"games_read\":{},\"opening_rows_seen\":{},\"parse_errors\":{}}}",
+            self.files_processed,
+            self.bytes_in,
+            self.games_read,
+            self.opening_rows_seen,
             self.parse_errors,
         )
     }
@@ -197,6 +248,9 @@ struct SampleExample {
     black: String,
     black_elo: String,
     result: String,
+    eco_raw: String,
+    eco_base: String,
+    eco_group: String,
     stem: String,
     ply_index: u32,
     fullmove_number: u32,
@@ -599,7 +653,7 @@ pub fn run_samples_subcommand(args: &[OsString]) -> Result<(), String> {
             .unwrap_or_else(|| "1,2,5,10,20".to_string())
             .as_str(),
     )?;
-    let sample_size = parse_optional_usize(&parsed, "sample-size")?.unwrap_or(60);
+    let sample_size = parse_optional_usize(&parsed, "sample-size")?.unwrap_or(32);
     if sample_size == 0 {
         return Err("fce-combined-samples: --sample-size must be positive".to_string());
     }
@@ -618,6 +672,75 @@ pub fn run_samples_subcommand(args: &[OsString]) -> Result<(), String> {
         show_progress: !parsed.global.no_progress,
     };
     let stats = run_fce_combined_samples(&opts)?;
+    println!("{}", stats.to_json());
+    Ok(())
+}
+
+pub fn run_openings_subcommand(args: &[OsString]) -> Result<(), String> {
+    if args.iter().any(|arg| {
+        let text = arg.to_string_lossy();
+        text == "--help" || text == "-h" || text == "help"
+    }) {
+        println!("{OPENINGS_USAGE}");
+        return Ok(());
+    }
+    let parsed = cli::parse(
+        args,
+        &["allow-parse-errors", "force"],
+        &[
+            "output",
+            "o",
+            "relative-to",
+            "known-stems",
+            "thresholds",
+            "limit-files",
+            "limit-games",
+        ],
+    )
+    .map_err(|e| format!("{e}\n{OPENINGS_USAGE}"))?;
+
+    if parsed.positionals.is_empty() {
+        return Err(OPENINGS_USAGE.to_string());
+    }
+
+    let known_stems = parse_known_stems(
+        parsed
+            .get_kv("known-stems")
+            .map(|value| value.to_string_lossy().into_owned())
+            .unwrap_or_default()
+            .as_str(),
+    );
+    if known_stems.is_empty() {
+        return Err(format!(
+            "fce-combined-openings: --known-stems is required\n{OPENINGS_USAGE}"
+        ));
+    }
+    let output = parsed
+        .get_kv("output")
+        .or_else(|| parsed.get_kv("o"))
+        .map(PathBuf::from)
+        .ok_or_else(|| format!("fce-combined-openings: --output is required\n{OPENINGS_USAGE}"))?;
+    let thresholds = parse_threshold_list(
+        parsed
+            .get_kv("thresholds")
+            .map(|value| value.to_string_lossy().into_owned())
+            .unwrap_or_else(|| "1,2,5,10,20".to_string())
+            .as_str(),
+    )?;
+
+    let opts = CombinedOpeningOptions {
+        inputs: parsed.positionals.clone(),
+        output,
+        relative_to: parsed.get_kv("relative-to").map(PathBuf::from),
+        known_stems,
+        thresholds,
+        limit_files: parse_optional_usize(&parsed, "limit-files")?,
+        limit_games: parse_optional_usize(&parsed, "limit-games")?,
+        allow_parse_errors: parsed.has_flag("allow-parse-errors"),
+        force: parsed.has_flag("force"),
+        show_progress: !parsed.global.no_progress,
+    };
+    let stats = run_fce_combined_openings(&opts)?;
     println!("{}", stats.to_json());
     Ok(())
 }
@@ -774,6 +897,78 @@ pub fn run_fce_combined_samples(
     })
 }
 
+pub fn run_fce_combined_openings(
+    opts: &CombinedOpeningOptions,
+) -> Result<CombinedOpeningStats, String> {
+    let mut files =
+        expand_inputs(&opts.inputs).map_err(|e| format!("input discovery failed: {e}"))?;
+    files.retain(|path| path.file_name().and_then(|s| s.to_str()) == Some("fce-table-markers.pgn"));
+    if let Some(limit) = opts.limit_files {
+        files.truncate(limit);
+    }
+    if opts.output.exists() && !opts.force {
+        return Err(format!(
+            "output already exists: {} (pass --force to replace it)",
+            opts.output.display()
+        ));
+    }
+    if let Some(parent) = opts.output.parent() {
+        fs::create_dir_all(parent)
+            .map_err(|e| format!("failed to create {}: {e}", parent.display()))?;
+    }
+
+    let marker_opts = CombinedMarkerOptions {
+        inputs: opts.inputs.clone(),
+        output: None,
+        sqlite_db: None,
+        profile_id: "openings".to_string(),
+        sqlite_batch_rows: 100_000,
+        relative_to: opts.relative_to.clone(),
+        known_stems: opts.known_stems.clone(),
+        max_pieces: 0,
+        limit_files: opts.limit_files,
+        limit_games: opts.limit_games,
+        allow_parse_errors: opts.allow_parse_errors,
+        force: opts.force,
+        show_progress: opts.show_progress,
+    };
+    let mut sink = OpeningSink::new(opts.thresholds.clone());
+    let stats = process_files(&marker_opts, &files, &mut sink)?;
+    let stats = finish_or_error(&marker_opts, stats)?;
+    let temp_path = temp_output_path(&opts.output);
+    let write_result = (|| -> Result<(), String> {
+        let file = File::create(&temp_path)
+            .map_err(|e| format!("failed to create {}: {e}", temp_path.display()))?;
+        let mut writer = BufWriter::new(file);
+        sink.write_json(&mut writer)?;
+        writer
+            .flush()
+            .map_err(|e| format!("flush {} failed: {e}", temp_path.display()))
+    })();
+    match write_result {
+        Ok(()) => {
+            fs::rename(&temp_path, &opts.output).map_err(|e| {
+                format!(
+                    "failed to rename {} to {}: {e}",
+                    temp_path.display(),
+                    opts.output.display()
+                )
+            })?;
+        }
+        Err(err) => {
+            let _ = fs::remove_file(&temp_path);
+            return Err(err);
+        }
+    }
+    Ok(CombinedOpeningStats {
+        files_processed: stats.files_processed,
+        bytes_in: stats.bytes_in,
+        games_read: stats.games_read,
+        opening_rows_seen: sink.rows_seen,
+        parse_errors: stats.parse_errors,
+    })
+}
+
 trait FactSink {
     fn write_game_stem(
         &mut self,
@@ -852,8 +1047,9 @@ impl SqliteFactSink {
                 stem, max_run_length, position_count,
                 marker_index, ply_index, fullmove_number, move_san, move_uci,
                 fen, side_to_move, piece_count, run_start_ply, run_end_ply,
-                material_side, material_label, material_signature
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                material_side, material_label, material_signature,
+                eco_raw, eco_base, eco_group
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ",
         )?;
         let insert_position = db.prepare(
@@ -863,8 +1059,9 @@ impl SqliteFactSink {
                 game_index, game_key, event, site, date, round, white, black, result,
                 stem, marker_index, ply_index, fullmove_number, move_san, move_uci,
                 fen, side_to_move, piece_count, run_length, run_start_ply, run_end_ply,
-                material_side, material_label, material_signature, eval_key
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                material_side, material_label, material_signature, eval_key,
+                eco_raw, eco_base, eco_group
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ",
         )?;
         let insert_evaluation = db.prepare(
@@ -939,6 +1136,7 @@ impl FactSink for SqliteFactSink {
             .bind_text(28, stem.first_marker.material_label)?;
         self.insert_game_stem
             .bind_text(29, &stem.first_marker.material_signature)?;
+        bind_eco_fields(&mut self.insert_game_stem, game, 30)?;
         self.insert_game_stem.step_done()?;
         self.insert_game_stem.reset_clear()?;
         self.bump_rows(1)
@@ -977,6 +1175,7 @@ impl FactSink for SqliteFactSink {
         self.insert_position
             .bind_text(29, &marker.material_signature)?;
         self.insert_position.bind_text(30, &eval_key)?;
+        bind_eco_fields(&mut self.insert_position, game, 31)?;
         self.insert_position.step_done()?;
         self.insert_position.reset_clear()?;
 
@@ -1187,6 +1386,185 @@ impl FactSink for SampleSink {
     }
 }
 
+#[derive(Debug, Clone, Default)]
+struct OpeningActualCounts {
+    win: usize,
+    draw: usize,
+    loss: usize,
+    decisive: usize,
+    unknown: usize,
+}
+
+#[derive(Debug, Clone, Default)]
+struct OpeningRowCounts {
+    quantity: usize,
+    actual: OpeningActualCounts,
+}
+
+#[derive(Debug, Clone, Default)]
+struct OpeningCounts {
+    matched_rows: usize,
+    rows: BTreeMap<String, OpeningRowCounts>,
+}
+
+struct OpeningSink {
+    thresholds: Vec<usize>,
+    views: BTreeMap<String, BTreeMap<usize, BTreeMap<String, OpeningCounts>>>,
+    rows_seen: usize,
+}
+
+impl OpeningSink {
+    fn new(mut thresholds: Vec<usize>) -> Self {
+        thresholds.sort_unstable();
+        thresholds.dedup();
+        let mut views = BTreeMap::new();
+        for view in ["all", "otb", "online"] {
+            views.insert(view.to_string(), BTreeMap::new());
+        }
+        Self {
+            thresholds,
+            views,
+            rows_seen: 0,
+        }
+    }
+
+    fn add(&mut self, view: &str, threshold: usize, eco: &str, stem: &GameStemRun, result: &str) {
+        let counts = self
+            .views
+            .entry(view.to_string())
+            .or_default()
+            .entry(threshold)
+            .or_default()
+            .entry(eco.to_string())
+            .or_default();
+        counts.matched_rows += 1;
+        let row = counts.rows.entry(stem.stem.clone()).or_default();
+        row.quantity += 1;
+        match classify_result(result, stem.first_marker.material_side) {
+            "win" => row.actual.win += 1,
+            "draw" => row.actual.draw += 1,
+            "loss" => row.actual.loss += 1,
+            "decisive" => row.actual.decisive += 1,
+            _ => row.actual.unknown += 1,
+        }
+    }
+
+    fn write_json<W: Write>(&self, out: &mut W) -> Result<(), String> {
+        write!(
+            out,
+            "{{\"schemaVersion\":1,\"kind\":\"fce-opening-ending-counts\""
+        )
+        .map_err(|e| e.to_string())?;
+        write!(
+            out,
+            ",\"semantics\":\"first-run game-ending incidence by ECO base; no tablebase data\""
+        )
+        .map_err(|e| e.to_string())?;
+        write!(out, ",\"thresholds\":[").map_err(|e| e.to_string())?;
+        for (idx, threshold) in self.thresholds.iter().enumerate() {
+            if idx > 0 {
+                write!(out, ",").map_err(|e| e.to_string())?;
+            }
+            write!(out, "{threshold}").map_err(|e| e.to_string())?;
+        }
+        write!(out, "],\"views\":{{").map_err(|e| e.to_string())?;
+        for (view_idx, view) in ["all", "otb", "online"].iter().enumerate() {
+            if view_idx > 0 {
+                write!(out, ",").map_err(|e| e.to_string())?;
+            }
+            write_json_string(out, view).map_err(|e| e.to_string())?;
+            write!(out, ":{{\"thresholds\":{{").map_err(|e| e.to_string())?;
+            for (threshold_idx, threshold) in self.thresholds.iter().enumerate() {
+                if threshold_idx > 0 {
+                    write!(out, ",").map_err(|e| e.to_string())?;
+                }
+                write_json_string(out, &threshold.to_string()).map_err(|e| e.to_string())?;
+                write!(out, ":{{\"openings\":{{").map_err(|e| e.to_string())?;
+                if let Some(openings) = self.views.get(*view).and_then(|v| v.get(threshold)) {
+                    for (eco_idx, (eco, counts)) in openings.iter().enumerate() {
+                        if eco_idx > 0 {
+                            write!(out, ",").map_err(|e| e.to_string())?;
+                        }
+                        write_json_string(out, eco).map_err(|e| e.to_string())?;
+                        write!(
+                            out,
+                            ":{{\"metrics\":{{\"matchedRows\":{}}},\"rows\":{{",
+                            counts.matched_rows
+                        )
+                        .map_err(|e| e.to_string())?;
+                        for (row_idx, (stem, row)) in counts.rows.iter().enumerate() {
+                            if row_idx > 0 {
+                                write!(out, ",").map_err(|e| e.to_string())?;
+                            }
+                            write_json_string(out, stem).map_err(|e| e.to_string())?;
+                            write!(
+                                out,
+                                ":{{\"quantity\":{},\"actualResult\":{{\"totalGames\":{},\"sideWins\":{},\"sideDraws\":{},\"sideLosses\":{},\"symmetricDecisive\":{},\"unknownGames\":{}}}}}",
+                                row.quantity,
+                                row.quantity,
+                                row.actual.win,
+                                row.actual.draw,
+                                row.actual.loss,
+                                row.actual.decisive,
+                                row.actual.unknown
+                            )
+                            .map_err(|e| e.to_string())?;
+                        }
+                        write!(out, "}}}}").map_err(|e| e.to_string())?;
+                    }
+                }
+                write!(out, "}}}}").map_err(|e| e.to_string())?;
+            }
+            write!(out, "}}}}").map_err(|e| e.to_string())?;
+        }
+        writeln!(out, "}}}}").map_err(|e| e.to_string())
+    }
+}
+
+impl FactSink for OpeningSink {
+    fn write_game_stem(
+        &mut self,
+        context: &FileContext,
+        game: &GameExtraction,
+        stem: &GameStemRun,
+    ) -> Result<(), String> {
+        let eco = eco_base(game);
+        let result = header_value(game, "Result");
+        let source_group = context.source_group.as_str();
+        let thresholds = self.thresholds.clone();
+        for threshold in thresholds {
+            if stem.max_run_length < threshold {
+                continue;
+            }
+            self.rows_seen += 1;
+            self.add("all", threshold, &eco, stem, result);
+            if source_group == "otb" || source_group == "online" {
+                self.add(source_group, threshold, &eco, stem, result);
+            }
+        }
+        Ok(())
+    }
+
+    fn write_position(
+        &mut self,
+        _context: &FileContext,
+        _game: &GameExtraction,
+        _marker: &CapturedMarker,
+    ) -> Result<(), String> {
+        Ok(())
+    }
+}
+
+fn classify_result(result: &str, material_side: &str) -> &'static str {
+    match (result, material_side) {
+        ("1/2-1/2", _) => "draw",
+        ("1-0", "symmetric") | ("0-1", "symmetric") => "decisive",
+        ("1-0", "white") | ("0-1", "black") => "win",
+        ("0-1", "white") | ("1-0", "black") => "loss",
+        _ => "unknown",
+    }
+}
+
 fn process_files<S: FactSink>(
     opts: &CombinedMarkerOptions,
     files: &[PathBuf],
@@ -1197,6 +1575,8 @@ fn process_files<S: FactSink>(
         .map(|path| fs::metadata(path).map(|m| m.len()).unwrap_or(0))
         .sum();
     let progress = ProgressReporter::bytes(total_bytes, "fce combined markers", opts.show_progress);
+    let log_progress = opts.show_progress && !io::stderr().is_terminal();
+    let started = Instant::now();
     let mut stats = CombinedMarkerStats::default();
     let mut remaining_games = opts.limit_games;
 
@@ -1227,6 +1607,14 @@ fn process_files<S: FactSink>(
                 break;
             };
             stats.games_read += 1;
+            if log_progress && stats.games_read % 500_000 == 0 {
+                eprintln!(
+                    "[reti-pgn-utils] fce combined markers: {} games read across {} file(s), elapsed {}s",
+                    stats.games_read,
+                    stats.files_processed,
+                    started.elapsed().as_secs()
+                );
+            }
             if let Some(remaining) = remaining_games.as_mut() {
                 *remaining = remaining.saturating_sub(1);
             }
@@ -1346,6 +1734,7 @@ fn write_game_stem_fact<W: Write>(
         "material_signature",
         &stem.first_marker.material_signature,
     )?;
+    write_eco_fields(out, game)?;
     writeln!(out, "}}")
 }
 
@@ -1369,6 +1758,7 @@ fn write_position_fact<W: Write>(
     write_num_field(out, "run_length", marker.run_length)?;
     write_num_field(out, "run_start_ply", marker.run_start_ply)?;
     write_num_field(out, "run_end_ply", marker.run_end_ply)?;
+    write_eco_fields(out, game)?;
     writeln!(out, "}}")
 }
 
@@ -1393,6 +1783,9 @@ fn sample_example(
         black: header_value(game, "Black").to_string(),
         black_elo: header_value(game, "BlackElo").to_string(),
         result: header_value(game, "Result").to_string(),
+        eco_raw: eco_raw(game).to_string(),
+        eco_base: eco_base(game),
+        eco_group: eco_group(game),
         stem: marker.stem.clone(),
         ply_index: marker.ply_index,
         fullmove_number: marker.fullmove_number,
@@ -1426,6 +1819,9 @@ fn write_sample_example<W: Write>(out: &mut W, example: &SampleExample) -> io::R
     write_json_pair(out, "black", &example.black, false)?;
     write_json_pair(out, "blackElo", &example.black_elo, false)?;
     write_json_pair(out, "result", &example.result, false)?;
+    write_json_pair(out, "ecoRaw", &example.eco_raw, false)?;
+    write_json_pair(out, "ecoBase", &example.eco_base, false)?;
+    write_json_pair(out, "ecoGroup", &example.eco_group, false)?;
     write_json_pair(out, "stem", &example.stem, false)?;
     write_num_pair(out, "plyIndex", example.ply_index, false)?;
     write_num_pair(out, "fullmoveNumber", example.fullmove_number, false)?;
@@ -1505,8 +1901,56 @@ fn bind_common_game_fields(
     stmt.bind_text(start_index + 12, header_value(game, "Result"))
 }
 
+fn bind_eco_fields(
+    stmt: &mut SqliteStatement,
+    game: &GameExtraction,
+    start_index: c_int,
+) -> Result<(), String> {
+    stmt.bind_text(start_index, eco_raw(game))?;
+    stmt.bind_text(start_index + 1, &eco_base(game))?;
+    stmt.bind_text(start_index + 2, &eco_group(game))
+}
+
 fn header_value<'a>(game: &'a GameExtraction, key: &str) -> &'a str {
     game.headers.get(key).map(String::as_str).unwrap_or("")
+}
+
+fn eco_raw(game: &GameExtraction) -> &str {
+    header_value(game, "ECO").trim()
+}
+
+fn eco_base(game: &GameExtraction) -> String {
+    normalize_eco_base(eco_raw(game)).unwrap_or_else(|| "unknown".to_string())
+}
+
+fn eco_group(game: &GameExtraction) -> String {
+    eco_base(game)
+        .chars()
+        .next()
+        .filter(|ch| matches!(ch, 'A'..='E'))
+        .map(|ch| ch.to_string())
+        .unwrap_or_else(|| "unknown".to_string())
+}
+
+fn normalize_eco_base(raw: &str) -> Option<String> {
+    let raw = raw.trim();
+    if raw.len() < 3 {
+        return None;
+    }
+    let mut chars = raw.chars();
+    let family = chars.next()?.to_ascii_uppercase();
+    let d1 = chars.next()?;
+    let d2 = chars.next()?;
+    if !matches!(family, 'A'..='E') || !d1.is_ascii_digit() || !d2.is_ascii_digit() {
+        return None;
+    }
+    Some(format!("{family}{d1}{d2}"))
+}
+
+fn write_eco_fields<W: Write>(out: &mut W, game: &GameExtraction) -> io::Result<()> {
+    write_str_field(out, "eco_raw", eco_raw(game))?;
+    write_str_field(out, "eco_base", &eco_base(game))?;
+    write_str_field(out, "eco_group", &eco_group(game))
 }
 
 fn write_header_field<W: Write>(
@@ -1918,6 +2362,9 @@ fn ensure_sqlite_schema(db: &SqliteDb) -> Result<(), String> {
             material_side TEXT NOT NULL,
             material_label TEXT NOT NULL,
             material_signature TEXT NOT NULL,
+            eco_raw TEXT NOT NULL DEFAULT '',
+            eco_base TEXT NOT NULL DEFAULT 'unknown',
+            eco_group TEXT NOT NULL DEFAULT 'unknown',
             PRIMARY KEY(source_pgn, game_key, stem)
         );
 
@@ -1951,7 +2398,10 @@ fn ensure_sqlite_schema(db: &SqliteDb) -> Result<(), String> {
             material_side TEXT NOT NULL,
             material_label TEXT NOT NULL,
             material_signature TEXT NOT NULL,
-            eval_key TEXT NOT NULL
+            eval_key TEXT NOT NULL,
+            eco_raw TEXT NOT NULL DEFAULT '',
+            eco_base TEXT NOT NULL DEFAULT 'unknown',
+            eco_group TEXT NOT NULL DEFAULT 'unknown'
         );
 
         CREATE TABLE IF NOT EXISTS evaluations (

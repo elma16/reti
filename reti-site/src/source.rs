@@ -18,6 +18,8 @@ pub struct SourceTotals {
     #[serde(rename = "totalGames")]
     pub total_games: u64,
     pub views: BTreeMap<String, u64>,
+    #[serde(rename = "openingTotals", default)]
+    pub opening_totals: BTreeMap<String, BTreeMap<String, u64>>,
     pub files: Vec<SourceTotalFile>,
 }
 
@@ -32,6 +34,8 @@ pub struct SourceTotalFile {
     #[serde(rename = "mtimeNs")]
     pub mtime_ns: Option<u64>,
     pub games: u64,
+    #[serde(rename = "ecoBaseCounts", default)]
+    pub eco_base_counts: BTreeMap<String, u64>,
 }
 
 pub fn load_summary(run_dir: &Path) -> SiteResult<Vec<SummaryRow>> {
@@ -118,11 +122,15 @@ pub fn parse_summary_csv(text: &str, run_dir: &Path) -> SiteResult<Vec<SummaryRo
 }
 
 pub fn load_source_totals(path: &Path, summary_rows: &[SummaryRow]) -> SiteResult<SourceTotals> {
-    let text = fs::read_to_string(path)
-        .map_err(|e| SiteError::new(format!("failed to read {}: {e}", path.display())))?;
-    let totals: SourceTotals = serde_json::from_str(&text)?;
+    let totals = read_source_totals(path)?;
     validate_source_totals(&totals, summary_rows)?;
     Ok(totals)
+}
+
+pub fn read_source_totals(path: &Path) -> SiteResult<SourceTotals> {
+    let text = fs::read_to_string(path)
+        .map_err(|e| SiteError::new(format!("failed to read {}: {e}", path.display())))?;
+    Ok(serde_json::from_str(&text)?)
 }
 
 fn validate_source_totals(totals: &SourceTotals, summary_rows: &[SummaryRow]) -> SiteResult<()> {
@@ -196,6 +204,7 @@ fn validate_source_totals(totals: &SourceTotals, summary_rows: &[SummaryRow]) ->
     validate_view_total(totals, "all", all_games)?;
     validate_view_total(totals, "otb", otb_games)?;
     validate_view_total(totals, "online", online_games)?;
+    validate_opening_totals(totals)?;
     Ok(())
 }
 
@@ -213,8 +222,52 @@ fn validate_view_total(totals: &SourceTotals, view: &str, expected: u64) -> Site
     Ok(())
 }
 
+fn validate_opening_totals(totals: &SourceTotals) -> SiteResult<()> {
+    if totals.opening_totals.is_empty() {
+        return Ok(());
+    }
+    for view in ["all", "otb", "online"] {
+        let Some(openings) = totals.opening_totals.get(view) else {
+            return Err(SiteError::new(format!(
+                "source totals openingTotals missing {view:?} view"
+            )));
+        };
+        let opening_sum: u64 = openings.values().sum();
+        let view_total = total_games_for_view(totals, view);
+        if opening_sum != view_total {
+            return Err(SiteError::new(format!(
+                "source totals openingTotals {view} sum {opening_sum} but view total is {view_total}"
+            )));
+        }
+    }
+    Ok(())
+}
+
 pub fn total_games_for_view(totals: &SourceTotals, view: &str) -> u64 {
     totals.views.get(view).copied().unwrap_or(0)
+}
+
+pub fn total_games_for_opening(totals: &SourceTotals, view: &str, eco_base: &str) -> u64 {
+    totals
+        .opening_totals
+        .get(view)
+        .and_then(|values| values.get(eco_base))
+        .copied()
+        .unwrap_or(0)
+}
+
+pub fn opening_bases(totals: &SourceTotals) -> Vec<String> {
+    totals
+        .opening_totals
+        .get("all")
+        .map(|values| {
+            values
+                .keys()
+                .filter(|key| key.as_str() != "unknown")
+                .cloned()
+                .collect()
+        })
+        .unwrap_or_default()
 }
 
 pub fn source_games(totals: &SourceTotals, source_pgn: &str) -> u64 {
@@ -297,6 +350,7 @@ mod tests {
                 ("otb".to_string(), 1),
                 ("online".to_string(), 1),
             ]),
+            opening_totals: BTreeMap::new(),
             files: vec![
                 SourceTotalFile {
                     source_pgn: "LumbrasGigaBase_OTB_2025.pgn".to_string(),
@@ -304,6 +358,7 @@ mod tests {
                     size_bytes: None,
                     mtime_ns: None,
                     games: 1,
+                    eco_base_counts: BTreeMap::new(),
                 },
                 SourceTotalFile {
                     source_pgn: "LumbrasGigaBase_Online_2025.pgn".to_string(),
@@ -311,6 +366,7 @@ mod tests {
                     size_bytes: None,
                     mtime_ns: None,
                     games: 1,
+                    eco_base_counts: BTreeMap::new(),
                 },
             ],
         };

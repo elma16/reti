@@ -33,6 +33,8 @@ subcommands:
   dedup   drop duplicate games by normalized movetext
   fce-combined-markers
           export facts from combined FCE {stem}-marked PGNs
+  fce-combined-openings
+          aggregate FCE ending incidence by ECO base from combined marker PGNs
   fce-combined-samples
           sample first-marker board examples from combined FCE PGNs
   fce-markers
@@ -65,6 +67,9 @@ fn dispatch(args: &[OsString]) -> Result<i32, String> {
         Some("concat") => concat::run_subcommand(&args[1..]).map(|_| 0),
         Some("dedup") => dedup::run_subcommand(&args[1..]).map(|_| 0),
         Some("fce-combined-markers") => fce_combined_markers::run_subcommand(&args[1..]).map(|_| 0),
+        Some("fce-combined-openings") => {
+            fce_combined_markers::run_openings_subcommand(&args[1..]).map(|_| 0)
+        }
         Some("fce-combined-samples") => {
             fce_combined_markers::run_samples_subcommand(&args[1..]).map(|_| 0)
         }

@@ -8,6 +8,8 @@ pub enum Command {
     BuildFceTablebase(BuildConfig),
     RenderSnapshot(RenderConfig),
     SamplesJs(SamplesJsConfig),
+    SankeyJs(SankeyJsConfig),
+    OpeningsJs(OpeningsJsConfig),
 }
 
 #[derive(Debug, Clone)]
@@ -19,7 +21,9 @@ pub struct BuildConfig {
     pub output_dir: PathBuf,
     pub title: String,
     pub pgn_utils_bin: PathBuf,
+    pub opening_catalog_csv: Option<PathBuf>,
     pub thresholds: Vec<u32>,
+    pub sample_size: usize,
     pub workers: usize,
     pub tablebase_threshold: u32,
     pub force: bool,
@@ -35,6 +39,21 @@ pub struct RenderConfig {
 #[derive(Debug, Clone)]
 pub struct SamplesJsConfig {
     pub samples_json: PathBuf,
+    pub output_js: PathBuf,
+}
+
+#[derive(Debug, Clone)]
+pub struct SankeyJsConfig {
+    pub sqlite_db: PathBuf,
+    pub output_js: PathBuf,
+    pub thresholds: Vec<u32>,
+}
+
+#[derive(Debug, Clone)]
+pub struct OpeningsJsConfig {
+    pub opening_counts_json: PathBuf,
+    pub source_totals_json: PathBuf,
+    pub opening_catalog_csv: Option<PathBuf>,
     pub output_js: PathBuf,
 }
 
@@ -63,12 +82,91 @@ impl Args {
             "samples-js" => Ok(Self {
                 command: Command::SamplesJs(parse_samples_js(raw)?),
             }),
+            "sankey-js" => Ok(Self {
+                command: Command::SankeyJs(parse_sankey_js(raw)?),
+            }),
+            "openings-js" => Ok(Self {
+                command: Command::OpeningsJs(parse_openings_js(raw)?),
+            }),
             _ => Err(SiteError::new(format!(
                 "unknown command {command:?}\n{}",
                 usage()
             ))),
         }
     }
+}
+
+fn parse_openings_js(args: Vec<OsString>) -> SiteResult<OpeningsJsConfig> {
+    let mut opening_counts_json = None;
+    let mut source_totals_json = None;
+    let mut opening_catalog_csv = Some(PathBuf::from("data/openings/lumbras_eco_codes.csv"));
+    let mut output_js = None;
+    let mut i = 0usize;
+    while i < args.len() {
+        let arg = args[i].to_string_lossy();
+        match arg.as_ref() {
+            "--opening-counts-json" => {
+                opening_counts_json = Some(next_path(&args, &mut i, "--opening-counts-json")?);
+            }
+            "--source-totals-json" => {
+                source_totals_json = Some(next_path(&args, &mut i, "--source-totals-json")?);
+            }
+            "--opening-catalog-csv" => {
+                opening_catalog_csv = Some(next_path(&args, &mut i, "--opening-catalog-csv")?);
+            }
+            "--no-opening-catalog" => {
+                opening_catalog_csv = None;
+                i += 1;
+            }
+            "--output-js" => {
+                output_js = Some(next_path(&args, &mut i, "--output-js")?);
+            }
+            _ => {
+                return Err(SiteError::new(format!(
+                    "unknown openings-js option {arg:?}\n{}",
+                    openings_js_usage()
+                )));
+            }
+        }
+    }
+    Ok(OpeningsJsConfig {
+        opening_counts_json: required(opening_counts_json, "--opening-counts-json")?,
+        source_totals_json: required(source_totals_json, "--source-totals-json")?,
+        opening_catalog_csv,
+        output_js: required(output_js, "--output-js")?,
+    })
+}
+
+fn parse_sankey_js(args: Vec<OsString>) -> SiteResult<SankeyJsConfig> {
+    let mut sqlite_db = None;
+    let mut output_js = None;
+    let mut thresholds = vec![1, 2, 5, 10, 20];
+    let mut i = 0usize;
+    while i < args.len() {
+        let arg = args[i].to_string_lossy();
+        match arg.as_ref() {
+            "--sqlite-db" => {
+                sqlite_db = Some(next_path(&args, &mut i, "--sqlite-db")?);
+            }
+            "--output-js" => {
+                output_js = Some(next_path(&args, &mut i, "--output-js")?);
+            }
+            "--thresholds" => {
+                thresholds = parse_thresholds(&next_string(&args, &mut i, "--thresholds")?)?;
+            }
+            _ => {
+                return Err(SiteError::new(format!(
+                    "unknown sankey-js option {arg:?}\n{}",
+                    sankey_js_usage()
+                )));
+            }
+        }
+    }
+    Ok(SankeyJsConfig {
+        sqlite_db: required(sqlite_db, "--sqlite-db")?,
+        output_js: required(output_js, "--output-js")?,
+        thresholds,
+    })
 }
 
 fn parse_samples_js(args: Vec<OsString>) -> SiteResult<SamplesJsConfig> {
@@ -106,7 +204,9 @@ fn parse_build(args: Vec<OsString>) -> SiteResult<BuildConfig> {
     let mut output_dir = None;
     let mut title = None;
     let mut pgn_utils_bin = PathBuf::from("native/pgn-utils/target/release/reti-pgn-utils");
+    let mut opening_catalog_csv = Some(PathBuf::from("data/openings/lumbras_eco_codes.csv"));
     let mut thresholds = vec![1, 2, 5, 10, 20];
+    let mut sample_size = 32usize;
     let mut workers = 1usize;
     let mut tablebase_threshold = 5u32;
     let mut force = false;
@@ -137,8 +237,21 @@ fn parse_build(args: Vec<OsString>) -> SiteResult<BuildConfig> {
             "--pgn-utils-bin" => {
                 pgn_utils_bin = next_path(&args, &mut i, "--pgn-utils-bin")?;
             }
+            "--opening-catalog-csv" => {
+                opening_catalog_csv = Some(next_path(&args, &mut i, "--opening-catalog-csv")?);
+            }
+            "--no-opening-catalog" => {
+                opening_catalog_csv = None;
+                i += 1;
+            }
             "--thresholds" => {
                 thresholds = parse_thresholds(&next_string(&args, &mut i, "--thresholds")?)?;
+            }
+            "--sample-size" => {
+                sample_size = parse_positive_usize(
+                    &next_string(&args, &mut i, "--sample-size")?,
+                    "--sample-size",
+                )?;
             }
             "--workers" => {
                 workers =
@@ -184,7 +297,9 @@ fn parse_build(args: Vec<OsString>) -> SiteResult<BuildConfig> {
         output_dir: required(output_dir, "--output-dir")?,
         title: required(title, "--title")?,
         pgn_utils_bin,
+        opening_catalog_csv,
         thresholds,
+        sample_size,
         workers,
         tablebase_threshold,
         force,
@@ -274,11 +389,11 @@ fn parse_positive_u32(raw: &str, flag: &str) -> SiteResult<u32> {
 }
 
 fn usage() -> &'static str {
-    "usage: reti-site <build-fce-tablebase|render-snapshot|samples-js> [options]"
+    "usage: reti-site <build-fce-tablebase|render-snapshot|samples-js|sankey-js|openings-js> [options]"
 }
 
 fn build_usage() -> &'static str {
-    "usage: reti-site build-fce-tablebase --annotated-run-dir DIR --source-totals-json FILE --syzygy-dir DIR --output-dir DIR --title TITLE [--work-dir DIR] [--workers N] [--thresholds 1,2,5,10,20]"
+    "usage: reti-site build-fce-tablebase --annotated-run-dir DIR --source-totals-json FILE --syzygy-dir DIR --output-dir DIR --title TITLE [--work-dir DIR] [--workers N] [--thresholds 1,2,5,10,20] [--sample-size 32] [--opening-catalog-csv FILE|--no-opening-catalog]"
 }
 
 fn render_usage() -> &'static str {
@@ -287,6 +402,14 @@ fn render_usage() -> &'static str {
 
 fn samples_js_usage() -> &'static str {
     "usage: reti-site samples-js --samples-json FILE --output-js FILE"
+}
+
+fn sankey_js_usage() -> &'static str {
+    "usage: reti-site sankey-js --sqlite-db FILE --output-js FILE [--thresholds 1,2,5,10,20]"
+}
+
+fn openings_js_usage() -> &'static str {
+    "usage: reti-site openings-js --opening-counts-json FILE --source-totals-json FILE --output-js FILE [--opening-catalog-csv FILE|--no-opening-catalog]"
 }
 
 #[cfg(test)]
@@ -336,6 +459,50 @@ mod tests {
     }
 
     #[test]
+    fn parses_build_sample_size() {
+        let args = Args::parse([
+            OsString::from("build-fce-tablebase"),
+            OsString::from("--annotated-run-dir"),
+            OsString::from("run"),
+            OsString::from("--source-totals-json"),
+            OsString::from("totals.json"),
+            OsString::from("--syzygy-dir"),
+            OsString::from("tb"),
+            OsString::from("--output-dir"),
+            OsString::from("out"),
+            OsString::from("--title"),
+            OsString::from("T"),
+            OsString::from("--sample-size"),
+            OsString::from("12"),
+        ])
+        .unwrap();
+        match args.command {
+            Command::BuildFceTablebase(config) => {
+                assert_eq!(config.sample_size, 12);
+            }
+            _ => panic!("wrong command"),
+        }
+
+        let err = Args::parse([
+            OsString::from("build-fce-tablebase"),
+            OsString::from("--annotated-run-dir"),
+            OsString::from("run"),
+            OsString::from("--source-totals-json"),
+            OsString::from("totals.json"),
+            OsString::from("--syzygy-dir"),
+            OsString::from("tb"),
+            OsString::from("--output-dir"),
+            OsString::from("out"),
+            OsString::from("--title"),
+            OsString::from("T"),
+            OsString::from("--sample-size"),
+            OsString::from("0"),
+        ])
+        .unwrap_err();
+        assert!(err.to_string().contains("--sample-size must be positive"));
+    }
+
+    #[test]
     fn parses_samples_js() {
         let args = Args::parse([
             OsString::from("samples-js"),
@@ -349,6 +516,58 @@ mod tests {
             Command::SamplesJs(config) => {
                 assert_eq!(config.samples_json, PathBuf::from("samples.json"));
                 assert_eq!(config.output_js, PathBuf::from("sampled_examples.js"));
+            }
+            _ => panic!("wrong command"),
+        }
+    }
+
+    #[test]
+    fn parses_sankey_js() {
+        let args = Args::parse([
+            OsString::from("sankey-js"),
+            OsString::from("--sqlite-db"),
+            OsString::from("evaluations.sqlite3"),
+            OsString::from("--output-js"),
+            OsString::from("sankey.js"),
+            OsString::from("--thresholds"),
+            OsString::from("1,5"),
+        ])
+        .unwrap();
+        match args.command {
+            Command::SankeyJs(config) => {
+                assert_eq!(config.sqlite_db, PathBuf::from("evaluations.sqlite3"));
+                assert_eq!(config.output_js, PathBuf::from("sankey.js"));
+                assert_eq!(config.thresholds, vec![1, 5]);
+            }
+            _ => panic!("wrong command"),
+        }
+    }
+
+    #[test]
+    fn parses_openings_js() {
+        let args = Args::parse([
+            OsString::from("openings-js"),
+            OsString::from("--opening-counts-json"),
+            OsString::from("opening_counts.json"),
+            OsString::from("--source-totals-json"),
+            OsString::from("source_totals.json"),
+            OsString::from("--output-js"),
+            OsString::from("openings.js"),
+            OsString::from("--no-opening-catalog"),
+        ])
+        .unwrap();
+        match args.command {
+            Command::OpeningsJs(config) => {
+                assert_eq!(
+                    config.opening_counts_json,
+                    PathBuf::from("opening_counts.json")
+                );
+                assert_eq!(
+                    config.source_totals_json,
+                    PathBuf::from("source_totals.json")
+                );
+                assert_eq!(config.output_js, PathBuf::from("openings.js"));
+                assert!(config.opening_catalog_csv.is_none());
             }
             _ => panic!("wrong command"),
         }

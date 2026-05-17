@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FCE Ending Distribution by Opening</title>
+  <script>
+    try {
+      const theme = localStorage.getItem("fce-theme");
+      if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme;
+    } catch (error) {}
+  </script>
+  <link rel="stylesheet" href="fce.css">
+</head>
+<body>
+<main>
+  <header class="page-head">
+    <div class="header-main">
+      <div>
+        <p class="eyebrow">Fundamental Chess Endings snapshot</p>
+        <h1>Ending Distributions by Opening</h1>
+        <p class="byline">One ECO base code at a time, with exact incidence counts from the combined FCE marker run.</p>
+        <nav class="page-nav" aria-label="Site views">
+          <a href="index.html">Statistics table</a>
+          <a href="sankey.html">Ending transitions</a>
+          <a class="active" href="openings.html">Opening distributions</a>
+        </nav>
+      </div>
+      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle light and dark mode">
+        <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.8 6.8 0 0 0 9.8 9.8z"></path></svg>
+        <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>
+      </button>
+    </div>
+  </header>
+
+  <section class="article-intro" aria-labelledby="opening-method-title">
+    <h2 id="opening-method-title">What This Page Counts</h2>
+    <p>Select one ECO base code, such as B90, and the table shows how often each FCE ending appears in games with that opening code. The denominator for Opening corpus % is the exact number of source games with that ECO base in the selected corpus.</p>
+    <p>The counts use the same first-run semantics as the main table: each game can count once for each ending stem if the first run for that stem meets the selected half-move threshold. Tablebase columns and example games are intentionally omitted here.</p>
+  </section>
+
+  <div class="controls opening-controls">
+    <div class="control-group opening-search-group">
+      <strong>Opening</strong>
+      <input id="opening-search" class="opening-search" type="search" list="opening-options" autocomplete="off" spellcheck="false" aria-label="Opening ECO code or name">
+      <datalist id="opening-options"></datalist>
+    </div>
+    <div class="control-group"><strong>Corpus</strong> <span class="seg" id="opening-view-controls"></span></div>
+    <div class="control-group"><strong>Minimum half-moves</strong> <span class="seg" id="opening-threshold-controls"></span></div>
+    <div class="control-group"><strong>Display</strong> <span class="seg" id="opening-mode-controls"></span></div>
+    <div class="control-group"><strong>Bars shown</strong> <span class="seg" id="opening-limit-controls"></span></div>
+  </div>
+
+  <div class="metrics" id="opening-metrics"></div>
+
+  <section class="opening-chart-panel" id="opening-chart-panel" aria-labelledby="opening-chart-title">
+    <h2 id="opening-chart-title">Distribution</h2>
+    <div id="opening-bars" class="opening-bars"></div>
+  </section>
+
+  <div class="table-wrap" id="opening-table-wrap">
+    <table id="opening-table">
+      <thead></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</main>
+<script src="snapshot.js"></script>
+<script src="openings.js"></script>
+<script src="fce-openings.js"></script>
+</body>
+</html>

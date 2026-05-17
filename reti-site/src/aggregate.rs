@@ -2,7 +2,11 @@ use serde::Serialize;
 use std::collections::BTreeMap;
 
 use crate::catalog;
-use crate::source::{source_bucket_label, source_games, total_games_for_view, SourceTotals};
+use crate::openings::{OpeningCatalog, OpeningOption};
+use crate::source::{
+    opening_bases, source_bucket_label, source_games, total_games_for_opening,
+    total_games_for_view, SourceTotals,
+};
 use crate::sqlite::{Db, SQLITE_ROW};
 use crate::{SiteError, SiteResult};
 
@@ -23,6 +27,8 @@ pub struct Snapshot {
     pub source_buckets: Vec<SourceBucket>,
     #[serde(rename = "datasetViews")]
     pub dataset_views: DatasetViews,
+    #[serde(rename = "openingFilters", skip_serializing_if = "Option::is_none")]
+    pub opening_filters: Option<OpeningFilters>,
     pub rows: Vec<DisplayRow>,
     #[serde(rename = "tablebaseMode")]
     pub tablebase_mode: String,
@@ -79,6 +85,20 @@ pub struct ThresholdView {
     pub rows: BTreeMap<String, RowStats>,
     #[serde(rename = "sourceBuckets")]
     pub source_buckets: BTreeMap<String, SourceThresholdStats>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct OpeningFilters {
+    pub default: &'static str,
+    pub exactness: &'static str,
+    pub semantics: &'static str,
+    pub options: Vec<OpeningOption>,
+    pub views: BTreeMap<String, OpeningDatasetViews>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct OpeningDatasetViews {
+    pub views: BTreeMap<String, View>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -200,10 +220,16 @@ pub fn ensure_indexes(db: &Db) -> SiteResult<()> {
         "
         CREATE INDEX IF NOT EXISTS idx_game_stems_view_threshold
             ON game_stems(source_group, max_run_length, stem);
+        CREATE INDEX IF NOT EXISTS idx_game_stems_opening_threshold
+            ON game_stems(eco_base, source_group, max_run_length, stem);
         CREATE INDEX IF NOT EXISTS idx_game_stems_game
             ON game_stems(source_group, source_pgn, game_key);
+        CREATE INDEX IF NOT EXISTS idx_game_stems_sankey
+            ON game_stems(source_group, source_pgn, game_key, ply_index, stem, max_run_length);
         CREATE INDEX IF NOT EXISTS idx_positions_view_threshold
             ON positions(source_group, run_length, stem);
+        CREATE INDEX IF NOT EXISTS idx_positions_opening_threshold
+            ON positions(eco_base, source_group, run_length, stem);
         CREATE INDEX IF NOT EXISTS idx_positions_eval_key
             ON positions(eval_key);
         CREATE INDEX IF NOT EXISTS idx_evaluations_status
@@ -218,6 +244,7 @@ pub fn build_snapshot(
     snapshot_id: String,
     generated_at: String,
     source_totals: &SourceTotals,
+    opening_catalog: &OpeningCatalog,
     thresholds: &[u32],
 ) -> SiteResult<Snapshot> {
     let mut views = BTreeMap::new();
@@ -228,7 +255,7 @@ pub fn build_snapshot(
                 key: key.to_string(),
                 label: label.to_string(),
                 total_games: total_games_for_view(source_totals, key),
-                threshold_views: build_threshold_views(db, source_totals, key, thresholds)?,
+                threshold_views: build_threshold_views(db, source_totals, key, None, thresholds)?,
             },
         );
     }
@@ -276,6 +303,7 @@ pub fn build_snapshot(
             default: "all",
             views,
         },
+        opening_filters: build_opening_filters(db, source_totals, opening_catalog, thresholds)?,
         rows: display_rows(),
         tablebase_mode: "combined-first-marker-rust-v2".to_string(),
     })
@@ -285,33 +313,31 @@ fn build_threshold_views(
     db: &Db,
     source_totals: &SourceTotals,
     view: &str,
+    eco_base: Option<&str>,
     thresholds: &[u32],
 ) -> SiteResult<BTreeMap<String, ThresholdView>> {
-    let total_games = total_games_for_view(source_totals, view);
+    let total_games = eco_base
+        .map(|eco| total_games_for_opening(source_totals, view, eco))
+        .unwrap_or_else(|| total_games_for_view(source_totals, view));
     let mut out = BTreeMap::new();
     for threshold in thresholds {
+        let where_clause = threshold_where(*threshold, view, eco_base, "");
         let matched_rows = scalar_count(
             db,
-            &format!(
-                "SELECT COUNT(*) FROM game_stems WHERE max_run_length >= {}{}",
-                threshold,
-                view_where(view, "")
-            ),
+            &format!("SELECT COUNT(*) FROM game_stems WHERE {where_clause}"),
         )?;
         let matched_games = scalar_count(
             db,
             &format!(
-                "SELECT COUNT(*) FROM (SELECT source_pgn, game_key FROM game_stems WHERE max_run_length >= {}{} GROUP BY source_pgn, game_key)",
-                threshold,
-                view_where(view, "")
+                "SELECT COUNT(*) FROM (SELECT source_pgn, game_key FROM game_stems WHERE {where_clause} GROUP BY source_pgn, game_key)"
             ),
         )?;
-        let mut rows = incidence_rows(db, view, *threshold, total_games, matched_rows)?;
-        let actual = actual_result_rows(db, view, *threshold)?;
+        let mut rows = incidence_rows(db, view, eco_base, *threshold, total_games, matched_rows)?;
+        let actual = actual_result_rows(db, view, eco_base, *threshold)?;
         for (stem, stats) in actual {
             rows.entry(stem).or_default().actual_result = stats;
         }
-        let wdl = wdl_rows(db, view, *threshold)?;
+        let wdl = wdl_rows(db, view, eco_base, *threshold)?;
         for (stem, stats) in wdl {
             rows.entry(stem).or_default().tablebase_wdl = stats;
         }
@@ -329,7 +355,11 @@ fn build_threshold_views(
                     tablebase_positions,
                 },
                 rows,
-                source_buckets: source_thresholds(db, view, *threshold)?,
+                source_buckets: if eco_base.is_none() {
+                    source_thresholds(db, view, *threshold)?
+                } else {
+                    BTreeMap::new()
+                },
             },
         );
     }
@@ -339,18 +369,22 @@ fn build_threshold_views(
 fn incidence_rows(
     db: &Db,
     view: &str,
+    eco_base: Option<&str>,
     threshold: u32,
     total_games: u64,
     matched_rows: u64,
 ) -> SiteResult<BTreeMap<String, RowStats>> {
-    let mut rows: BTreeMap<String, RowStats> = catalog::known_stems()
-        .into_iter()
-        .map(|stem| (stem, RowStats::default()))
-        .collect();
+    let mut rows: BTreeMap<String, RowStats> = if eco_base.is_none() {
+        catalog::known_stems()
+            .into_iter()
+            .map(|stem| (stem, RowStats::default()))
+            .collect()
+    } else {
+        BTreeMap::new()
+    };
     let sql = format!(
-        "SELECT stem, COUNT(*) FROM game_stems WHERE max_run_length >= {}{} GROUP BY stem",
-        threshold,
-        view_where(view, "")
+        "SELECT stem, COUNT(*) FROM game_stems WHERE {} GROUP BY stem",
+        threshold_where(threshold, view, eco_base, "")
     );
     let mut stmt = db.prepare(&sql)?;
     while stmt.step()? == SQLITE_ROW {
@@ -367,6 +401,7 @@ fn incidence_rows(
 fn actual_result_rows(
     db: &Db,
     view: &str,
+    eco_base: Option<&str>,
     threshold: u32,
 ) -> SiteResult<BTreeMap<String, ActualStats>> {
     let sql = format!(
@@ -384,7 +419,7 @@ fn actual_result_rows(
                     ELSE 'unknown'
                 END AS result_outcome
             FROM game_stems
-            WHERE max_run_length >= {}{}
+            WHERE {}
         )
         SELECT stem,
                COUNT(*),
@@ -395,8 +430,7 @@ fn actual_result_rows(
                SUM(CASE WHEN result_outcome = 'unknown' THEN 1 ELSE 0 END)
         FROM classified GROUP BY stem
         ",
-        threshold,
-        view_where(view, "")
+        threshold_where(threshold, view, eco_base, "")
     );
     let mut out = BTreeMap::new();
     let mut stmt = db.prepare(&sql)?;
@@ -416,8 +450,13 @@ fn actual_result_rows(
     Ok(out)
 }
 
-fn wdl_rows(db: &Db, view: &str, threshold: u32) -> SiteResult<BTreeMap<String, WdlStats>> {
-    let mut crosstabs = result_crosstab_rows(db, view, threshold)?;
+fn wdl_rows(
+    db: &Db,
+    view: &str,
+    eco_base: Option<&str>,
+    threshold: u32,
+) -> SiteResult<BTreeMap<String, WdlStats>> {
+    let mut crosstabs = result_crosstab_rows(db, view, eco_base, threshold)?;
     let sql = format!(
         "
         WITH classified AS (
@@ -447,7 +486,7 @@ fn wdl_rows(db: &Db, view: &str, threshold: u32) -> SiteResult<BTreeMap<String, 
                     ELSE 'unknown'
                 END AS result_outcome
             FROM positions p JOIN evaluations e ON e.eval_key = p.eval_key
-            WHERE p.run_length >= {}{}
+            WHERE {}
         )
         SELECT stem,
                COUNT(*),
@@ -462,8 +501,7 @@ fn wdl_rows(db: &Db, view: &str, threshold: u32) -> SiteResult<BTreeMap<String, 
                SUM(CASE WHEN result_outcome = 'decisive' THEN 1 ELSE 0 END)
         FROM classified GROUP BY stem
         ",
-        threshold,
-        view_where(view, "p.")
+        threshold_where(threshold, view, eco_base, "p.")
     );
     let mut out = BTreeMap::new();
     let mut stmt = db.prepare(&sql)?;
@@ -491,6 +529,7 @@ fn wdl_rows(db: &Db, view: &str, threshold: u32) -> SiteResult<BTreeMap<String, 
 fn result_crosstab_rows(
     db: &Db,
     view: &str,
+    eco_base: Option<&str>,
     threshold: u32,
 ) -> SiteResult<BTreeMap<String, ResultCrosstab>> {
     let sql = format!(
@@ -518,14 +557,13 @@ fn result_crosstab_rows(
                     ELSE 'unknown'
                 END AS result_outcome
             FROM positions p JOIN evaluations e ON e.eval_key = p.eval_key
-            WHERE p.run_length >= {}{}
+            WHERE {}
         )
         SELECT stem, tb_outcome, result_outcome, COUNT(*)
         FROM classified
         GROUP BY stem, tb_outcome, result_outcome
         ",
-        threshold,
-        view_where(view, "p.")
+        threshold_where(threshold, view, eco_base, "p.")
     );
     let mut counts: BTreeMap<String, BTreeMap<String, OutcomeCounts>> = BTreeMap::new();
     let mut stmt = db.prepare(&sql)?;
@@ -566,6 +604,64 @@ fn result_crosstab_rows(
         out.insert(stem, ResultCrosstab { rows });
     }
     Ok(out)
+}
+
+fn build_opening_filters(
+    db: &Db,
+    source_totals: &SourceTotals,
+    opening_catalog: &OpeningCatalog,
+    thresholds: &[u32],
+) -> SiteResult<Option<OpeningFilters>> {
+    let bases = opening_bases(source_totals);
+    if bases.is_empty() {
+        return Ok(None);
+    }
+    let mut options = Vec::new();
+    let mut views_by_opening = BTreeMap::new();
+    let total_bases = bases.len();
+    for (index, eco_base) in bases.into_iter().enumerate() {
+        if index == 0 || (index + 1) % 25 == 0 || index + 1 == total_bases {
+            eprintln!(
+                "[reti-site] Aggregating opening filters: {}/{} {}",
+                index + 1,
+                total_bases,
+                eco_base
+            );
+        }
+        let total_games = total_games_for_opening(source_totals, "all", &eco_base);
+        if total_games == 0 {
+            continue;
+        }
+        let option = opening_catalog.option_for_base(&eco_base, total_games);
+        let mut views = BTreeMap::new();
+        for (key, label) in [("all", "All"), ("otb", "OTB"), ("online", "Online")] {
+            views.insert(
+                key.to_string(),
+                View {
+                    key: key.to_string(),
+                    label: label.to_string(),
+                    total_games: total_games_for_opening(source_totals, key, &eco_base),
+                    threshold_views: build_threshold_views(
+                        db,
+                        source_totals,
+                        key,
+                        Some(&eco_base),
+                        thresholds,
+                    )?,
+                },
+            );
+        }
+        views_by_opening.insert(option.key.clone(), OpeningDatasetViews { views });
+        options.push(option);
+    }
+    options.sort_by(|a, b| a.eco_base.cmp(&b.eco_base).then(a.label.cmp(&b.label)));
+    Ok(Some(OpeningFilters {
+        default: "all",
+        exactness: "exact",
+        semantics: "opening filters use standard ECO base codes A00-E99; extended Lumbra ECO tags are normalized to their first three characters",
+        options,
+        views: views_by_opening,
+    }))
 }
 
 fn source_thresholds(
@@ -679,6 +775,24 @@ fn view_where(view: &str, alias: &str) -> String {
         "otb" | "online" => format!(" AND {alias}source_group = '{view}'"),
         _ => unreachable!("unknown view"),
     }
+}
+
+fn threshold_where(threshold: u32, view: &str, eco_base: Option<&str>, alias: &str) -> String {
+    let run_column = if alias == "p." {
+        "run_length"
+    } else {
+        "max_run_length"
+    };
+    let mut clauses = vec![format!("{alias}{run_column} >= {threshold}")];
+    match view {
+        "all" => {}
+        "otb" | "online" => clauses.push(format!("{alias}source_group = '{view}'")),
+        _ => unreachable!("unknown view"),
+    }
+    if let Some(eco_base) = eco_base {
+        clauses.push(format!("{alias}eco_base = '{}'", escape_sql(eco_base)));
+    }
+    clauses.join(" AND ")
 }
 
 fn pct(numerator: u64, denominator: u64) -> f64 {

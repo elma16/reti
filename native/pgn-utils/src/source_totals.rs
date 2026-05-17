@@ -41,6 +41,7 @@ pub struct SourceFileTotal {
     pub size_bytes: u64,
     pub modified_unix_nanos: u128,
     pub games: usize,
+    pub eco_base_counts: BTreeMap<String, usize>,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -49,6 +50,7 @@ pub struct SourceTotals {
     pub bytes_in: u64,
     pub total_games: usize,
     pub views: BTreeMap<String, usize>,
+    pub opening_totals: BTreeMap<String, BTreeMap<String, usize>>,
     pub files: Vec<SourceFileTotal>,
 }
 
@@ -71,6 +73,23 @@ impl SourceTotals {
             out.push(':');
             out.push_str(&value.to_string());
         }
+        out.push_str("},\"openingTotals\":{");
+        for (view_index, (view, totals)) in self.opening_totals.iter().enumerate() {
+            if view_index > 0 {
+                out.push(',');
+            }
+            out.push_str(&json_string(view));
+            out.push_str(":{");
+            for (eco_index, (eco, games)) in totals.iter().enumerate() {
+                if eco_index > 0 {
+                    out.push(',');
+                }
+                out.push_str(&json_string(eco));
+                out.push(':');
+                out.push_str(&games.to_string());
+            }
+            out.push('}');
+        }
         out.push_str("},\"files\":[");
         for (index, file) in self.files.iter().enumerate() {
             if index > 0 {
@@ -87,6 +106,16 @@ impl SourceTotals {
                 ",\"sizeBytes\":{},\"mtimeNs\":{},\"games\":{}",
                 file.size_bytes, file.modified_unix_nanos, file.games
             ));
+            out.push_str(",\"ecoBaseCounts\":{");
+            for (eco_index, (eco, games)) in file.eco_base_counts.iter().enumerate() {
+                if eco_index > 0 {
+                    out.push(',');
+                }
+                out.push_str(&json_string(eco));
+                out.push(':');
+                out.push_str(&games.to_string());
+            }
+            out.push('}');
             out.push('}');
         }
         out.push_str("]}");
@@ -109,6 +138,10 @@ pub fn run_source_totals(opts: SourceTotalsOptions) -> io::Result<SourceTotals> 
     views.insert("online".to_string(), 0usize);
     views.insert("otb".to_string(), 0usize);
     views.insert("unknown".to_string(), 0usize);
+    let mut opening_totals: BTreeMap<String, BTreeMap<String, usize>> = BTreeMap::new();
+    for view in ["all", "online", "otb", "unknown"] {
+        opening_totals.insert(view.to_string(), BTreeMap::new());
+    }
 
     for path in &files {
         let metadata = fs::metadata(path)?;
@@ -126,10 +159,17 @@ pub fn run_source_totals(opts: SourceTotalsOptions) -> io::Result<SourceTotals> 
 
         let file = File::open(path)?;
         let reader = BufReader::new(progress.wrap(file));
-        let games = count_event_tags(reader)?;
+        let file_counts = count_games_and_eco_bases(reader)?;
+        let games = file_counts.games;
         let source_group = classify_source_group(&source_pgn).to_string();
         *views.entry("all".to_string()).or_insert(0) += games;
         *views.entry(source_group.clone()).or_insert(0) += games;
+        add_opening_counts(&mut opening_totals, "all", &file_counts.eco_base_counts);
+        add_opening_counts(
+            &mut opening_totals,
+            &source_group,
+            &file_counts.eco_base_counts,
+        );
 
         let modified_unix_nanos = metadata
             .modified()
@@ -148,6 +188,7 @@ pub fn run_source_totals(opts: SourceTotalsOptions) -> io::Result<SourceTotals> 
             size_bytes: metadata.len(),
             modified_unix_nanos,
             games,
+            eco_base_counts: file_counts.eco_base_counts,
         });
     }
 
@@ -158,12 +199,22 @@ pub fn run_source_totals(opts: SourceTotalsOptions) -> io::Result<SourceTotals> 
         bytes_in: total_bytes,
         total_games,
         views,
+        opening_totals,
         files: file_totals,
     })
 }
 
-fn count_event_tags<R: BufRead>(mut reader: R) -> io::Result<usize> {
-    let mut count = 0usize;
+#[derive(Debug, Clone, Eq, PartialEq)]
+struct FileCounts {
+    games: usize,
+    eco_base_counts: BTreeMap<String, usize>,
+}
+
+fn count_games_and_eco_bases<R: BufRead>(mut reader: R) -> io::Result<FileCounts> {
+    let mut games = 0usize;
+    let mut eco_base_counts = BTreeMap::new();
+    let mut in_game = false;
+    let mut current_eco_base: Option<String> = None;
     let mut line = Vec::new();
     loop {
         line.clear();
@@ -171,11 +222,47 @@ fn count_event_tags<R: BufRead>(mut reader: R) -> io::Result<usize> {
         if n == 0 {
             break;
         }
-        if is_event_line(strip_eol(&line)) {
-            count += 1;
+        let clean = strip_eol(&line);
+        if is_event_line(clean) {
+            if in_game {
+                games += 1;
+                let eco = current_eco_base
+                    .take()
+                    .unwrap_or_else(|| "unknown".to_string());
+                *eco_base_counts.entry(eco).or_insert(0) += 1;
+            }
+            in_game = true;
+        } else if in_game && current_eco_base.is_none() {
+            if let Some(eco) = eco_base_from_tag_line(clean) {
+                current_eco_base = Some(eco);
+            }
         }
     }
-    Ok(count)
+    if in_game {
+        games += 1;
+        let eco = current_eco_base.unwrap_or_else(|| "unknown".to_string());
+        *eco_base_counts.entry(eco).or_insert(0) += 1;
+    }
+    Ok(FileCounts {
+        games,
+        eco_base_counts,
+    })
+}
+
+#[cfg(test)]
+fn count_event_tags<R: BufRead>(reader: R) -> io::Result<usize> {
+    Ok(count_games_and_eco_bases(reader)?.games)
+}
+
+fn add_opening_counts(
+    opening_totals: &mut BTreeMap<String, BTreeMap<String, usize>>,
+    view: &str,
+    counts: &BTreeMap<String, usize>,
+) {
+    let view_totals = opening_totals.entry(view.to_string()).or_default();
+    for (eco, games) in counts {
+        *view_totals.entry(eco.clone()).or_insert(0) += *games;
+    }
 }
 
 fn strip_eol(line: &[u8]) -> &[u8] {
@@ -192,6 +279,33 @@ fn strip_eol(line: &[u8]) -> &[u8] {
 fn is_event_line(line: &[u8]) -> bool {
     let trimmed = trim_ascii_start(line);
     trimmed.starts_with(b"[Event ") || trimmed.starts_with(b"[Event\t")
+}
+
+fn eco_base_from_tag_line(line: &[u8]) -> Option<String> {
+    let trimmed = trim_ascii_start(line);
+    if !(trimmed.starts_with(b"[ECO ") || trimmed.starts_with(b"[ECO\t")) {
+        return None;
+    }
+    let first_quote = trimmed.iter().position(|&b| b == b'"')?;
+    let rest = &trimmed[first_quote + 1..];
+    let second_quote = rest.iter().position(|&b| b == b'"')?;
+    let raw = std::str::from_utf8(&rest[..second_quote]).ok()?.trim();
+    normalize_eco_base(raw)
+}
+
+fn normalize_eco_base(raw: &str) -> Option<String> {
+    let raw = raw.trim();
+    if raw.len() < 3 {
+        return None;
+    }
+    let mut chars = raw.chars();
+    let family = chars.next()?.to_ascii_uppercase();
+    let d1 = chars.next()?;
+    let d2 = chars.next()?;
+    if !matches!(family, 'A'..='E') || !d1.is_ascii_digit() || !d2.is_ascii_digit() {
+        return None;
+    }
+    Some(format!("{family}{d1}{d2}"))
 }
 
 fn trim_ascii_start(line: &[u8]) -> &[u8] {
@@ -327,6 +441,23 @@ mod tests {
     fn counts_event_tag_lines() {
         let input = b" [Event \"a\"]\n[Site \"?\"]\n\n1. e4 *\n\t[Event \"b\"]\n\n1. d4 *\n";
         assert_eq!(count_event_tags(Cursor::new(input)).unwrap(), 2);
+    }
+
+    #[test]
+    fn counts_eco_bases_per_game() {
+        let input = b"[Event \"a\"]\n[ECO \"A00q\"]\n\n1. b4 *\n[Event \"b\"]\n[Site \"?\"]\n\n1. d4 *\n[Event \"c\"]\n[ECO \"e99\"]\n\n1. d4 *\n";
+        let counts = count_games_and_eco_bases(Cursor::new(input)).unwrap();
+        assert_eq!(counts.games, 3);
+        assert_eq!(counts.eco_base_counts.get("A00"), Some(&1));
+        assert_eq!(counts.eco_base_counts.get("E99"), Some(&1));
+        assert_eq!(counts.eco_base_counts.get("unknown"), Some(&1));
+    }
+
+    #[test]
+    fn normalizes_eco_base_from_extended_code() {
+        assert_eq!(normalize_eco_base("A00q").as_deref(), Some("A00"));
+        assert_eq!(normalize_eco_base("e99").as_deref(), Some("E99"));
+        assert_eq!(normalize_eco_base("X99"), None);
     }
 
     #[test]

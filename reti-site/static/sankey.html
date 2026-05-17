@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FCE Ending Transitions in Lumbra's Gigabase</title>
+  <script>
+    try {
+      const theme = localStorage.getItem("fce-theme");
+      if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme;
+    } catch (error) {}
+  </script>
+  <link rel="stylesheet" href="fce.css">
+</head>
+<body>
+<main>
+  <header class="page-head">
+    <div class="header-main">
+      <div>
+        <p class="eyebrow">Fundamental Chess Endings snapshot</p>
+        <h1>Consecutive FCE Ending Transitions</h1>
+        <p class="byline">A separate view of how endings first appear after one another in the same games.</p>
+        <nav class="page-nav" aria-label="Site views">
+          <a href="index.html">Statistics table</a>
+          <a class="active" href="sankey.html">Ending transitions</a>
+        </nav>
+      </div>
+      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle light and dark mode">
+        <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.8 6.8 0 0 0 9.8 9.8z"></path></svg>
+        <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>
+      </button>
+    </div>
+  </header>
+
+  <section class="article-intro sankey-method" aria-labelledby="sankey-method-title">
+    <h2 id="sankey-method-title">What This Diagram Counts</h2>
+    <p>Each node is one FCE ending row, including the auxiliary pawnless and connected-pawn subrows used in the table. For a selected corpus and half-move threshold, each game contributes the endings whose first run meets that threshold.</p>
+    <p>Within a game, those qualifying endings are ordered by the ply where their first marker appears. A link counts a consecutive transition from one first-marker stage to the next. If several endings first appear on the same ply, they are treated as co-present at the same stage; the diagram does not invent an order between them.</p>
+    <p>The counts are link incidences, not mutually exclusive game counts. A single game can contribute several consecutive links if it passes through several different FCE endings. Exact counts and percentages are shown in link hover text rather than directly on the flows.</p>
+  </section>
+
+  <div class="controls sankey-controls">
+    <div class="control-group"><strong>Corpus</strong> <span class="seg" id="sankey-view-controls"></span></div>
+    <div class="control-group"><strong>Minimum half-moves</strong> <span class="seg" id="sankey-threshold-controls"></span></div>
+    <div class="control-group"><strong>Links shown</strong> <span class="seg" id="sankey-limit-controls"></span></div>
+  </div>
+
+  <div class="metrics" id="sankey-metrics"></div>
+
+  <section class="sankey-panel" aria-labelledby="sankey-title">
+    <div class="sankey-panel-head">
+      <div>
+        <h2 id="sankey-title">Top Consecutive Transitions</h2>
+        <p id="sankey-subtitle"></p>
+      </div>
+    </div>
+    <div class="sankey-wrap">
+      <svg id="sankey-svg" class="sankey-svg" role="img" aria-labelledby="sankey-title sankey-subtitle"></svg>
+    </div>
+  </section>
+
+</main>
+<script src="sankey.js"></script>
+<script src="fce-sankey.js"></script>
+</body>
+</html>
