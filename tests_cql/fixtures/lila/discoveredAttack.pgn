@@ -1,0 +1,16 @@
+[Event "discoveredAttack positive"]
+[Site "tests_cql"]
+[SetUp "1"]
+[FEN "4k3/8/8/8/8/8/4N3/4R2K w - - 0 1"]
+[Result "*"]
+
+1. Ng3+ *
+
+[Event "discoveredAttack negative"]
+[Site "tests_cql"]
+[SetUp "1"]
+[FEN "4k3/8/8/8/8/8/4N3/4R2K w - - 0 1"]
+[Result "*"]
+
+*
+

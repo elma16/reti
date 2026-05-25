@@ -6,3 +6,5 @@ cql(quiet)
 sort "max consecutive non-captures"
 line
   --> not move capture [Aa] {5 200}
+
+comment("max_consecutive_noncaptures")

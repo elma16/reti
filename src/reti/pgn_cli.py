@@ -485,7 +485,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         dest="preserve_markup",
         action="store_true",
         help=(
-            "Fast mode only: keep PGN comments ({...}, ;..., %...) and side "
+            "Fast mode only: keep PGN comments ({...}, ;..., %%...) and side "
             "variations ((...)) instead of stripping them. Still scrubs BOMs, "
             "invalid UTF-8, and control characters."
         ),

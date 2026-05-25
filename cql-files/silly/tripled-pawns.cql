@@ -3,3 +3,5 @@
 cql()
 
 flipcolor shift (P[a2-7] == 3)
+
+comment("tripled-pawns")

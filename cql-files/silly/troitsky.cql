@@ -21,3 +21,5 @@ flipcolor {
      p[d4-7] or
      p[e4-7])
 }
+
+comment("troitsky")

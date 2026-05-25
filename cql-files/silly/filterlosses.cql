@@ -5,3 +5,5 @@
 cql()
 
 tag "Termination" ~~ "Normal"
+
+comment("filterlosses")

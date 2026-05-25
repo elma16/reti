@@ -1,0 +1,15 @@
+[Event "one move positive"]
+[Site "tests_cql"]
+[SetUp "1"]
+[FEN "7k/5Q2/6K1/8/8/8/8/8 w - - 0 1"]
+[Result "1-0"]
+
+1. Qf8# 1-0
+
+[Event "one move negative"]
+[Site "tests_cql"]
+[SetUp "1"]
+[FEN "7k/5Q2/6K1/8/8/8/8/8 w - - 0 1"]
+[Result "*"]
+
+*

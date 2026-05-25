@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import shutil
 import sqlite3
@@ -13,6 +12,8 @@ from typing import Any, Iterable
 
 import chess
 
+from reti.common.hashing import canonical_json, sha256_file, sha256_text
+from reti.common.source_metadata import source_stem
 from reti.evaluation.backends import (
     StockfishSession,
     open_tablebase_from_directories,
@@ -140,22 +141,6 @@ def create_progress_bar(
     return tqdm(total=total, desc=desc, unit=unit, dynamic_ncols=True)
 
 
-def canonical_json(payload: Any) -> str:
-    return json.dumps(payload, ensure_ascii=True, sort_keys=True, separators=(",", ":"))
-
-
-def sha256_text(text: str) -> str:
-    return hashlib.sha256(text.encode("utf-8")).hexdigest()
-
-
-def sha256_file(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
-
-
 def file_signature(path: Path, *, include_hash: bool = False) -> dict[str, Any]:
     stat = path.stat()
     payload: dict[str, Any] = {
@@ -226,7 +211,7 @@ def position_key(row: dict[str, Any]) -> str:
 
 
 def source_bucket_from_source_pgn(source_pgn: str) -> str:
-    return Path(source_pgn).stem if source_pgn else ""
+    return source_stem(source_pgn) if source_pgn else ""
 
 
 def legacy_game_key(row: dict[str, Any]) -> str:

@@ -6,3 +6,5 @@ cql(quiet)
 sort "max consecutive captures"
 line
   --> move capture [Aa] {3 100}
+
+comment("max_consecutive_captures")

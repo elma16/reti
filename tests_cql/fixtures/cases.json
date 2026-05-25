@@ -187,15 +187,6 @@
     "fce-table-9-3QPq": {
       "fen": "FCE/table/9-3QPq.txt"
     },
-    "fce-toc-10": {
-      "fen": "FCE/toc/10.txt"
-    },
-    "fce-toc-8": {
-      "fen": "FCE/toc/8.txt"
-    },
-    "fce-toc-9": {
-      "fen": "FCE/toc/9.txt"
-    },
     "mates-BN": {
       "fen": "mates/BN.txt"
     },
@@ -318,6 +309,102 @@
     },
     "mates-vukovicmate": {
       "fen": "mates/vukovicmate.txt"
+    },
+    "lila-bishopEndgame": {
+      "fen": "lila/bishopEndgame.txt"
+    },
+    "lila-castling": {
+      "pgn": "lila/castling.pgn"
+    },
+    "lila-enPassant": {
+      "pgn": "lila/enPassant.pgn"
+    },
+    "lila-knightEndgame": {
+      "fen": "lila/knightEndgame.txt"
+    },
+    "lila-long": {
+      "pgn": "lila/long.pgn"
+    },
+    "lila-mate": {
+      "fen": "lila/mate.txt"
+    },
+    "lila-oneMove": {
+      "pgn": "lila/oneMove.pgn"
+    },
+    "lila-pawnEndgame": {
+      "fen": "lila/pawnEndgame.txt"
+    },
+    "lila-promotion": {
+      "pgn": "lila/promotion.pgn"
+    },
+    "lila-queenEndgame": {
+      "fen": "lila/queenEndgame.txt"
+    },
+    "lila-queenRookEndgame": {
+      "fen": "lila/queenRookEndgame.txt"
+    },
+    "lila-rookEndgame": {
+      "fen": "lila/rookEndgame.txt"
+    },
+    "lila-short": {
+      "pgn": "lila/short.pgn"
+    },
+    "lila-underPromotion": {
+      "pgn": "lila/underPromotion.pgn"
+    },
+    "lila-veryLong": {
+      "pgn": "lila/veryLong.pgn"
+    },
+    "lila-anastasiaMate": {
+      "fen": "lila/anastasiaMate.txt"
+    },
+    "lila-arabianMate": {
+      "fen": "lila/arabianMate.txt"
+    },
+    "lila-backRankMate": {
+      "fen": "lila/backRankMate.txt"
+    },
+    "lila-doubleBishopMate": {
+      "fen": "lila/doubleBishopMate.txt"
+    },
+    "lila-dovetailMate": {
+      "fen": "lila/dovetailMate.txt"
+    },
+    "lila-hookMate": {
+      "fen": "lila/hookMate.txt"
+    },
+    "lila-smotheredMate": {
+      "fen": "lila/smotheredMate.txt"
+    },
+    "lila-advantage": {
+      "pgn": "lila/advantage.pgn"
+    },
+    "lila-crushing": {
+      "pgn": "lila/crushing.pgn"
+    },
+    "lila-discoveredAttack": {
+      "pgn": "lila/discoveredAttack.pgn"
+    },
+    "lila-doubleCheck": {
+      "fen": "lila/doubleCheck.txt"
+    },
+    "lila-equality": {
+      "pgn": "lila/equality.pgn"
+    },
+    "lila-pin": {
+      "fen": "lila/pin.txt"
+    },
+    "lila-skewer": {
+      "fen": "lila/skewer.txt"
+    },
+    "lila-xRayAttack": {
+      "fen": "lila/xRayAttack.txt"
+    },
+    "lila-zugzwang": {
+      "fen": "lila/zugzwang.txt"
+    },
+    "lila-bodenMate": {
+      "fen": "lila/bodenMate.txt"
     }
   },
   "cases": [
@@ -712,24 +799,6 @@
       "id": "FCE table 9-3QPq: +fen / -fen"
     },
     {
-      "cql": "cql-files/FCE/toc/10.cql",
-      "dataset": "fce-toc-10",
-      "expected": 1,
-      "id": "FCE toc 10: +fen / -fen"
-    },
-    {
-      "cql": "cql-files/FCE/toc/8.cql",
-      "dataset": "fce-toc-8",
-      "expected": 1,
-      "id": "FCE toc 8: +fen / -fen"
-    },
-    {
-      "cql": "cql-files/FCE/toc/9.cql",
-      "dataset": "fce-toc-9",
-      "expected": 1,
-      "id": "FCE toc 9: +fen / -fen"
-    },
-    {
       "cql": "cql-files/mates/BN.cql",
       "dataset": "mates-BN",
       "expected": 1,
@@ -974,6 +1043,228 @@
       "dataset": "mates-vukovicmate",
       "expected": 1,
       "id": "mates vukovicmate: + / -"
+    },
+    {
+      "cql": "cql-files/100endings/56RPr.cql",
+      "dataset": "100endings-52_68RPr",
+      "expected": 1,
+      "id": "cql-files/100endings/56RPr.cql: auto-probed + / -"
+    },
+    {
+      "cql": "cql-files/FCE/10-2Qr.cql",
+      "dataset": "fce-table-10-2Qr",
+      "expected": 1,
+      "id": "cql-files/FCE/10-2Qr.cql: auto-probed + / -"
+    },
+    {
+      "cql": "cql-files/FCE/10-7-1Qbrr.cql",
+      "dataset": "fce-table-10-7-1Qbrr",
+      "expected": 1,
+      "id": "cql-files/FCE/10-7-1Qbrr.cql: auto-probed + / -"
+    },
+    {
+      "cql": "cql-files/FCE/8-1RNr.cql",
+      "dataset": "fce-table-8-1RNr",
+      "expected": 1,
+      "id": "cql-files/FCE/8-1RNr.cql: auto-probed + / -"
+    },
+    {
+      "cql": "cql-files/FCE/8-2RBr.cql",
+      "dataset": "fce-table-8-2RBr",
+      "expected": 1,
+      "id": "cql-files/FCE/8-2RBr.cql: auto-probed + / -"
+    },
+    {
+      "cql": "cql-files/lila/bishopEndgame.cql",
+      "dataset": "lila-bishopEndgame",
+      "expected": 1,
+      "id": "cql-files/lila/bishopEndgame.cql: CQL-verified + / -"
+    },
+    {
+      "cql": "cql-files/lila/castling.cql",
+      "dataset": "lila-castling",
+      "expected": 1,
+      "id": "cql-files/lila/castling.cql: CQL-verified + / -"
+    },
+    {
+      "cql": "cql-files/lila/enPassant.cql",
+      "dataset": "lila-enPassant",
+      "expected": 1,
+      "id": "cql-files/lila/enPassant.cql: CQL-verified + / -"
+    },
+    {
+      "cql": "cql-files/lila/knightEndgame.cql",
+      "dataset": "lila-knightEndgame",
+      "expected": 1,
+      "id": "cql-files/lila/knightEndgame.cql: CQL-verified + / -"
+    },
+    {
+      "cql": "cql-files/lila/long.cql",
+      "dataset": "lila-long",
+      "expected": 1,
+      "id": "cql-files/lila/long.cql: CQL-verified + / -"
+    },
+    {
+      "cql": "cql-files/lila/mate.cql",
+      "dataset": "lila-mate",
+      "expected": 1,
+      "id": "cql-files/lila/mate.cql: CQL-verified + / -"
+    },
+    {
+      "cql": "cql-files/lila/oneMove.cql",
+      "dataset": "lila-oneMove",
+      "expected": 1,
+      "id": "cql-files/lila/oneMove.cql: CQL-verified + / -"
+    },
+    {
+      "cql": "cql-files/lila/pawnEndgame.cql",
+      "dataset": "lila-pawnEndgame",
+      "expected": 1,
+      "id": "cql-files/lila/pawnEndgame.cql: CQL-verified + / -"
+    },
+    {
+      "cql": "cql-files/lila/promotion.cql",
+      "dataset": "lila-promotion",
+      "expected": 1,
+      "id": "cql-files/lila/promotion.cql: CQL-verified + / -"
+    },
+    {
+      "cql": "cql-files/lila/queenEndgame.cql",
+      "dataset": "lila-queenEndgame",
+      "expected": 1,
+      "id": "cql-files/lila/queenEndgame.cql: CQL-verified + / -"
+    },
+    {
+      "cql": "cql-files/lila/queenRookEndgame.cql",
+      "dataset": "lila-queenRookEndgame",
+      "expected": 1,
+      "id": "cql-files/lila/queenRookEndgame.cql: CQL-verified + / -"
+    },
+    {
+      "cql": "cql-files/lila/rookEndgame.cql",
+      "dataset": "lila-rookEndgame",
+      "expected": 1,
+      "id": "cql-files/lila/rookEndgame.cql: CQL-verified + / -"
+    },
+    {
+      "cql": "cql-files/lila/short.cql",
+      "dataset": "lila-short",
+      "expected": 1,
+      "id": "cql-files/lila/short.cql: CQL-verified + / -"
+    },
+    {
+      "cql": "cql-files/lila/underPromotion.cql",
+      "dataset": "lila-underPromotion",
+      "expected": 1,
+      "id": "cql-files/lila/underPromotion.cql: CQL-verified + / -"
+    },
+    {
+      "cql": "cql-files/lila/veryLong.cql",
+      "dataset": "lila-veryLong",
+      "expected": 1,
+      "id": "cql-files/lila/veryLong.cql: CQL-verified + / -"
+    },
+    {
+      "cql": "cql-files/lila/anastasiaMate.cql",
+      "dataset": "lila-anastasiaMate",
+      "expected": 1,
+      "id": "cql-files/lila/anastasiaMate.cql: CQL-verified + / -"
+    },
+    {
+      "cql": "cql-files/lila/arabianMate.cql",
+      "dataset": "lila-arabianMate",
+      "expected": 1,
+      "id": "cql-files/lila/arabianMate.cql: CQL-verified + / -"
+    },
+    {
+      "cql": "cql-files/lila/backRankMate.cql",
+      "dataset": "lila-backRankMate",
+      "expected": 1,
+      "id": "cql-files/lila/backRankMate.cql: CQL-verified + / -"
+    },
+    {
+      "cql": "cql-files/lila/doubleBishopMate.cql",
+      "dataset": "lila-doubleBishopMate",
+      "expected": 1,
+      "id": "cql-files/lila/doubleBishopMate.cql: CQL-verified + / -"
+    },
+    {
+      "cql": "cql-files/lila/dovetailMate.cql",
+      "dataset": "lila-dovetailMate",
+      "expected": 1,
+      "id": "cql-files/lila/dovetailMate.cql: CQL-verified + / -"
+    },
+    {
+      "cql": "cql-files/lila/hookMate.cql",
+      "dataset": "lila-hookMate",
+      "expected": 1,
+      "id": "cql-files/lila/hookMate.cql: CQL-verified + / -"
+    },
+    {
+      "cql": "cql-files/lila/smotheredMate.cql",
+      "dataset": "lila-smotheredMate",
+      "expected": 1,
+      "id": "cql-files/lila/smotheredMate.cql: CQL-verified + / -"
+    },
+    {
+      "cql": "cql-files/lila/advantage.cql",
+      "dataset": "lila-advantage",
+      "expected": 1,
+      "id": "cql-files/lila/advantage.cql: CQL-verified + / -"
+    },
+    {
+      "cql": "cql-files/lila/crushing.cql",
+      "dataset": "lila-crushing",
+      "expected": 1,
+      "id": "cql-files/lila/crushing.cql: CQL-verified + / -"
+    },
+    {
+      "cql": "cql-files/lila/discoveredAttack.cql",
+      "dataset": "lila-discoveredAttack",
+      "expected": 1,
+      "id": "cql-files/lila/discoveredAttack.cql: CQL-verified + / -"
+    },
+    {
+      "cql": "cql-files/lila/doubleCheck.cql",
+      "dataset": "lila-doubleCheck",
+      "expected": 1,
+      "id": "cql-files/lila/doubleCheck.cql: CQL-verified + / -"
+    },
+    {
+      "cql": "cql-files/lila/equality.cql",
+      "dataset": "lila-equality",
+      "expected": 1,
+      "id": "cql-files/lila/equality.cql: CQL-verified + / -"
+    },
+    {
+      "cql": "cql-files/lila/pin.cql",
+      "dataset": "lila-pin",
+      "expected": 1,
+      "id": "cql-files/lila/pin.cql: CQL-verified + / -"
+    },
+    {
+      "cql": "cql-files/lila/skewer.cql",
+      "dataset": "lila-skewer",
+      "expected": 1,
+      "id": "cql-files/lila/skewer.cql: CQL-verified + / -"
+    },
+    {
+      "cql": "cql-files/lila/xRayAttack.cql",
+      "dataset": "lila-xRayAttack",
+      "expected": 1,
+      "id": "cql-files/lila/xRayAttack.cql: CQL-verified + / -"
+    },
+    {
+      "cql": "cql-files/lila/zugzwang.cql",
+      "dataset": "lila-zugzwang",
+      "expected": 1,
+      "id": "cql-files/lila/zugzwang.cql: CQL-verified + / -"
+    },
+    {
+      "cql": "cql-files/lila/bodenMate.cql",
+      "dataset": "lila-bodenMate",
+      "expected": 1,
+      "id": "cql-files/lila/bodenMate.cql: CQL-verified + / -"
     }
   ]
 }

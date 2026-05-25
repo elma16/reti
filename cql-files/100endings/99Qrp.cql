@@ -5,3 +5,5 @@ cql()
 flipcolor flip (Q == 1 and r == 1 and p[b-g2-7] == 1)
 
 [Aa] == 5
+
+comment("99Qrp")

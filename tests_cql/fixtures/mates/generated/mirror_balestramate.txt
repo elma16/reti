@@ -1,0 +1,4 @@
+# positive (CQL-verified)
+r1bqkbnr/pppppBpp/n7/4N1B1/3PP3/8/PPPN1PPP/R2QK2R b KQkq - 0 10
+# negative (CQL-verified)
+7k/8/8/8/8/8/8/K7 w - - 0 1

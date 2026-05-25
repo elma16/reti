@@ -3,3 +3,5 @@ cql()
 
 move enpassant
 move legal count == 1
+
+comment("onlymoveep")

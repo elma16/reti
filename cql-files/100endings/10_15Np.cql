@@ -5,3 +5,5 @@ cql()
 flipcolor (N == 1 and p == 1)
 
 [Aa] == 4
+
+comment("10_15Np")

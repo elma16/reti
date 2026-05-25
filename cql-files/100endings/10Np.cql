@@ -5,3 +5,5 @@ cql()
 flipcolor flipvertical (N == 1 and p[a2] == 1) 
 
 [Aa] == 4
+
+comment("10Np")

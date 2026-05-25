@@ -5,3 +5,5 @@ cql()
 flipcolor (Q == 1 and q == 1) 
 
 [Aa] == 4
+
+comment("20Qq")

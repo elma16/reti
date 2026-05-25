@@ -12,4 +12,6 @@ line quiet
   --> move from A to [Aa_]
   --> A attacks k == 2
   --> move from A to [Aa_]
-  --> mate} 
+  --> mate}
+
+comment("Qsacmate")

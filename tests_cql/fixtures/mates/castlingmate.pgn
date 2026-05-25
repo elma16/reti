@@ -1,0 +1,15 @@
+[Event "castlingmate positive"]
+[Site "tests_cql"]
+[SetUp "1"]
+[FEN "5k2/4p1p1/8/1B6/2B5/8/Q7/4K2R w K - 0 1"]
+[Result "1-0"]
+
+1. O-O# 1-0
+
+[Event "castlingmate negative"]
+[Site "tests_cql"]
+[SetUp "1"]
+[FEN "5k2/4p1p1/8/1B6/2B5/8/Q7/4K2R w K - 0 1"]
+[Result "*"]
+
+*

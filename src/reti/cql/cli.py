@@ -17,6 +17,7 @@ from reti.cql.runner import (
     parse_jobs_value,
     run_job_matrix,
 )
+from reti.cql.single_merge import merge_single_output
 from reti.common.pgn_discovery import InputCollection, discover_input_files
 from reti.common.progress import progress_write
 
@@ -201,7 +202,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         dest="strict_pgn_parse",
         action="store_true",
         help=(
-            "Run a full python-chess PGN parse during preflight. This is slower "
+            "Run a full Rust/shakmaty PGN lint pass during preflight. This is slower "
             "on large databases but can surface parser-level PGN issues earlier."
         ),
     )
@@ -224,12 +225,37 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--single-output",
+        dest="single_output",
+        action="store_true",
+        help=(
+            "After all jobs finish, merge per-pair outputs into a single PGN "
+            "per source PGN. Each game appears once with comments from every "
+            "CQL script that matched it overlaid at the matching plies."
+        ),
+    )
+    parser.add_argument(
+        "--include-unmatched",
+        dest="include_unmatched",
+        action="store_true",
+        help=(
+            "With --single-output, also emit source games that no CQL script "
+            "matched (passed through with their original comments)."
+        ),
+    )
+    parser.add_argument(
         "legacy_args",
         nargs="*",
         help=argparse.SUPPRESS,
     )
 
     args = parser.parse_args(argv)
+
+    if args.include_unmatched and not args.single_output:
+        parser.error("--include-unmatched requires --single-output")
+
+    if args.single_output and args.merge_output:
+        parser.error("--single-output and --merge-output are mutually exclusive")
 
     if args.legacy_args:
         if len(args.legacy_args) != 3:
@@ -294,7 +320,14 @@ def main() -> int:
 
     results, pgn_inputs, cql_inputs = result
 
-    if args.merge_output:
+    if args.single_output:
+        merge_single_output(
+            results,
+            pgn_inputs,
+            output_directory,
+            include_unmatched=args.include_unmatched,
+        )
+    elif args.merge_output:
         merge_outputs_by_cql(results, cql_inputs, output_directory)
 
     summary_csv = write_summary_csv(

@@ -1,3 +1,5 @@
+// Searches for the bahr chess motif.
+
 
 cql()
 
@@ -32,3 +34,5 @@ flipcolor flipvertical {
     // or in front of the attacking king
     (k & (up 1 7 (P & passedpawns))) or (k & (up 1 7 K))
 }
+
+comment("bahr")

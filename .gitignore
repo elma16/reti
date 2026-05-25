@@ -1,5 +1,6 @@
 *.DS_Store
 *.pgn
+!tests_cql/fixtures/**/*.pgn
 *.jpeg
 *.py[cod]
 
@@ -27,11 +28,14 @@ vscode-cql6/
 # Whitelist only the public CQL collections we intend to keep in-repo.
 !cql-files/
 cql-files/*
+!cql-files/REFILE_MANIFEST.tsv
 !cql-files/FCE/
+!cql-files/lila/
 !cql-files/mates/
 !cql-files/silly/
 !cql-files/100endings/
 !cql-files/FCE/**/*.cql
+!cql-files/lila/**/*.cql
 !cql-files/mates/**/*.cql
 !cql-files/silly/**/*.cql
 !cql-files/100endings/**/*.cql

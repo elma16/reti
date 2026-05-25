@@ -18,6 +18,7 @@ from typing import Any
 
 import chess
 
+from reti.common.hashing import sha256_text
 from reti.fce_combined_snapshot import (
     DEFAULT_COMBINED_CQL,
     CombinedSourceStats,
@@ -375,9 +376,7 @@ def position_key(raw: dict[str, Any]) -> str:
         "ply_index": raw.get("ply_index", 0),
         "fen": raw.get("fen", ""),
     }
-    import hashlib
-
-    return hashlib.sha256(canonical_json(material).encode("utf-8")).hexdigest()
+    return sha256_text(canonical_json(material))
 
 
 def ingest_facts(

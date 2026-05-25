@@ -1,0 +1,4 @@
+# positive
+q7/8/8/8/k7/8/8/R6K w - - 0 1
+# negative
+8/8/8/8/k7/8/8/R6K w - - 0 1

@@ -349,6 +349,38 @@ fn lint_json_emits_machine_readable_output() {
 }
 
 #[test]
+fn annotated_pgn_exports_per_game_marker_jsonl() {
+    let dir = tmpdir("annotated-pgn");
+    let input = dir.join("in.pgn");
+    let output = dir.join("annotated.jsonl");
+    fs::write(
+        &input,
+        b"[Event \"x\"]\n[Result \"*\"]\n\n1. e4 { CQL } e5 2. Nf3 {CQL} *\n",
+    )
+    .unwrap();
+
+    let (stdout, stderr, code) = run(&[
+        "annotated-pgn",
+        "--no-progress",
+        "-o",
+        output.to_str().unwrap(),
+        input.to_str().unwrap(),
+    ]);
+    assert_eq!(code, 0, "stderr: {stderr}");
+    assert_eq!(
+        json_field(&stdout, "positions_written").as_deref(),
+        Some("2")
+    );
+
+    let written = fs::read_to_string(&output).unwrap();
+    assert_eq!(written.lines().count(), 1);
+    assert!(written.contains("\"move_uci_sequence\":[\"e2e4\",\"e7e5\",\"g1f3\"]"));
+    assert!(written.contains("\"move_san\":\"e4\""));
+    assert!(written.contains("\"move_uci\":\"g1f3\""));
+    assert!(written.contains("\"parse_errors\":[]"));
+}
+
+#[test]
 fn fce_markers_exports_first_marker_position_as_jsonl() {
     let dir = tmpdir("fce-markers");
     let bucket = dir.join("LumbrasGigaBase_OTB_test");

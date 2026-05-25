@@ -27,6 +27,7 @@ from reti.cql.preflight import (
     preflight_pgn_files as _preflight_pgn_files,
     sanitize_pgn_to_temp,
     smoke_test_pgn_with_cql as _smoke_test_pgn_with_cql,
+    validate_pgn_with_native_lint,
     validate_pgn_text_compatibility,
     validate_pgn_with_python_parser,
 )
@@ -42,6 +43,7 @@ from reti.cql.runner import (
     run_cql_job as _run_cql_job,
     run_job_matrix as _run_job_matrix,
 )
+from reti.cql.single_merge import merge_single_output
 from reti.common.pgn_discovery import (
     InputCollection,
     discover_input_files,
@@ -75,6 +77,7 @@ __all__ = [
     "main",
     "make_terminal_safe",
     "merge_outputs_by_cql",
+    "merge_single_output",
     "parse_args",
     "parse_cql_threads_value",
     "parse_jobs_value",
@@ -92,6 +95,7 @@ __all__ = [
     "smoke_test_pgn_with_cql",
     "subprocess",
     "validate_pgn_text_compatibility",
+    "validate_pgn_with_native_lint",
     "validate_pgn_with_python_parser",
     "write_summary_csv",
 ]

@@ -4,3 +4,5 @@ cql()
 flipcolor {result 1-0 
 power A < power a}
 [QqRrBbNn] == 0
+
+comment("underdog")

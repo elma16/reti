@@ -1,0 +1,11 @@
+[Event "long positive"]
+[Site "tests_cql"]
+[Result "*"]
+
+1. e4 e5 2. Nf3 Nc6 *
+
+[Event "long negative"]
+[Site "tests_cql"]
+[Result "*"]
+
+1. e4 e5 *

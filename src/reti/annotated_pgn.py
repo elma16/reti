@@ -1,17 +1,18 @@
 from __future__ import annotations
 
+import json
 import re
+import subprocess
+import tempfile
 from collections.abc import Generator
 from dataclasses import dataclass
 from pathlib import Path
-
-import chess
-import chess.pgn as chess_pgn
 
 from reti.common.pgn_discovery import (
     discover_pgn_files,
     format_pgn_display_path,
 )
+from reti.pgn_utils import find_pgn_utils_binary
 
 __all__ = [
     "AnnotatedPosition",
@@ -47,46 +48,103 @@ class ParsedAnnotatedGame:
 
 
 def side_name(turn: bool) -> str:
-    return "white" if turn == chess.WHITE else "black"
+    return "white" if turn else "black"
 
 
 def comment_matches_marker(comment: str, marker_text: str) -> bool:
     return comment.strip() == marker_text
 
 
-def _parse_one_game(
-    game: chess_pgn.Game,
-    game_index: int,
-    marker_text: str,
-) -> ParsedAnnotatedGame:
-    move_uci_sequence = tuple(move.uci() for move in game.mainline_moves())
-    positions: list[AnnotatedPosition] = []
-    for node in game.mainline():
-        if not comment_matches_marker(node.comment, marker_text):
-            continue
+def _position_from_native(raw: dict[str, object]) -> AnnotatedPosition:
+    return AnnotatedPosition(
+        ply_index=int(raw.get("ply_index", 0)),
+        fullmove_number=int(raw.get("fullmove_number", 0)),
+        move_san=str(raw.get("move_san", "")),
+        move_uci=str(raw.get("move_uci", "")),
+        fen=str(raw.get("fen", "")),
+        side_to_move=str(raw.get("side_to_move", "")),
+        piece_count=int(raw.get("piece_count", 0)),
+    )
 
-        board = node.board()
-        positions.append(
-            AnnotatedPosition(
-                ply_index=board.ply(),
-                fullmove_number=board.fullmove_number,
-                move_san=node.san(),
-                move_uci=node.uci(),
-                fen=board.fen(),
-                side_to_move=side_name(board.turn),
-                piece_count=len(board.piece_map()),
-            )
+
+def _game_from_native(raw: dict[str, object]) -> ParsedAnnotatedGame:
+    headers_raw = raw.get("headers", {})
+    headers = {
+        str(key): str(value)
+        for key, value in (headers_raw.items() if isinstance(headers_raw, dict) else ())
+    }
+    parse_errors_raw = raw.get("parse_errors", [])
+    parse_errors = tuple(str(error) for error in parse_errors_raw) if isinstance(parse_errors_raw, list) else ()
+    moves_raw = raw.get("move_uci_sequence", [])
+    move_uci_sequence = tuple(str(move) for move in moves_raw) if isinstance(moves_raw, list) else ()
+    positions_raw = raw.get("positions", [])
+    positions = (
+        tuple(_position_from_native(position) for position in positions_raw if isinstance(position, dict))
+        if isinstance(positions_raw, list)
+        else ()
+    )
+    return ParsedAnnotatedGame(
+        game_index=int(raw.get("game_index", 0)),
+        headers=headers,
+        parse_errors=parse_errors,
+        move_uci_sequence=move_uci_sequence,
+        positions=positions,
+    )
+
+
+def _native_annotated_pgn(
+    pgn_path: Path,
+    *,
+    marker_text: str,
+) -> list[ParsedAnnotatedGame]:
+    binary_path = find_pgn_utils_binary()
+    if binary_path is None:
+        raise RuntimeError(
+            "native PGN playthrough helper not found; build it with "
+            "`cargo build --release --manifest-path native/pgn-utils/Cargo.toml`"
         )
 
-    return ParsedAnnotatedGame(
-        game_index=game_index,
-        headers=dict(game.headers),
-        parse_errors=tuple(
-            str(error) for error in (getattr(game, "errors", None) or [])
-        ),
-        move_uci_sequence=move_uci_sequence,
-        positions=tuple(positions),
-    )
+    with tempfile.TemporaryDirectory(prefix="reti_annotated_pgn_") as tmpdir:
+        output_path = Path(tmpdir) / "games.jsonl"
+        process = subprocess.run(
+            [
+                str(binary_path),
+                "annotated-pgn",
+                "--marker",
+                marker_text,
+                "--allow-parse-errors",
+                "--force",
+                "--no-progress",
+                "--output",
+                str(output_path),
+                str(pgn_path),
+            ],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+        if process.returncode != 0:
+            detail = process.stderr.strip() or process.stdout.strip()
+            raise RuntimeError(detail or "native PGN playthrough helper failed")
+
+        parsed: list[ParsedAnnotatedGame] = []
+        with output_path.open("r", encoding="utf-8") as handle:
+            for line_number, line in enumerate(handle, start=1):
+                if not line.strip():
+                    continue
+                try:
+                    raw = json.loads(line)
+                except json.JSONDecodeError as exc:
+                    raise RuntimeError(
+                        f"native PGN helper wrote invalid JSONL at line {line_number}: {exc}"
+                    ) from exc
+                if not isinstance(raw, dict):
+                    raise RuntimeError(
+                        f"native PGN helper wrote non-object JSONL at line {line_number}"
+                    )
+                parsed.append(_game_from_native(raw))
+        return parsed
 
 
 def parse_annotated_pgn(
@@ -94,16 +152,7 @@ def parse_annotated_pgn(
     *,
     marker_text: str,
 ) -> list[ParsedAnnotatedGame]:
-    parsed_games: list[ParsedAnnotatedGame] = []
-    with pgn_path.open("r", encoding="utf-8", errors="replace", newline="") as handle:
-        game_index = 0
-        while True:
-            game = chess_pgn.read_game(handle)
-            if game is None:
-                break
-            game_index += 1
-            parsed_games.append(_parse_one_game(game, game_index, marker_text))
-    return parsed_games
+    return _native_annotated_pgn(pgn_path, marker_text=marker_text)
 
 
 def iter_annotated_pgn(
@@ -117,22 +166,23 @@ def iter_annotated_pgn(
     previous yield, based on the file-handle position.  This is useful for
     driving a progress bar weighted by file size.
     """
-    with pgn_path.open("r", encoding="utf-8", errors="replace", newline="") as handle:
-        game_index = 0
-        prev_pos = 0
-        while True:
-            game = chess_pgn.read_game(handle)
-            if game is None:
-                break
-            game_index += 1
-            current_pos = handle.tell()
-            bytes_consumed = current_pos - prev_pos
-            prev_pos = current_pos
-            yield _parse_one_game(game, game_index, marker_text), bytes_consumed
+    parsed_games = parse_annotated_pgn(pgn_path, marker_text=marker_text)
+    if not parsed_games:
+        return
+    file_size = pgn_path.stat().st_size
+    base = file_size // len(parsed_games)
+    consumed = 0
+    for index, parsed_game in enumerate(parsed_games, start=1):
+        if index == len(parsed_games):
+            bytes_consumed = file_size - consumed
+        else:
+            bytes_consumed = base
+            consumed += bytes_consumed
+        yield parsed_game, bytes_consumed
 
 
 # ---------------------------------------------------------------------------
-# Fast PGN scanner -- skips move validation for ~100x throughput.
+# Fast PGN scanner -- skips move validation for high-throughput aggregate views.
 # Produces the same (ParsedAnnotatedGame, bytes_consumed) tuples so it is a
 # drop-in replacement for iter_annotated_pgn in contexts that only need
 # headers, move text (for game-key hashing), and {CQL} ply positions.
@@ -225,7 +275,7 @@ def fast_iter_annotated_pgn(
 
     Reads the file once, splits into games with a regex, and scans each
     game's movetext for SAN tokens and marker comments without validating
-    moves against the board.  ~100x faster than the python-chess path.
+    moves against the board. This is for aggregate views that do not need FENs.
 
     ``move_uci_sequence`` on the yielded games contains **SAN** (not UCI)
     tokens.  This is fine for :func:`build_game_key` since it only hashes

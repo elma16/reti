@@ -1,0 +1,4 @@
+# positive
+3rkr2/4p3/8/1B5B/8/8/8/K7 b - - 0 1
+# negative
+3rkr2/4p3/8/1B6/8/8/8/K7 b - - 0 1

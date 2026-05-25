@@ -5,3 +5,5 @@ cql()
 (P == 1 and p == 1 and passedpawns == 2)
 
 [Aa] == 4
+
+comment("82Pp")

@@ -13,3 +13,5 @@ flipcolor {
           --> move from $r to h8
     }
 }
+
+comment("rookhomerun")

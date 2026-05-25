@@ -1,0 +1,11 @@
+[Event "short positive"]
+[Site "tests_cql"]
+[Result "*"]
+
+1. e4 e5 *
+
+[Event "short negative"]
+[Site "tests_cql"]
+[Result "*"]
+
+1. e4 *

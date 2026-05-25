@@ -8,3 +8,5 @@ flipcolor {
       --> move from K
       --> mate
 }
+
+comment("blockcheckwithmate")

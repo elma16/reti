@@ -19,7 +19,8 @@ use std::ffi::OsString;
 use std::process::ExitCode;
 
 use reti_pgn_utils::{
-    clean, concat, dedup, fce_combined_markers, fce_markers, fce_syzygy, lint, source_totals,
+    annotated, clean, concat, dedup, fce_combined_markers, fce_markers, fce_syzygy, lint,
+    source_totals,
 };
 
 const USAGE: &str = "\
@@ -28,6 +29,8 @@ usage: reti-pgn-utils <SUBCOMMAND> [options]
        reti-pgn-utils --inspect INPUT_PGN
 
 subcommands:
+  annotated-pgn
+          export marker positions from annotated PGNs using shakmaty replay
   clean   rewrite a PGN file (strips markup, normalizes whitespace, etc.)
   concat  concatenate one or more PGN files / directories into one
   dedup   drop duplicate games by normalized movetext
@@ -63,6 +66,7 @@ fn main() -> ExitCode {
 fn dispatch(args: &[OsString]) -> Result<i32, String> {
     let first = args.first().map(|a| a.to_string_lossy().into_owned());
     match first.as_deref() {
+        Some("annotated-pgn") => annotated::run_subcommand(&args[1..]).map(|_| 0),
         Some("clean") => clean::run_subcommand(&args[1..]).map(|_| 0),
         Some("concat") => concat::run_subcommand(&args[1..]).map(|_| 0),
         Some("dedup") => dedup::run_subcommand(&args[1..]).map(|_| 0),

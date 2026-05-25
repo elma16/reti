@@ -1,0 +1,11 @@
+[Event "very long positive"]
+[Site "tests_cql"]
+[Result "1-0"]
+
+1. e4 e5 2. Qh5 Nc6 3. Bc4 Nf6 4. Qxf7# 1-0
+
+[Event "very long negative"]
+[Site "tests_cql"]
+[Result "*"]
+
+1. e4 e5 2. Qh5 Nc6 *

@@ -5,3 +5,5 @@ cql()
 flipcolor (B == 1 and n == 1 and [Pp] == 1)
 
 [Aa] == 5
+
+comment("37_40BNP")

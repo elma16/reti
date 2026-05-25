@@ -6,3 +6,5 @@ cql(quiet)
 sort "max consecutive checks"
 line
   --> check {3 100}
+
+comment("max_consecutive_checks")

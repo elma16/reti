@@ -15,3 +15,5 @@ flipcolor {
           --> move from $r to a8
     }
 }
+
+comment("rook_homerun")

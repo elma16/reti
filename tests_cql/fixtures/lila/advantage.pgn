@@ -1,0 +1,16 @@
+[Event "advantage positive"]
+[Site "tests_cql"]
+[SetUp "1"]
+[FEN "7k/8/8/8/8/8/8/R3K3 w Q - 0 1"]
+[Result "1-0"]
+
+1. Ra8+ 1-0
+
+[Event "advantage negative"]
+[Site "tests_cql"]
+[SetUp "1"]
+[FEN "7k/8/8/8/8/8/8/4K3 w - - 0 1"]
+[Result "1-0"]
+
+1. Kf2 1-0
+

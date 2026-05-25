@@ -8,3 +8,5 @@ piece $Repeater in [Aa] {
     line singlecolor
       --> (move from $Repeater and movenumber <= 12) {3 12}
 }
+
+comment("one_piece_opening_streak")

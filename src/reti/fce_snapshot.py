@@ -3,7 +3,6 @@ from __future__ import annotations
 import argparse
 import copy
 import csv
-import hashlib
 import html
 import json
 import shutil
@@ -15,6 +14,13 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from reti.common.hashing import canonical_json, manifest_fingerprint, sha256_file
+from reti.common.json_io import load_json, write_json
+from reti.common.source_metadata import (
+    source_bucket_key,
+    source_bucket_label,
+    source_sort_key,
+)
 from reti.fce_metadata import FCE_CATALOG
 
 
@@ -135,18 +141,6 @@ class SnapshotBuildResult:
     up_to_date: bool = False
 
 
-def canonical_json(payload: Any) -> str:
-    return json.dumps(payload, ensure_ascii=True, sort_keys=True, separators=(",", ":"))
-
-
-def sha256_file(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
-
-
 def file_signature(path: Path, *, include_hash: bool) -> dict[str, Any]:
     if not path.exists():
         raise SnapshotError(f"Required input does not exist: {path}")
@@ -159,37 +153,6 @@ def file_signature(path: Path, *, include_hash: bool) -> dict[str, Any]:
     if include_hash:
         payload["sha256"] = sha256_file(path)
     return payload
-
-
-def manifest_fingerprint(payload: dict[str, Any]) -> str:
-    digest_payload = {key: value for key, value in payload.items() if key != "fingerprint"}
-    return hashlib.sha256(canonical_json(digest_payload).encode("utf-8")).hexdigest()
-
-
-def source_sort_key(source_pgn: str) -> tuple[int, str]:
-    stem = Path(source_pgn).stem
-    if stem.endswith("_noDate") or stem == "noDate":
-        return 999999, stem
-    for token in stem.replace("-", "_").split("_"):
-        if len(token) >= 4 and token[:4].isdigit():
-            return int(token[:4]), stem
-        if token.isdigit():
-            return int(token), stem
-    return 999998, stem
-
-
-def source_bucket_key(source_pgn: str) -> str:
-    stem = Path(source_pgn).stem
-    prefix = "LumbrasGigaBase_OTB_"
-    if stem.startswith(prefix):
-        return stem[len(prefix) :]
-    return stem
-
-
-def source_bucket_label(source_pgn: str) -> str:
-    return source_bucket_key(source_pgn).replace("_partial_release", " partial").replace(
-        "_", " "
-    )
 
 
 def parse_match_count(raw_value: str, *, row_number: int) -> int:
@@ -3183,10 +3146,6 @@ def render_snapshot_html(snapshot: dict[str, Any], *, title: str | None = None) 
 """
 
 
-def write_json(path: Path, payload: Any) -> None:
-    path.write_text(canonical_json(payload) + "\n", encoding="utf-8")
-
-
 def write_summary_by_ending_csv(snapshot: dict[str, Any], path: Path) -> None:
     source_columns = [
         f"count:{bucket['sourceStem']}" for bucket in snapshot.get("sourceBuckets", [])
@@ -3279,11 +3238,6 @@ def write_snapshot_directory(
         html_path=target_dir / "index.html",
         snapshot_id=snapshot["snapshotId"],
     )
-
-
-def load_json(path: Path) -> Any:
-    with path.open("r", encoding="utf-8") as handle:
-        return json.load(handle)
 
 
 def build_fce_gigabase_snapshot(

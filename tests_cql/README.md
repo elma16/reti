@@ -61,6 +61,24 @@ Manifest mode supports an opt-in strict check:
 - Leave it unset/false for focused suites (for example, testing only one
   directory like FCE table scripts).
 
+Inventory audit
+---------------
+
+`tests_cql/test_cql_inventory.py` enforces the structural CQL inventory:
+
+- every source script under `cql-files/{100endings,FCE,lila,mates,silly}` has a
+  leading intent comment;
+- source scripts are non-empty and byte-distinct;
+- recovered staging directories such as `cql-files/mates2` and
+  `cql-files/tosort` have no remaining `.cql` files;
+- every manifest case points to an existing CQL file and to a fixture with at
+  least one positive and one negative example.
+
+The current coverage snapshot is written to
+`tests_cql/fixtures/cql_coverage_report.tsv`. Rows with `covered=False` still
+need semantic positive/negative examples before full coverage enforcement can
+be enabled.
+
 FCE suite
 ---------
 

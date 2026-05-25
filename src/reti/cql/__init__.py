@@ -21,6 +21,7 @@ from reti.cql.preflight import (
     preflight_pgn_files,
     sanitize_pgn_to_temp,
     validate_pgn_text_compatibility,
+    validate_pgn_with_native_lint,
     validate_pgn_with_python_parser,
 )
 from reti.cql.runner import (
@@ -57,6 +58,7 @@ __all__ = [
     "run_job_matrix",
     "sanitize_pgn_to_temp",
     "validate_pgn_text_compatibility",
+    "validate_pgn_with_native_lint",
     "validate_pgn_with_python_parser",
     "write_summary_csv",
 ]

@@ -6,3 +6,5 @@ flipcolor {
     check
     (A attacks k) >= 2
 }
+
+comment("doublecheck")

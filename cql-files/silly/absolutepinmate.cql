@@ -1,3 +1,5 @@
+// Searches for the absolutepinmate chess motif.
+
 cql()
 
 flipcolor {
@@ -12,3 +14,5 @@ flipcolor {
                  pin through a != pinnedPieces
              }
 }
+
+comment("absolutepinmate")

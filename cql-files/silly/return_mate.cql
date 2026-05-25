@@ -13,3 +13,5 @@ flipcolor {
     (move from R to h1) or
     (move from Q to d1)
 }
+
+comment("return_mate")

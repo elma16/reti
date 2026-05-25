@@ -1,0 +1,12 @@
+[Event "equality positive"]
+[Site "tests_cql"]
+[Result "1/2-1/2"]
+
+1. e4 e5 1/2-1/2
+
+[Event "equality negative"]
+[Site "tests_cql"]
+[Result "1-0"]
+
+1. e4 e5 1-0
+

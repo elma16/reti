@@ -1,0 +1,314 @@
+path	covered	dataset
+cql-files/100endings/01_05P.cql	True	100endings-01_05P
+cql-files/100endings/06_07RB.cql	True	100endings-06_07RB
+cql-files/100endings/08_09Rn.cql	True	100endings-08_09Rn
+cql-files/100endings/100Qrp.cql	True	100endings-100Qrp
+cql-files/100endings/10Np.cql	False	
+cql-files/100endings/10_15Np.cql	True	100endings-10_15Np
+cql-files/100endings/11Np.cql	False	
+cql-files/100endings/12Np.cql	False	
+cql-files/100endings/16_19Qp.cql	True	100endings-16_19Qp
+cql-files/100endings/20Qq.cql	True	100endings-20Qq
+cql-files/100endings/21_29Rp.cql	True	100endings-21_29Rp
+cql-files/100endings/30_32Rpp.cql	True	100endings-30_32Rpp
+cql-files/100endings/33_36BPb.cql	True	100endings-33_36BPb
+cql-files/100endings/37_40BNP.cql	True	100endings-37_40BNP
+cql-files/100endings/41_51ocBPPb.cql	True	100endings-41_51ocBPPb
+cql-files/100endings/42_43ocBPPb.cql	False	
+cql-files/100endings/44_51ocBPPb.cql	False	
+cql-files/100endings/52_68RPr.cql	True	100endings-52_68RPr
+cql-files/100endings/55RPr.cql	False	
+cql-files/100endings/56RPr.cql	True	100endings-52_68RPr
+cql-files/100endings/57_58RPr.cql	False	
+cql-files/100endings/65_68RPr.cql	False	
+cql-files/100endings/69_76RPPr.cql	True	100endings-69_76RPPr
+cql-files/100endings/77PP.cql	True	100endings-77PP
+cql-files/100endings/78PP.cql	True	100endings-78PP
+cql-files/100endings/79_81Pp.cql	True	100endings-79_81Pp
+cql-files/100endings/82Pp.cql	True	100endings-82Pp
+cql-files/100endings/83_86PPp.cql	True	100endings-83_86PPp
+cql-files/100endings/87PPp.cql	True	100endings-87PPp
+cql-files/100endings/88PPp.cql	True	100endings-88PPp
+cql-files/100endings/93BN.cql	True	100endings-93BN
+cql-files/100endings/94_96RBr.cql	True	100endings-94_96RBr
+cql-files/100endings/97RPb.cql	True	100endings-97RPb
+cql-files/100endings/98RPb.cql	True	100endings-98RPb
+cql-files/100endings/99Qrp.cql	True	100endings-99Qrp
+cql-files/A2IM/R4r3.cql	False	
+cql-files/FCE/1-1Q.cql	False	
+cql-files/FCE/1-2R.cql	False	
+cql-files/FCE/1-3BB.cql	False	
+cql-files/FCE/1-5NNp.cql	False	
+cql-files/FCE/10-2Qr.cql	True	fce-table-10-2Qr
+cql-files/FCE/10-7-1Qbrr.cql	True	fce-table-10-7-1Qbrr
+cql-files/FCE/10-8.cql	False	
+cql-files/FCE/2-1Pp.cql	False	
+cql-files/FCE/5-3-ABBnn.cql	False	
+cql-files/FCE/5-3-BBBbn.cql	False	
+cql-files/FCE/6-1-DRPp.cql	False	
+cql-files/FCE/7-3Rbn.cql	False	
+cql-files/FCE/8-1RNr.cql	True	fce-table-8-1RNr
+cql-files/FCE/8-2RBr.cql	True	fce-table-8-2RBr
+cql-files/FCE/combined/fce-table-markers.cql	False	
+cql-files/FCE/table/1-4BN.cql	True	fce-table-1-4BN
+cql-files/FCE/table/10-1Qa.cql	True	fce-table-10-1Qa
+cql-files/FCE/table/10-2Qr.cql	True	fce-table-10-2QrPp
+cql-files/FCE/table/10-2QrNoPawns.cql	True	fce-table-10-2Qr
+cql-files/FCE/table/10-2QrPp.cql	True	fce-table-10-2QrPp
+cql-files/FCE/table/10-3Qaa.cql	True	fce-table-10-3Qaa
+cql-files/FCE/table/10-4Qra.cql	True	fce-table-10-4Qra
+cql-files/FCE/table/10-5Qrr.cql	True	fce-table-10-5Qrr
+cql-files/FCE/table/10-6Qaaa.cql	True	fce-table-10-6Qaaa
+cql-files/FCE/table/10-7-1Qbrr.cql	True	fce-table-10-7-1QbrrPp
+cql-files/FCE/table/10-7-1QbrrNoPawns.cql	True	fce-table-10-7-1QbrrNoPawns
+cql-files/FCE/table/10-7-1QbrrPp.cql	True	fce-table-10-7-1QbrrPp
+cql-files/FCE/table/10-7QAq.cql	True	fce-table-10-7QAq
+cql-files/FCE/table/2-0Pp.cql	True	fce-table-2-0Pp
+cql-files/FCE/table/2-1P.cql	True	fce-table-2-1P
+cql-files/FCE/table/3-1Np.cql	True	fce-table-3-1Np
+cql-files/FCE/table/3-2NN.cql	True	fce-table-3-2NN
+cql-files/FCE/table/4-1Bp.cql	True	fce-table-4-1Bp
+cql-files/FCE/table/4-2scBB.cql	True	fce-table-4-2scBB
+cql-files/FCE/table/4-3ocBB.cql	True	fce-table-4-3ocBB
+cql-files/FCE/table/5-0BN.cql	True	fce-table-5-0BN
+cql-files/FCE/table/6-1-0RP.cql	True	fce-table-6-1-0RP
+cql-files/FCE/table/6-2-0Rr.cql	True	fce-table-6-2-0Rr
+cql-files/FCE/table/6-2-1RPr.cql	True	fce-table-6-2-1RPr
+cql-files/FCE/table/6-2-2RPPr.cql	True	fce-table-6-2-2RPPr
+cql-files/FCE/table/6-2-2RPPrConnected.cql	True	fce-table-6-2-2RPPrConnected
+cql-files/FCE/table/6-3RRrr.cql	True	fce-table-6-3RRrr
+cql-files/FCE/table/7-1RN.cql	True	fce-table-7-1RN
+cql-files/FCE/table/7-2RB.cql	True	fce-table-7-2RB
+cql-files/FCE/table/8-1RNr.cql	True	fce-table-8-1RNrPp
+cql-files/FCE/table/8-1RNrNoPawns.cql	True	fce-table-8-1RNr
+cql-files/FCE/table/8-1RNrPp.cql	True	fce-table-8-1RNrPp
+cql-files/FCE/table/8-2RBr.cql	True	fce-table-8-2RBrPp
+cql-files/FCE/table/8-2RBrNoPawns.cql	True	fce-table-8-2RBr
+cql-files/FCE/table/8-2RBrPp.cql	True	fce-table-8-2RBrPp
+cql-files/FCE/table/8-3RAra.cql	True	fce-table-8-3RAra
+cql-files/FCE/table/9-1Qp.cql	True	fce-table-9-1Qp
+cql-files/FCE/table/9-2Qq.cql	True	fce-table-9-2Qq
+cql-files/FCE/table/9-3QPq.cql	True	fce-table-9-3QPq
+cql-files/SergeiTkachenko/bishop.cql	False	
+cql-files/SergeiTkachenko/bishopbishop.cql	False	
+cql-files/SergeiTkachenko/bishopknight.cql	False	
+cql-files/SergeiTkachenko/king.cql	False	
+cql-files/SergeiTkachenko/knight.cql	False	
+cql-files/SergeiTkachenko/knightknight.cql	False	
+cql-files/SergeiTkachenko/pawn.cql	False	
+cql-files/SergeiTkachenko/pawn__1119612d9ced.cql	False	
+cql-files/SergeiTkachenko/queen.cql	False	
+cql-files/SergeiTkachenko/rook.cql	False	
+cql-files/arves/fortress.cql	False	
+cql-files/arves/knighttour.cql	False	
+cql-files/arves/mini.cql	False	
+cql-files/arves/powerlarge.cql	False	
+cql-files/attack/greekgift.cql	False	
+cql-files/lhampton/alekhinegun.cql	False	
+cql-files/lhampton/answercheckwithmate.cql	False	
+cql-files/lhampton/castleoppside.cql	False	
+cql-files/lhampton/doublecheckcapture.cql	False	
+cql-files/lhampton/dovetail.cql	False	
+cql-files/lhampton/epaulette.cql	False	
+cql-files/lhampton/kinghunt.cql	False	
+cql-files/lhampton/pawnchain.cql	False	
+cql-files/lhampton/pawnforkrook.cql	False	
+cql-files/lhampton/railroad.cql	False	
+cql-files/lhampton/rookpintoqueen.cql	False	
+cql-files/lhampton/royalcheck.cql	False	
+cql-files/lhampton/skeweredking.cql	False	
+cql-files/lhampton/threewayknightfork.cql	False	
+cql-files/lhampton/windmill.cql	False	
+cql-files/lhampton/zwischenzug.cql	False	
+cql-files/lila/advancedPawn.cql	False	
+cql-files/lila/advantage.cql	True	lila-advantage
+cql-files/lila/anastasiaMate.cql	True	lila-anastasiaMate
+cql-files/lila/arabianMate.cql	True	lila-arabianMate
+cql-files/lila/attackingF2F7.cql	False	
+cql-files/lila/attraction.cql	False	
+cql-files/lila/backRankMate.cql	True	lila-backRankMate
+cql-files/lila/bishopEndgame.cql	True	lila-bishopEndgame
+cql-files/lila/bodenMate.cql	True	lila-bodenMate
+cql-files/lila/capturingDefender.cql	False	
+cql-files/lila/castling.cql	True	lila-castling
+cql-files/lila/clearance.cql	False	
+cql-files/lila/collinear.cql	False	
+cql-files/lila/crushing.cql	True	lila-crushing
+cql-files/lila/defensiveMove.cql	False	
+cql-files/lila/deflection.cql	False	
+cql-files/lila/discoveredAttack.cql	True	lila-discoveredAttack
+cql-files/lila/doubleBishopMate.cql	True	lila-doubleBishopMate
+cql-files/lila/doubleCheck.cql	True	lila-doubleCheck
+cql-files/lila/dovetailMate.cql	True	lila-dovetailMate
+cql-files/lila/enPassant.cql	True	lila-enPassant
+cql-files/lila/equality.cql	True	lila-equality
+cql-files/lila/exposedKing.cql	False	
+cql-files/lila/fork.cql	False	
+cql-files/lila/hangingPiece.cql	False	
+cql-files/lila/hookMate.cql	True	lila-hookMate
+cql-files/lila/interference.cql	False	
+cql-files/lila/intermezzo.cql	False	
+cql-files/lila/kingsideAttack.cql	False	
+cql-files/lila/knightEndgame.cql	True	lila-knightEndgame
+cql-files/lila/long.cql	True	lila-long
+cql-files/lila/mate.cql	True	lila-mate
+cql-files/lila/mateIn1.cql	False	
+cql-files/lila/mateIn2.cql	False	
+cql-files/lila/mateIn3.cql	False	
+cql-files/lila/mateIn4.cql	False	
+cql-files/lila/mateIn5.cql	False	
+cql-files/lila/oneMove.cql	True	lila-oneMove
+cql-files/lila/pawnEndgame.cql	True	lila-pawnEndgame
+cql-files/lila/pin.cql	True	lila-pin
+cql-files/lila/promotion.cql	True	lila-promotion
+cql-files/lila/queenEndgame.cql	True	lila-queenEndgame
+cql-files/lila/queenRookEndgame.cql	True	lila-queenRookEndgame
+cql-files/lila/queensideAttack.cql	False	
+cql-files/lila/quietMove.cql	False	
+cql-files/lila/rookEndgame.cql	True	lila-rookEndgame
+cql-files/lila/sacrifice.cql	False	
+cql-files/lila/short.cql	True	lila-short
+cql-files/lila/skewer.cql	True	lila-skewer
+cql-files/lila/smotheredMate.cql	True	lila-smotheredMate
+cql-files/lila/trappedPiece.cql	False	
+cql-files/lila/underPromotion.cql	True	lila-underPromotion
+cql-files/lila/veryLong.cql	True	lila-veryLong
+cql-files/lila/xRayAttack.cql	True	lila-xRayAttack
+cql-files/lila/zugzwang.cql	True	lila-zugzwang
+cql-files/mates/BN.cql	True	mates-BN
+cql-files/mates/KBB.cql	True	mates-KBB
+cql-files/mates/KNN.cql	True	mates-KNN
+cql-files/mates/anastasiamate.cql	True	mates-anastasiamate
+cql-files/mates/anderssen.cql	True	mates-anderssen
+cql-files/mates/arabianmate.cql	True	mates-arabianmate
+cql-files/mates/backrankmate.cql	True	mates-backrankmate
+cql-files/mates/balestramate.cql	True	mates-balestramate
+cql-files/mates/blackburnemate.cql	True	mates-blackburnemate
+cql-files/mates/blindswinemate.cql	True	mates-blindswinemate
+cql-files/mates/bodenmate.cql	True	mates-bodenmate
+cql-files/mates/castlingmate.cql	True	mates-castlingmate
+cql-files/mates/corner.cql	True	mates-corner
+cql-files/mates/damiano.cql	True	mates-damiano
+cql-files/mates/damianobishopmate.cql	True	mates-damianobishopmate
+cql-files/mates/davidandgoliath.cql	True	mates-davidandgoliath
+cql-files/mates/doubleknight.cql	True	mates-doubleknight
+cql-files/mates/dovetailmate.cql	True	mates-dovetailmate
+cql-files/mates/epaulettemate.cql	True	mates-epaulettemate
+cql-files/mates/greco.cql	True	mates-greco
+cql-files/mates/hookmate.cql	True	mates-hookmate
+cql-files/mates/ismate.cql	True	mates-ismate
+cql-files/mates/killbox.cql	True	mates-killbox
+cql-files/mates/laddermate.cql	True	mates-laddermate
+cql-files/mates/legalmate.cql	True	mates-legalmate
+cql-files/mates/lolli.cql	True	mates-lolli
+cql-files/mates/maxlangemate.cql	True	mates-maxlangemate
+cql-files/mates/mayet.cql	True	mates-mayet
+cql-files/mates/morphymate.cql	True	mates-morphymate
+cql-files/mates/opera.cql	True	mates-opera
+cql-files/mates/pillsbury.cql	True	mates-pillsbury
+cql-files/mates/queen.cql	True	mates-queen
+cql-files/mates/retimate.cql	True	mates-retimate
+cql-files/mates/rookmate.cql	True	mates-rookmate
+cql-files/mates/smotheredmate.cql	True	mates-smotheredmate
+cql-files/mates/suffocationmate.cql	True	mates-suffocationmate
+cql-files/mates/swallowtail.cql	True	mates-swallowtail
+cql-files/mates/trianglemate.cql	True	mates-trianglemate
+cql-files/mates/twobishopmate.cql	True	mates-twobishopmate
+cql-files/mates/twoknightmate.cql	True	mates-twoknightmate
+cql-files/mates/vukovicmate.cql	True	mates-vukovicmate
+cql-files/silly/12pawnmoves.cql	False	
+cql-files/silly/3knights.cql	False	
+cql-files/silly/4vs3.cql	False	
+cql-files/silly/HvdH-tablebase.cql	False	
+cql-files/silly/Qsacmate.cql	False	
+cql-files/silly/RB.cql	False	
+cql-files/silly/Rpppp-connect.cql	False	
+cql-files/silly/Rpppp.cql	False	
+cql-files/silly/abcd.cql	False	
+cql-files/silly/absolutepinmate.cql	False	
+cql-files/silly/attackedsquaremate.cql	False	
+cql-files/silly/bad_bishop.cql	False	
+cql-files/silly/bad_knight.cql	False	
+cql-files/silly/bahr.cql	False	
+cql-files/silly/blockcheckwithmate.cql	False	
+cql-files/silly/castleaftermove40.cql	False	
+cql-files/silly/connected_passed_pawns.cql	False	
+cql-files/silly/crosspin.cql	False	
+cql-files/silly/double_attacked_mate.cql	False	
+cql-files/silly/doublecheck.cql	False	
+cql-files/silly/doublecheckANDmate.cql	False	
+cql-files/silly/elasticband.cql	False	
+cql-files/silly/evals.cql	False	
+cql-files/silly/filterlosses.cql	False	
+cql-files/silly/fischer.cql	False	
+cql-files/silly/freespace.cql	False	
+cql-files/silly/g5mate.cql	False	
+cql-files/silly/greekgift.cql	False	
+cql-files/silly/halloween.cql	False	
+cql-files/silly/imbalance.cql	False	
+cql-files/silly/kingsidecastlemate.cql	False	
+cql-files/silly/knightinthecorner.cql	False	
+cql-files/silly/knightontherim.cql	False	
+cql-files/silly/knights_tour.cql	False	
+cql-files/silly/krabbe-chess-curiosities/unguarded_guard.cql	False	
+cql-files/silly/krabbeboatmate.cql	False	
+cql-files/silly/krabbeboatmatebig.cql	False	
+cql-files/silly/krabbebreakthrough.cql	False	
+cql-files/silly/lalic.cql	False	
+cql-files/silly/legal.cql	False	
+cql-files/silly/matewithking.cql	False	
+cql-files/silly/matewithpawn.cql	False	
+cql-files/silly/max_consecutive_captures.cql	False	
+cql-files/silly/max_consecutive_checks.cql	False	
+cql-files/silly/max_consecutive_noncaptures.cql	False	
+cql-files/silly/max_consecutive_promotions.cql	False	
+cql-files/silly/miniature.cql	False	
+cql-files/silly/most_hanging.cql	False	
+cql-files/silly/most_visited_square.cql	False	
+cql-files/silly/nocapturebeforemove30.cql	False	
+cql-files/silly/octopus.cql	False	
+cql-files/silly/one_piece_opening_streak.cql	False	
+cql-files/silly/only-move-mate.cql	False	
+cql-files/silly/onlymoveep.cql	False	
+cql-files/silly/onlymovemate.cql	False	
+cql-files/silly/oppositesidecastling.cql	False	
+cql-files/silly/pawnwall.cql	False	
+cql-files/silly/pieceonstartingsquaremate.cql	False	
+cql-files/silly/quadrupled-pawns.cql	False	
+cql-files/silly/queensidecastlemate.cql	False	
+cql-files/silly/ramblingrook.cql	False	
+cql-files/silly/return_mate.cql	False	
+cql-files/silly/rook_homerun.cql	False	
+cql-files/silly/rookhomerun.cql	False	
+cql-files/silly/trappedknight.cql	False	
+cql-files/silly/triangulation.cql	False	
+cql-files/silly/triangulation_general.cql	False	
+cql-files/silly/tripled-pawn-creations-slow.cql	False	
+cql-files/silly/tripled-pawns.cql	False	
+cql-files/silly/troitsky.cql	False	
+cql-files/silly/underdog.cql	False	
+cql-files/silly/underpromotion.cql	False	
+cql-files/structures/33-42.cql	False	
+cql-files/structures/ACK.cql	False	
+cql-files/structures/AsymmetricBenoni.cql	False	
+cql-files/structures/Carlsbad.cql	False	
+cql-files/structures/CaroKann.cql	False	
+cql-files/structures/FrenchI.cql	False	
+cql-files/structures/FrenchII.cql	False	
+cql-files/structures/FrenchIII.cql	False	
+cql-files/structures/GrunfeldCentre.cql	False	
+cql-files/structures/HangingPawns.cql	False	
+cql-files/structures/Hedgehog.cql	False	
+cql-files/structures/IQP.cql	False	
+cql-files/structures/KIDComplex.cql	False	
+cql-files/structures/KIDI.cql	False	
+cql-files/structures/KIDII.cql	False	
+cql-files/structures/KIDIII.cql	False	
+cql-files/structures/Maroczy.cql	False	
+cql-files/structures/NajdorfI.cql	False	
+cql-files/structures/NajdorfII.cql	False	
+cql-files/structures/OpenKID.cql	False	
+cql-files/structures/Slav.cql	False	
+cql-files/structures/stonewall.cql	False	
+cql-files/structures/stonewall__b3678d238d8e.cql	False	
+cql-files/structures/symben.cql	False	

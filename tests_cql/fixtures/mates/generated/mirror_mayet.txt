@@ -1,0 +1,4 @@
+# positive (CQL-verified)
+3kR3/p2B3p/3Q4/2P3p1/8/5p2/PPP2PbP/6K1 b - - 1 29
+# negative (CQL-verified)
+7k/8/8/8/8/8/8/K7 w - - 0 1

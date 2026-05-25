@@ -3,3 +3,5 @@
   cql()
 
   flipcolor (Q == 1 and [BN] == 1 and [Rr] == 0 and q == 1 and [bn] == 1)
+
+comment("10-8")

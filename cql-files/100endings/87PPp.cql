@@ -6,6 +6,4 @@ flipcolor flipvertical (P[g-h2-7] == 2 and p[h2-7] == 1)
 
 [Aa] == 5
 
-
-
-
+comment("87PPp")

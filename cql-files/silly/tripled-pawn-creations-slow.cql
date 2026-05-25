@@ -16,3 +16,5 @@ flipcolor {
     (move from P capture [a] to g2-7 and Pg2-7 == 3) or
     (move from P capture [a] to h2-7 and Ph2-7 == 3)
 }
+
+comment("tripled-pawn-creations-slow")

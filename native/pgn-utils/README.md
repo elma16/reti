@@ -21,6 +21,9 @@ The binary exposes subcommands plus a backwards-compatible legacy form:
 - `dedup` — drop duplicate games from a single file by hashing normalized
   movetext (move numbers, comments, variations, NAGs, result tokens, and
   whitespace are stripped before hashing).
+- `annotated-pgn` — stream annotated PGNs, replay mainlines with `shakmaty`,
+  and write JSONL records containing headers, UCI moves, replay errors, and
+  positions marked by a chosen comment such as `{CQL}`.
 - `lint` — report (does **not** fix) structural, header-consistency, and
   move-legality issues. Move legality is checked by replaying SAN moves with
   the `shakmaty` engine. Exits with status 2 if any issues are found.
@@ -56,6 +59,7 @@ The new subcommand form, for direct human use:
 | `reti-pgn-utils clean [--preserve-markup] [--inspect] INPUT [OUTPUT]` | same lexical rewrite as legacy, exposed as a subcommand |
 | `reti-pgn-utils concat -o OUT [--clean] [--dedup] INPUTS...` | concatenate files / directories into one PGN |
 | `reti-pgn-utils dedup -o OUT INPUT` | drop duplicate games by movetext |
+| `reti-pgn-utils annotated-pgn -o OUT [--marker CQL] INPUTS...` | replay annotated PGNs and export per-game marker JSONL |
 | `reti-pgn-utils lint [--json] INPUT` | report issues (exit 2 on any) |
 | `reti-pgn-utils source-totals -o OUT INPUTS...` | count games per source PGN once |
 

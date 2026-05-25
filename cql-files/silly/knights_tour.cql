@@ -11,3 +11,5 @@ flipcolor {
           --> move from $n {6 63}
     }
 }
+
+comment("knights_tour")

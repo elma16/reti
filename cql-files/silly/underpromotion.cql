@@ -6,3 +6,5 @@ cql(quiet)
 flipcolor {
     move promote [RBN]
 }
+
+comment("underpromotion")

@@ -6,3 +6,5 @@ cql(quiet)
 sort "max consecutive promotions"
 line
   --> move promote [QRBNqrbn] {2 32}
+
+comment("max_consecutive_promotions")

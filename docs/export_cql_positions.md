@@ -4,7 +4,11 @@
 such as `{CQL}` and appends one CSV row per marked position.
 
 The exporter treats a marker comment as applying to the position after the move
-it follows. For directory input, `.pgn` files are discovered recursively.
+it follows. PGN replay is done by the native `reti-pgn-utils annotated-pgn`
+path using Rust `pgn-reader` + `shakmaty`, not `python-chess`; build the helper
+with `cargo build --release --manifest-path native/pgn-utils/Cargo.toml` if it
+is not already present. For directory input, `.pgn` files are discovered
+recursively.
 
 ## Usage
 

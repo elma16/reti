@@ -1,0 +1,5 @@
+// Searches for the only move mate chess motif.
+
+cql()
+
+(move legal count == 1) and (move mate)

@@ -31,7 +31,7 @@ Optional flags:
 - `--keep-output`: when `-o` is omitted, keep the temporary output directory
 - `--skip-pgn-preflight`: skip the initial PGN validation pass
 - `--smoke-test-pgns`: run one cheap CQL smoke query per PGN during preflight
-- `--strict-pgn-parse`: run a full `python-chess` parse during preflight
+- `--strict-pgn-parse`: run a full Rust/shakmaty PGN lint pass during preflight
 
 Legacy positional syntax still works for now, but the explicit flag form above
 is the intended interface.
@@ -106,9 +106,9 @@ Before the full matrix run, the runner does a PGN preflight by default:
 - if a PGN contains a UTF-8 BOM, invalid UTF-8, NUL bytes, or other control
   characters, it creates a sanitized temporary runtime copy and leaves the
   original file untouched
-- by default it does not run a full `python-chess` parse or a CQL smoke test,
+- by default it does not run a full Rust/shakmaty legality pass or a CQL smoke test,
   so startup stays cheap on large databases
-- `--strict-pgn-parse` enables the full `python-chess` parse check
+- `--strict-pgn-parse` enables the full Rust/shakmaty legality check
 - `--smoke-test-pgns` enables one cheap CQL smoke query per PGN so CQL-level
   crashes caused by the PGN itself show up before the `PGN x CQL`
   cross-product starts

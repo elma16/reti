@@ -324,7 +324,7 @@ def collect_hits_from_pgn_dir(
 
     for pgn_path, ending, file_size in work_items:
         display_path = format_pgn_display_path(pgn_path, pgn_root)
-        pbar.set_postfix_str(pgn_path.stem, refresh=False)
+        pbar.set_postfix_str(pgn_path.stem)
 
         try:
             game_stream = fast_iter_annotated_pgn(pgn_path, marker_text=marker_text)

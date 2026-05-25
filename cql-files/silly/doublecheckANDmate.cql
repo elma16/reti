@@ -6,3 +6,5 @@ flipcolor {
     (A attacks k) >= 2
     mate
 }
+
+comment("doublecheckANDmate")

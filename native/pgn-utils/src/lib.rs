@@ -5,6 +5,7 @@
 //! points. Splitting the logic into a library lets us unit-test the parsers,
 //! splitters, and rewriters directly without spawning a subprocess.
 
+pub mod annotated;
 pub mod clean;
 pub mod cli;
 pub mod concat;

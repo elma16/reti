@@ -10,6 +10,13 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from reti.common.json_io import load_json
+from reti.common.source_metadata import (
+    classify_source_group as classify_lumbras_source_group,
+    combined_source_bucket_key,
+    combined_source_bucket_label,
+    source_sort_key,
+)
 from reti.fce_metadata import FCE_CATALOG
 from reti.fce_snapshot import (
     REPO_ROOT,
@@ -20,7 +27,6 @@ from reti.fce_snapshot import (
     file_signature,
     manifest_fingerprint,
     original_fce_reference_payload,
-    source_sort_key,
     write_snapshot_directory,
 )
 
@@ -91,38 +97,7 @@ def count_event_tags_with_progress(path: Path, progress: Any | None = None) -> i
 
 
 def classify_source_group(source_pgn: str) -> str:
-    stem = Path(source_pgn).stem
-    if stem.startswith("LumbrasGigaBase_OTB_"):
-        return "otb"
-    if stem.startswith("LumbrasGigaBase_Online_"):
-        return "online"
-    raise SnapshotError(
-        f"Could not classify source PGN {source_pgn!r}; expected "
-        "LumbrasGigaBase_OTB_* or LumbrasGigaBase_Online_*"
-    )
-
-
-def combined_source_bucket_key(source_pgn: str) -> str:
-    stem = Path(source_pgn).stem
-    for group, prefix in (
-        ("otb", "LumbrasGigaBase_OTB_"),
-        ("online", "LumbrasGigaBase_Online_"),
-    ):
-        if stem.startswith(prefix):
-            return f"{group}:{stem[len(prefix):]}"
-    return stem
-
-
-def combined_source_bucket_label(source_pgn: str) -> str:
-    stem = Path(source_pgn).stem
-    for label, prefix in (
-        ("OTB", "LumbrasGigaBase_OTB_"),
-        ("Online", "LumbrasGigaBase_Online_"),
-    ):
-        if stem.startswith(prefix):
-            bucket = stem[len(prefix) :].replace("_partial_release", " partial")
-            return f"{label} {bucket.replace('_', ' ')}"
-    return stem.replace("_partial_release", " partial").replace("_", " ")
+    return classify_lumbras_source_group(source_pgn, error_type=SnapshotError)
 
 
 def combined_source_sort_key(row: CombinedSummaryRow) -> tuple[int, tuple[int, str]]:
@@ -767,13 +742,6 @@ def build_combined_snapshot_payload(
         },
     }
     return snapshot
-
-
-def load_json(path: Path) -> Any:
-    with path.open("r", encoding="utf-8") as handle:
-        import json
-
-        return json.load(handle)
 
 
 def build_fce_combined_snapshot(

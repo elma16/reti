@@ -10,12 +10,12 @@ real work happens.
 from __future__ import annotations
 
 import io
+import json
 import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
 
-import chess.pgn as chess_pgn
 from tqdm import tqdm as tqdm_progress
 
 from reti.cql.backend import CqlBackend
@@ -24,6 +24,7 @@ from reti.common.progress import format_progress_label, progress_write
 from reti.common.subprocess_helpers import describe_returncode
 from reti.pgn_utils import (
     FastPgnRewriteStats,
+    find_pgn_utils_binary,
     inspect_pgn_fast,
     rewrite_pgn_fast,
 )
@@ -148,23 +149,58 @@ def sanitize_pgn_to_temp(
     return destination
 
 
-def validate_pgn_with_python_parser(pgn_path: Path) -> str | None:
-    """Surface the first parser error from python-chess."""
-    try:
-        with pgn_path.open("r", encoding="utf-8", errors="replace") as handle:
-            game_index = 0
-            while True:
-                game = chess_pgn.read_game(handle)
-                if game is None:
-                    break
-                game_index += 1
-                errors = getattr(game, "errors", None) or []
-                if errors:
-                    return f"python-chess parse error in game {game_index}: {errors[0]}"
-    except Exception as exc:
-        return f"python-chess could not read the PGN: {exc}"
+def validate_pgn_with_native_lint(pgn_path: Path) -> str | None:
+    """Surface the first Rust/shakmaty PGN lint issue."""
+    binary_path = find_pgn_utils_binary()
+    if binary_path is None:
+        return (
+            "native PGN linter not found; build it with "
+            "`cargo build --release --manifest-path native/pgn-utils/Cargo.toml`"
+        )
 
-    return None
+    process = subprocess.run(
+        [
+            str(binary_path),
+            "lint",
+            "--json",
+            "--no-progress",
+            str(pgn_path),
+        ],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+    if process.returncode == 0:
+        return None
+
+    if process.stdout.strip():
+        try:
+            report = json.loads(process.stdout)
+            issues = report.get("issues", [])
+            if issues:
+                first = issues[0]
+                return (
+                    "native PGN lint issue in game "
+                    f"{first.get('game_index', '?')}: "
+                    f"[{first.get('code', 'issue')}] {first.get('message', '')}"
+                )
+        except Exception:
+            pass
+
+    detail = process.stderr.strip() or process.stdout.strip()
+    if process.returncode == 2:
+        return detail or "native PGN lint found issues"
+    return detail or f"native PGN lint failed with exit code {process.returncode}"
+
+
+def validate_pgn_with_python_parser(pgn_path: Path) -> str | None:
+    """Compatibility alias for the old strict parse hook.
+
+    Strict preflight now uses the Rust/shakmaty PGN linter rather than
+    the old Python parser path.
+    """
+    return validate_pgn_with_native_lint(pgn_path)
 
 
 def smoke_test_pgn_with_cql(
