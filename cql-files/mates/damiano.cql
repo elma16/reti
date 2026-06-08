@@ -5,5 +5,3 @@ Damiano's mate is a classic method of checkmating and one of the oldest. It work
 cql() mate flipcolor shift flip {
     kg8 rf8 Qh7 pg7 Pg6
 }
-
-comment("damiano")

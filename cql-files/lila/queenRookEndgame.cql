@@ -4,5 +4,3 @@ cql()
 #[BNbn] == 0
 #[Qq] >= 1
 #[Rr] >= 1
-
-comment("queenRookEndgame")

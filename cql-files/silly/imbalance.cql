@@ -5,5 +5,3 @@ cql()
 
 power [Aa] >= 1
 abs(power A - power a) >= 2
-
-comment("imbalance")

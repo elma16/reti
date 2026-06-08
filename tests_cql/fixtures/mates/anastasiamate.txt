@@ -1,4 +1,4 @@
 # positive (should match)
-2k5/p4p2/n1p5/1p4p1/PP2Ppp1/4b3/7r/RK1rBR2 w - - 3 29
-# negative (single tweak, should not match)
-2k5/p4p2/n1p5/1p4p1/PP2Ppp1/4b3/7r/RK1rBR2 b - - 3 29
+8/4N1pk/8/8/8/8/7R/K7 b - - 0 1
+# negative (cross-pattern: K+R vs k bare king (no knight, no blocker); should not match)
+k6R/8/1K6/8/8/8/8/8 b - - 0 1

@@ -7,4 +7,3 @@ flipcolor (R == 1 and  p == 2 and connectedpawns == 2)
 
 [Aa] == 5
 
-comment("30_32Rpp")

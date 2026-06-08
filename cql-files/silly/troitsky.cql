@@ -22,4 +22,3 @@ flipcolor {
      p[e4-7])
 }
 
-comment("troitsky")

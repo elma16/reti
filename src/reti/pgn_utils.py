@@ -256,15 +256,15 @@ def _repo_root() -> Path:
 
 def _native_binary_name() -> str:
     if os.name == "nt":
-        return "reti-pgn-utils.exe"
-    return "reti-pgn-utils"
+        return "pgn-utils.exe"
+    return "pgn-utils"
 
 
 def find_pgn_utils_binary() -> Path | None:
-    if os.environ.get("RETI_PGN_UTILS_NO_NATIVE") == "1":
+    if os.environ.get("PGN_UTILS_NO_NATIVE") == "1":
         return None
 
-    explicit = os.environ.get("RETI_PGN_UTILS_BIN")
+    explicit = os.environ.get("PGN_UTILS_BIN")
     if explicit:
         candidate = Path(explicit).expanduser()
         if candidate.is_file():
@@ -279,10 +279,9 @@ def find_pgn_utils_binary() -> Path | None:
         if candidate.is_file():
             return candidate
 
-    for name in (binary_name, "pgn-utils"):
-        on_path = shutil.which(name)
-        if on_path:
-            return Path(on_path)
+    on_path = shutil.which(binary_name)
+    if on_path:
+        return Path(on_path)
 
     return None
 
@@ -323,27 +322,92 @@ def _rewrite_pgn_fast_native(
     return _parse_native_stats(process.stdout)
 
 
+# Standard PGN export movetext wrap width. Mirrors `MOVETEXT_WIDTH` in
+# `native/pgn-utils/src/clean.rs` so the Python fallback and the native binary
+# produce equivalent strip-mode output.
+_MOVETEXT_WIDTH = 80
+
+
+def _reflow_pgn(text: str) -> str:
+    """Re-flow stripped PGN into standard export formatting.
+
+    A line-for-line port of `reflow_pgn` in `native/pgn-utils/src/clean.rs`:
+    header tag lines are emitted verbatim, one blank line separates a game's
+    headers from its movetext and consecutive games, and movetext tokens flow
+    continuously, wrapping at ``_MOVETEXT_WIDTH`` columns between whole tokens.
+    Only used in strip mode (``preserve_markup`` keeps the lexer's layout).
+    """
+    out: list[str] = []
+    state = "start"  # "start" | "headers" | "movetext"
+    col = 0
+
+    def emit(token: str) -> None:
+        nonlocal col
+        if col == 0:
+            out.append(token)
+            col = len(token)
+        elif col + 1 + len(token) <= _MOVETEXT_WIDTH:
+            out.append(" ")
+            out.append(token)
+            col += 1 + len(token)
+        else:
+            out.append("\n")
+            out.append(token)
+            col = len(token)
+
+    for raw_line in text.split("\n"):
+        stripped = raw_line.rstrip("\r").strip(" \t")
+        if not stripped:
+            continue
+        if stripped[0] == "[":
+            is_event = stripped.startswith("[Event ") or stripped.startswith("[Event\t")
+            if state == "movetext":
+                out.append("\n\n")
+            elif state == "headers" and is_event:
+                out.append("\n")
+            out.append(stripped)
+            out.append("\n")
+            state = "headers"
+            col = 0
+        else:
+            if state == "headers":
+                out.append("\n")
+                col = 0
+            for token in stripped.split():
+                emit(token)
+            state = "movetext"
+
+    if state == "movetext":
+        out.append("\n\n")
+    return "".join(out)
+
+
 def rewrite_pgn_fast_python(
     source_path: Path,
     destination_path: Path,
     *,
     preserve_markup: bool = False,
 ) -> FastPgnRewriteStats:
-    writer: _FastPgnLexicalWriter
-    stats: FastPgnRewriteStats
-    with source_path.open("rb") as raw_handle, destination_path.open(
-        "w", encoding="utf-8", newline="\n"
-    ) as output_handle:
+    # Buffer the lexer output so strip mode can be re-flowed before writing.
+    buffer = io.StringIO()
+    with source_path.open("rb") as raw_handle:
         text_handle = io.TextIOWrapper(
             raw_handle,
             encoding="utf-8",
             errors="replace",
             newline=None,
         )
-        writer = _FastPgnLexicalWriter(output_handle, preserve_markup=preserve_markup)
+        writer = _FastPgnLexicalWriter(buffer, preserve_markup=preserve_markup)
         for chunk in iter(lambda: text_handle.read(1024 * 1024), ""):
             writer.feed(chunk)
         stats = writer.finish()
+
+    output_text = buffer.getvalue()
+    if not preserve_markup:
+        output_text = _reflow_pgn(output_text)
+
+    with destination_path.open("w", encoding="utf-8", newline="\n") as output_handle:
+        output_handle.write(output_text)
 
     return stats
 

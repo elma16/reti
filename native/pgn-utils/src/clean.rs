@@ -10,8 +10,8 @@
 //! JSON stats are printed on stdout and the output file is byte-identical to
 //! the previous implementation.
 
-use std::fs::{self, File};
-use std::io::{self, BufWriter, Write};
+use std::fs::File;
+use std::io::{self, BufWriter, IsTerminal, Read, Write};
 use std::path::{Path, PathBuf};
 
 use crate::progress::ProgressReporter;
@@ -414,7 +414,15 @@ impl<'w> FastRewriter<'w> {
 }
 
 /// Convenience helper that runs the rewriter against an in-memory string and
-/// returns `(rewritten_bytes, stats)`. Used by tests and by `concat --clean`.
+/// returns `(rewritten_bytes, stats)`. Used by `clean`, the legacy form, and
+/// `concat --clean`.
+///
+/// In strip mode (`preserve_markup == false`) the rewriter's output is run
+/// through [`reflow_pgn`] so the movetext is re-wrapped into standard export
+/// formatting instead of inheriting the source's (now comment-less) line
+/// breaks. With `preserve_markup` the bytes are returned untouched so callers
+/// that depend on the exact lexical layout — notably the `{CQL}`-marker
+/// preflight path — see no change.
 pub fn rewrite_to_vec(text: &str, preserve_markup: bool) -> io::Result<(Vec<u8>, CleanStats)> {
     let mut buf: Vec<u8> = Vec::with_capacity(text.len());
     let stats = {
@@ -422,40 +430,163 @@ pub fn rewrite_to_vec(text: &str, preserve_markup: bool) -> io::Result<(Vec<u8>,
         rw.feed_text(text);
         rw.finish()?
     };
-    Ok((buf, stats))
+    let out = if preserve_markup {
+        buf
+    } else {
+        reflow_pgn(&buf)
+    };
+    Ok((out, stats))
 }
 
-/// CLI entry for `clean` (and the legacy positional form).
+/// Standard PGN export movetext wrap width: a movetext line never exceeds this
+/// many columns, and breaks fall only between whole tokens.
+const MOVETEXT_WIDTH: usize = 80;
+
+/// Re-flow stripped PGN (the output of [`FastRewriter`] with
+/// `preserve_markup == false`) into conventional export formatting:
 ///
-/// `output_path == None` is the legacy `--inspect` mode: scan the input and
-/// report stats without writing anything.
-pub fn run_clean(
-    input_path: &Path,
-    output_path: Option<&Path>,
+///   * header tag lines (`[Tag "..."]`) are emitted verbatim, one per line;
+///   * exactly one blank line separates a game's headers from its movetext;
+///   * movetext tokens (move numbers, SAN, NAGs, the result) flow continuously
+///     and wrap at [`MOVETEXT_WIDTH`] columns, breaking only between tokens;
+///   * exactly one blank line separates consecutive games.
+///
+/// The lexer leaves one token per line when each move trailed a long comment in
+/// the source, and a stray blank line wherever a comment-only line was
+/// stripped; this pass collapses that ragged output into the standard layout.
+/// It works on raw bytes so it never has to assume valid UTF-8 (player names,
+/// etc. are passed through unchanged).
+pub fn reflow_pgn(bytes: &[u8]) -> Vec<u8> {
+    #[derive(PartialEq)]
+    enum State {
+        Start,
+        Headers,
+        Movetext,
+    }
+
+    let mut out: Vec<u8> = Vec::with_capacity(bytes.len());
+    let mut state = State::Start;
+    let mut col = 0usize;
+
+    for raw_line in bytes.split(|&b| b == b'\n') {
+        // Drop a trailing CR so CRLF-terminated input reflows cleanly.
+        let line = match raw_line.last() {
+            Some(b'\r') => &raw_line[..raw_line.len() - 1],
+            _ => raw_line,
+        };
+        let trimmed = trim_ascii_ws(line);
+        if trimmed.is_empty() {
+            // Blank lines carry no information here; spacing is reconstructed.
+            continue;
+        }
+
+        if trimmed[0] == b'[' {
+            // A header tag line. `[Event ` marks the start of a new game.
+            let is_event = trimmed.starts_with(b"[Event ") || trimmed.starts_with(b"[Event\t");
+            match state {
+                // New game after the previous game's movetext: end the line and
+                // leave one blank separator.
+                State::Movetext => out.extend_from_slice(b"\n\n"),
+                // A new game right after a headers-only game: one blank line so
+                // the two header blocks don't run together.
+                State::Headers if is_event => out.push(b'\n'),
+                _ => {}
+            }
+            out.extend_from_slice(trimmed);
+            out.push(b'\n');
+            state = State::Headers;
+            col = 0;
+        } else {
+            // A movetext line: flow its tokens into the wrapped output.
+            if state == State::Headers {
+                // One blank line between the header block and the movetext.
+                out.push(b'\n');
+                col = 0;
+            }
+            for token in trimmed.split(|&b| b == b' ' || b == b'\t') {
+                if !token.is_empty() {
+                    emit_movetext_token(&mut out, &mut col, token);
+                }
+            }
+            state = State::Movetext;
+        }
+    }
+
+    if state == State::Movetext {
+        // Terminate the final movetext line and leave one trailing blank line,
+        // matching the per-game separator the rest of the toolset emits.
+        out.extend_from_slice(b"\n\n");
+    }
+
+    out
+}
+
+/// Append `token` to the wrapped movetext in `out`, inserting a space or a line
+/// break as needed and tracking the current column in `col`.
+fn emit_movetext_token(out: &mut Vec<u8>, col: &mut usize, token: &[u8]) {
+    if *col == 0 {
+        out.extend_from_slice(token);
+        *col = token.len();
+    } else if *col + 1 + token.len() <= MOVETEXT_WIDTH {
+        out.push(b' ');
+        out.extend_from_slice(token);
+        *col += 1 + token.len();
+    } else {
+        out.push(b'\n');
+        out.extend_from_slice(token);
+        *col = token.len();
+    }
+}
+
+/// Trim leading/trailing ASCII spaces and tabs from a byte slice.
+fn trim_ascii_ws(s: &[u8]) -> &[u8] {
+    let mut start = 0;
+    while start < s.len() && (s[start] == b' ' || s[start] == b'\t') {
+        start += 1;
+    }
+    let mut end = s.len();
+    while end > start && (s[end - 1] == b' ' || s[end - 1] == b'\t') {
+        end -= 1;
+    }
+    &s[start..end]
+}
+
+/// Where a `clean` run sends its rewritten bytes.
+enum CleanOutput<'a> {
+    /// Write the rewritten PGN to this sink.
+    Write(&'a mut dyn Write),
+    /// Scan only and report stats (the legacy `--inspect` mode); produce no
+    /// output.
+    Inspect,
+}
+
+/// Core of `clean`: read everything from `reader`, run the rewriter, and send
+/// the result to `output`. `total` is the input length when known (a file) so
+/// the progress bar can show a percentage; `None` (stdin) falls back to a
+/// byte-counting spinner.
+fn clean_core(
+    reader: Box<dyn Read>,
+    total: Option<u64>,
+    output: CleanOutput<'_>,
     preserve_markup: bool,
+    label: &str,
     show_progress: bool,
 ) -> io::Result<CleanStats> {
-    let metadata = fs::metadata(input_path)?;
-    let total_bytes = metadata.len();
-    let progress = ProgressReporter::bytes(total_bytes, "clean", show_progress);
-
-    let file = File::open(input_path)?;
-    let mut wrapped = progress.wrap(file);
-    let mut bytes = Vec::with_capacity(total_bytes as usize);
+    let progress = ProgressReporter::maybe_bytes(total, label, show_progress);
+    let mut wrapped = progress.wrap(reader);
+    let mut bytes = Vec::new();
     io::copy(&mut wrapped, &mut bytes)?;
     let text = String::from_utf8_lossy(&bytes);
 
-    let stats = match output_path {
-        Some(path) => {
-            let out_file = File::create(path)?;
-            let mut writer = BufWriter::new(out_file);
-            let mut rw = FastRewriter::new(&mut writer, preserve_markup);
-            rw.feed_text(text.as_ref());
-            let stats = rw.finish()?;
-            writer.flush()?;
+    let stats = match output {
+        CleanOutput::Write(writer) => {
+            // Buffer + reflow so the movetext is re-wrapped (strip mode); the
+            // output is always smaller than the already-buffered input.
+            let (out_bytes, stats) = rewrite_to_vec(text.as_ref(), preserve_markup)?;
+            writer.write_all(&out_bytes)?;
             stats
         }
-        None => {
+        CleanOutput::Inspect => {
             let mut sink = io::sink();
             let mut rw = FastRewriter::new(&mut sink, preserve_markup);
             rw.set_inspect_only(true);
@@ -464,24 +595,69 @@ pub fn run_clean(
         }
     };
 
-    progress.finish("clean done");
+    progress.finish(&format!("{label} done"));
     Ok(stats)
+}
+
+/// CLI entry for `clean` (and the legacy positional form).
+///
+/// `output_path == None` is the legacy `--inspect` mode: scan the input and
+/// report stats without writing anything. `input_path` may be `-` for stdin.
+pub fn run_clean(
+    input_path: &Path,
+    output_path: Option<&Path>,
+    preserve_markup: bool,
+    show_progress: bool,
+) -> io::Result<CleanStats> {
+    let (reader, len) = crate::output::open_input(input_path)?;
+    match output_path {
+        Some(path) => {
+            let out_file = File::create(path)?;
+            let mut writer = BufWriter::new(out_file);
+            let stats = clean_core(
+                reader,
+                len,
+                CleanOutput::Write(&mut writer),
+                preserve_markup,
+                "clean",
+                show_progress,
+            )?;
+            writer.flush()?;
+            Ok(stats)
+        }
+        None => clean_core(
+            reader,
+            len,
+            CleanOutput::Inspect,
+            preserve_markup,
+            "clean",
+            show_progress,
+        ),
+    }
 }
 
 /// Subcommand entry: parses subcommand-specific args off the supplied list.
 ///
 /// Returns the path to write the output to (Some) or None if `--inspect`.
 pub fn run_subcommand(args: &[std::ffi::OsString]) -> Result<(), String> {
-    let parsed = crate::cli::parse(args, &["preserve-markup", "inspect"], &["input", "output"])
-        .map_err(|e| e.to_string())?;
+    let parsed = crate::cli::parse(
+        args,
+        &["preserve-markup", "inspect"],
+        &["input", "output", "o"],
+    )
+    .map_err(|e| e.to_string())?;
 
     let preserve = parsed.has_flag("preserve-markup");
     let inspect = parsed.has_flag("inspect");
+    let show_progress = !parsed.global.no_progress;
 
-    // Support both flag-form (`--input X --output Y`) and positional form
+    // Support both flag-form (`--input X --output Y`/`-o Y`) and positional form
     // (`clean INPUT OUTPUT` or `clean --inspect INPUT`).
     let mut input: Option<PathBuf> = parsed.get_kv("input").map(PathBuf::from);
-    let mut output: Option<PathBuf> = parsed.get_kv("output").map(PathBuf::from);
+    let mut output: Option<PathBuf> = parsed
+        .get_kv("output")
+        .or_else(|| parsed.get_kv("o"))
+        .map(PathBuf::from);
 
     let mut iter = parsed.positionals.iter();
     if input.is_none() {
@@ -494,29 +670,134 @@ pub fn run_subcommand(args: &[std::ffi::OsString]) -> Result<(), String> {
         return Err("clean: too many positional arguments".to_string());
     }
 
-    let input = input.ok_or_else(|| "clean: missing input path".to_string())?;
+    // No explicit input + piped stdin => read stdin, so `concat . | clean` works.
+    let input = match input {
+        Some(p) => p,
+        None => {
+            if io::stdin().is_terminal() {
+                return Err(
+                    "clean: missing input path (pass a file, - for stdin, or pipe into clean)"
+                        .to_string(),
+                );
+            }
+            PathBuf::from("-")
+        }
+    };
+
     if inspect && output.is_some() {
         return Err("clean: --inspect cannot be combined with an output path".to_string());
     }
-    if !inspect && output.is_none() {
-        return Err("clean: missing output path (use --inspect to scan only)".to_string());
+
+    if inspect {
+        let stats = run_clean(&input, None, preserve, show_progress)
+            .map_err(|e| format!("clean failed: {e}"))?;
+        // --inspect produces no data stream, so the stats are the result and
+        // belong on stdout.
+        crate::output::print_stats(&stats.to_json(), false);
+        return Ok(());
     }
 
-    let stats = run_clean(
-        &input,
-        output.as_deref(),
+    // Resolve the destination (file, forced `-`, piped stdout, or the
+    // terminal-flood guard) before consuming the (possibly stdin) input.
+    let sink = crate::output::open_output(output.as_deref(), "clean")
+        .map_err(|e| format!("clean failed: {e}"))?;
+    let stats_to_stderr = sink.stats_to_stderr;
+    let mut writer = sink.writer;
+
+    let (reader, len) =
+        crate::output::open_input(&input).map_err(|e| format!("clean failed: {e}"))?;
+    let stats = clean_core(
+        reader,
+        len,
+        CleanOutput::Write(&mut *writer),
         preserve,
-        !parsed.global.no_progress,
+        "clean",
+        show_progress,
     )
     .map_err(|e| format!("clean failed: {e}"))?;
+    writer.flush().map_err(|e| format!("clean failed: {e}"))?;
 
-    println!("{}", stats.to_json());
+    crate::output::print_stats(&stats.to_json(), stats_to_stderr);
     Ok(())
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn reflow_rewraps_ragged_movetext_and_collapses_blanks() {
+        // The TCEC shape: a stripped leading comment (-> blank line) plus a
+        // long comment after every move, so the lexer leaves one move per line.
+        let pgn = "[Event \"x\"]\n[Result \"1/2-1/2\"]\n\n{ huge engine options }\n\
+                   1. e4 {c} b6 {c}\n2. Nc3 {c}\nBb7 {c}\n3. d4 {c}\ne6 {c} 1/2-1/2\n";
+        let (out, _stats) = rewrite_to_vec(pgn, false).unwrap();
+        let s = String::from_utf8(out).unwrap();
+        assert!(!s.contains('{'), "comment leaked: {s:?}");
+        // Movetext flows onto one line (well under 80 cols), result included.
+        assert!(
+            s.contains("1. e4 b6 2. Nc3 Bb7 3. d4 e6 1/2-1/2"),
+            "movetext not reflowed: {s:?}"
+        );
+        // Exactly one blank line between headers and movetext, and no stray
+        // blank from the stripped leading comment.
+        assert!(
+            s.contains("[Result \"1/2-1/2\"]\n\n1. e4"),
+            "header/movetext spacing wrong: {s:?}"
+        );
+        assert!(!s.contains("\n\n\n"), "triple newline present: {s:?}");
+    }
+
+    #[test]
+    fn reflow_wraps_long_movetext_at_column_limit() {
+        let mut pgn = String::from("[Event \"x\"]\n\n");
+        for i in 1..=60 {
+            pgn.push_str(&format!("{i}. Nf3 Nc6 "));
+        }
+        pgn.push_str("1-0\n");
+        let (out, _stats) = rewrite_to_vec(&pgn, false).unwrap();
+        let s = String::from_utf8(out).unwrap();
+        for line in s.lines() {
+            assert!(
+                line.len() <= MOVETEXT_WIDTH,
+                "line over {MOVETEXT_WIDTH}: {line:?}"
+            );
+        }
+        let movetext_lines = s
+            .lines()
+            .filter(|l| l.starts_with(|c: char| c.is_ascii_digit()))
+            .count();
+        assert!(
+            movetext_lines >= 2,
+            "expected wrapping into multiple lines: {s:?}"
+        );
+    }
+
+    #[test]
+    fn reflow_separates_headers_only_games() {
+        // A game with no movetext must still be separated from the next game's
+        // headers by one blank line (no merging, no triple newline).
+        let pgn = "[Event \"a\"]\n[Site \"s\"]\n\n[Event \"b\"]\n\n1. e4 e5 1-0\n";
+        let (out, _stats) = rewrite_to_vec(pgn, false).unwrap();
+        let s = String::from_utf8(out).unwrap();
+        assert!(
+            s.contains("[Site \"s\"]\n\n[Event \"b\"]"),
+            "headers merged: {s:?}"
+        );
+        assert!(!s.contains("\n\n\n"), "triple newline present: {s:?}");
+    }
+
+    #[test]
+    fn reflow_separates_games_with_one_blank_line() {
+        let pgn = "[Event \"a\"]\n\n1. e4 {x}\ne5 1-0\n\n[Event \"b\"]\n\n1. d4 d5 0-1\n";
+        let (out, _stats) = rewrite_to_vec(pgn, false).unwrap();
+        let s = String::from_utf8(out).unwrap();
+        assert!(
+            s.contains("1. e4 e5 1-0\n\n[Event \"b\"]"),
+            "game separator wrong: {s:?}"
+        );
+        assert!(!s.contains("\n\n\n"), "triple newline present: {s:?}");
+    }
 
     #[test]
     fn strips_block_comments_and_variations() {

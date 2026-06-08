@@ -25,7 +25,7 @@ use crate::concat::expand_inputs;
 use crate::progress::ProgressReporter;
 
 const USAGE: &str = "\
-usage: reti-pgn-utils fce-combined-markers [options] INPUT_PGN_OR_DIR...
+usage: pgn-utils fce-combined-markers [options] INPUT_PGN_OR_DIR...
 
 options:
   -o, --output PATH       write JSONL facts to PATH; use '-' or omit for stdout
@@ -44,7 +44,7 @@ options:
   --no-progress           disable the stderr progress bar";
 
 const SAMPLES_USAGE: &str = "\
-usage: reti-pgn-utils fce-combined-samples [options] INPUT_PGN_OR_DIR...
+usage: pgn-utils fce-combined-samples [options] INPUT_PGN_OR_DIR...
 
 options:
   -o, --output PATH       write sampled examples JSON to PATH
@@ -59,7 +59,7 @@ options:
   --no-progress           disable the stderr progress bar";
 
 const OPENINGS_USAGE: &str = "\
-usage: reti-pgn-utils fce-combined-openings [options] INPUT_PGN_OR_DIR...
+usage: pgn-utils fce-combined-openings [options] INPUT_PGN_OR_DIR...
 
 options:
   -o, --output PATH       write opening aggregate JSON to PATH
@@ -1609,7 +1609,7 @@ fn process_files<S: FactSink>(
             stats.games_read += 1;
             if log_progress && stats.games_read % 500_000 == 0 {
                 eprintln!(
-                    "[reti-pgn-utils] fce combined markers: {} games read across {} file(s), elapsed {}s",
+                    "[pgn-utils] fce combined markers: {} games read across {} file(s), elapsed {}s",
                     stats.games_read,
                     stats.files_processed,
                     started.elapsed().as_secs()
@@ -2226,6 +2226,9 @@ fn classify_material_side(ending: &str, pos: &Chess) -> MaterialPerspective {
         "1-4BN" => select_material_side(pos, "bishop+knight side", |own, opp| {
             own.b >= 1 && own.n >= 1 && nonking(opp) == 0
         }),
+        "1-5NNp" => {
+            select_material_side(pos, "two-knights side", |own, opp| own.n >= 2 && opp.p >= 1)
+        }
         "2-1P" => {
             select_material_side(pos, "pawn side", |own, opp| own.p >= 1 && nonking(opp) == 0)
         }

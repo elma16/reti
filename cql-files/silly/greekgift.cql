@@ -9,4 +9,3 @@ line quiet
   --> terminal and
       (Ne-h5-8 == 2 or (R attacks killzone == 2 and not Q attacks killzone))
 
-comment("greekgift")

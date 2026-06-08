@@ -175,7 +175,7 @@ flag appears in at least one of the other two implementations.
 The script currently passes these flags to the CQL binary:
 
 ```
-<binary> -i <pgn> -o <output> [-threads N] <script.cql>
+<binary> -i <pgn> -o <output> -matchstring <script-stem> [-threads N] <script.cql>
 ```
 
 All three implementations accept this invocation identically. The safe common

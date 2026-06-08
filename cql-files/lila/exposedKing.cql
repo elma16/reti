@@ -6,4 +6,3 @@ cql()
   not p  attacks  k
   check}
 
-comment("exposedKing")

@@ -6,4 +6,3 @@ flipcolor {
     move from P capture a
 }
 
-comment("abcd")

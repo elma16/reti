@@ -3,12 +3,19 @@
 from __future__ import annotations
 
 import argparse
+from dataclasses import dataclass
+from enum import Enum
 import shutil
 import tempfile
 from pathlib import Path
 
-from reti.cql.backend import Cql6Backend, resolve_cql_binary
-from reti.cql.output import merge_outputs_by_cql, write_summary_csv
+from reti.cql.backend import create_cql_backend, resolve_cql_binary
+from reti.cql.output import (
+    JobOutputKey,
+    job_output_key,
+    merge_outputs_by_cql,
+    write_summary_csv,
+)
 from reti.cql.preflight import PgnPreflightResult, preflight_pgn_files
 from reti.cql.runner import (
     JobResult,
@@ -18,8 +25,35 @@ from reti.cql.runner import (
     run_job_matrix,
 )
 from reti.cql.single_merge import merge_single_output
-from reti.common.pgn_discovery import InputCollection, discover_input_files
+from reti.common.pgn_discovery import InputCollection, discover_input_files, relative_stem
 from reti.common.progress import progress_write
+
+
+class OutputMode(str, Enum):
+    PAIRS = "pairs"
+    BY_CQL = "by-cql"
+    SINGLE = "single"
+
+
+@dataclass(frozen=True)
+class PreflightOptions:
+    skip: bool = False
+    smoke_test: bool = False
+    strict_parse: bool = False
+
+
+@dataclass(frozen=True)
+class ExecutionOptions:
+    jobs: str | int = 1
+    cql_threads: str | int = "auto"
+    game_progress: bool = False
+    timeout_seconds: float | None = None
+
+
+@dataclass(frozen=True)
+class OutputOptions:
+    mode: OutputMode = OutputMode.PAIRS
+    include_unmatched: bool = False
 
 
 def run_cql_analysis(
@@ -28,17 +62,39 @@ def run_cql_analysis(
     scripts_location: str,
     output_dir: str | Path,
     *,
+    backend_name: str = "auto",
+    preflight_options: PreflightOptions | None = None,
+    execution_options: ExecutionOptions | None = None,
     jobs: str | int = 1,
     cql_threads: str | int = "auto",
     skip_pgn_preflight: bool = False,
     smoke_test_pgns: bool = False,
     strict_pgn_parse: bool = False,
     game_progress: bool = False,
+    timeout_seconds: float | None = None,
 ) -> tuple[list[JobResult], InputCollection, InputCollection] | None:
     cql_bin_path = resolve_cql_binary(cql_binary)
     if cql_bin_path is None:
         return None
-    backend = Cql6Backend(cql_bin_path)
+    try:
+        backend = create_cql_backend(cql_bin_path, backend_name)
+    except ValueError as exc:
+        print(f"Error: {exc}")
+        return None
+
+    if preflight_options is None:
+        preflight_options = PreflightOptions(
+            skip=skip_pgn_preflight,
+            smoke_test=smoke_test_pgns,
+            strict_parse=strict_pgn_parse,
+        )
+    if execution_options is None:
+        execution_options = ExecutionOptions(
+            jobs=jobs,
+            cql_threads=cql_threads,
+            game_progress=game_progress,
+            timeout_seconds=timeout_seconds,
+        )
 
     pgn_inputs = discover_input_files(pgn_location, ".pgn")
     if pgn_inputs is None:
@@ -53,7 +109,7 @@ def run_cql_analysis(
 
     with tempfile.TemporaryDirectory(prefix="cql_runtime_") as runtime_tmpdir:
         runtime_root = Path(runtime_tmpdir)
-        if skip_pgn_preflight:
+        if preflight_options.skip:
             prepared_pgns = [
                 PgnPreflightResult(
                     pgn_path=pgn_path,
@@ -69,13 +125,14 @@ def run_cql_analysis(
                 pgn_inputs,
                 backend,
                 runtime_root,
-                smoke_test_pgns=smoke_test_pgns,
-                strict_pgn_parse=strict_pgn_parse,
+                smoke_test_pgns=preflight_options.smoke_test,
+                strict_pgn_parse=preflight_options.strict_parse,
             )
             if any(not result.success for result in prepared_pgns):
                 return None
 
         print(f"Using CQL binary: {cql_bin_path}")
+        print(f"Using CQL backend: {type(backend).__name__}")
         print(
             f"Discovered {len(prepared_pgns)} PGN file(s) and "
             f"{len(cql_inputs.files)} CQL script(s)."
@@ -84,12 +141,37 @@ def run_cql_analysis(
         results = run_job_matrix(
             backend,
             job_specs,
-            jobs=jobs,
-            cql_threads=cql_threads,
-            game_progress=game_progress,
+            jobs=execution_options.jobs,
+            cql_threads=execution_options.cql_threads,
+            game_progress=execution_options.game_progress,
+            timeout_seconds=execution_options.timeout_seconds,
         )
 
     return results, pgn_inputs, cql_inputs
+
+
+def _summary_output_paths_for_mode(
+    results: list[JobResult],
+    pgn_inputs: InputCollection,
+    cql_inputs: InputCollection,
+    output_dir: Path,
+    output_options: OutputOptions,
+) -> dict[JobOutputKey, Path]:
+    output_paths: dict[JobOutputKey, Path] = {}
+    if output_options.mode == OutputMode.PAIRS:
+        return output_paths
+
+    for result in results:
+        if not result.success:
+            continue
+        final_output: Path
+        if output_options.mode == OutputMode.BY_CQL:
+            final_output = output_dir / f"{relative_stem(result.cql_path, cql_inputs.root)}.pgn"
+        else:
+            final_output = output_dir / f"{relative_stem(result.pgn_path, pgn_inputs.root)}.merged.pgn"
+        if final_output.exists():
+            output_paths[job_output_key(result)] = final_output
+    return output_paths
 
 
 def print_summary(results: list[JobResult], output_dir: Path, summary_csv: Path) -> int:
@@ -130,6 +212,13 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Path to the CQL executable, or an executable name available on PATH.",
     )
     parser.add_argument(
+        "--backend",
+        dest="backend",
+        choices=["auto", "cql6", "cqli"],
+        default="auto",
+        help="CQL command-line backend. Defaults to auto-detection from the binary name.",
+    )
+    parser.add_argument(
         "--scripts",
         "--cql-input",
         dest="scripts_location",
@@ -153,6 +242,15 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         dest="keep_output",
         action="store_true",
         help="Keep the temporary output directory when --output-dir is omitted.",
+    )
+    parser.add_argument(
+        "--preflight",
+        dest="preflight",
+        choices=["standard", "skip", "strict", "smoke", "strict-smoke"],
+        default="standard",
+        help=(
+            "PGN preflight policy. Replaces the older skip/smoke/strict boolean flags."
+        ),
     )
     parser.add_argument(
         "--skip-pgn-preflight",
@@ -207,12 +305,29 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--timeout",
+        dest="timeout_seconds",
+        type=float,
+        default=None,
+        help="Per CQL job timeout in seconds. Defaults to no timeout.",
+    )
+    parser.add_argument(
         "--game-progress",
         dest="game_progress",
         action="store_true",
         help=(
             "Show progress in games instead of jobs. Pre-counts games in each "
             "PGN so the progress bar reflects actual game throughput."
+        ),
+    )
+    parser.add_argument(
+        "--output-mode",
+        dest="output_mode",
+        choices=[mode.value for mode in OutputMode],
+        default=OutputMode.PAIRS.value,
+        help=(
+            "Final PGN layout: 'pairs' keeps one output per PGN/CQL pair, "
+            "'by-cql' merges per script, and 'single' merges per source PGN."
         ),
     )
     parser.add_argument(
@@ -252,10 +367,51 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     args = parser.parse_args(argv)
 
     if args.include_unmatched and not args.single_output:
-        parser.error("--include-unmatched requires --single-output")
+        if args.output_mode != OutputMode.SINGLE.value:
+            parser.error("--include-unmatched requires --output-mode single")
 
     if args.single_output and args.merge_output:
         parser.error("--single-output and --merge-output are mutually exclusive")
+
+    if args.timeout_seconds is not None and args.timeout_seconds <= 0:
+        parser.error("--timeout must be greater than 0")
+
+    legacy_output_modes = [
+        bool(args.merge_output),
+        bool(args.single_output),
+        args.output_mode != OutputMode.PAIRS.value,
+    ]
+    if sum(1 for enabled in legacy_output_modes if enabled) > 1:
+        parser.error(
+            "use only one output mode selector: --output-mode, --merge-output, or --single-output"
+        )
+
+    if args.merge_output:
+        args.output_mode = OutputMode.BY_CQL.value
+    elif args.single_output:
+        args.output_mode = OutputMode.SINGLE.value
+
+    if args.include_unmatched and args.output_mode != OutputMode.SINGLE.value:
+        parser.error("--include-unmatched requires --output-mode single")
+
+    if args.preflight != "standard" and (
+        args.skip_pgn_preflight or args.smoke_test_pgns or args.strict_pgn_parse
+    ):
+        parser.error(
+            "use either --preflight or the older preflight boolean flags, not both"
+        )
+    if args.skip_pgn_preflight and (args.smoke_test_pgns or args.strict_pgn_parse):
+        parser.error("--skip-pgn-preflight cannot be combined with smoke or strict checks")
+
+    if args.preflight == "skip":
+        args.skip_pgn_preflight = True
+    elif args.preflight == "strict":
+        args.strict_pgn_parse = True
+    elif args.preflight == "smoke":
+        args.smoke_test_pgns = True
+    elif args.preflight == "strict-smoke":
+        args.strict_pgn_parse = True
+        args.smoke_test_pgns = True
 
     if args.legacy_args:
         if len(args.legacy_args) != 3:
@@ -300,17 +456,30 @@ def main() -> int:
         cleanup_needed = not args.keep_output
         print(f"Using temporary output directory: {output_directory}")
 
+    preflight_options = PreflightOptions(
+        skip=args.skip_pgn_preflight,
+        smoke_test=args.smoke_test_pgns,
+        strict_parse=args.strict_pgn_parse,
+    )
+    execution_options = ExecutionOptions(
+        jobs=args.jobs,
+        cql_threads=args.cql_threads,
+        game_progress=args.game_progress,
+        timeout_seconds=args.timeout_seconds,
+    )
+    output_options = OutputOptions(
+        mode=OutputMode(args.output_mode),
+        include_unmatched=args.include_unmatched,
+    )
+
     result = run_cql_analysis(
         args.pgn_location,
         args.cql_binary,
         args.scripts_location,
         output_directory,
-        jobs=args.jobs,
-        cql_threads=args.cql_threads,
-        skip_pgn_preflight=args.skip_pgn_preflight,
-        smoke_test_pgns=args.smoke_test_pgns,
-        strict_pgn_parse=args.strict_pgn_parse,
-        game_progress=args.game_progress,
+        backend_name=args.backend,
+        preflight_options=preflight_options,
+        execution_options=execution_options,
     )
 
     if result is None:
@@ -320,18 +489,29 @@ def main() -> int:
 
     results, pgn_inputs, cql_inputs = result
 
-    if args.single_output:
+    if output_options.mode == OutputMode.SINGLE:
         merge_single_output(
             results,
             pgn_inputs,
             output_directory,
-            include_unmatched=args.include_unmatched,
+            include_unmatched=output_options.include_unmatched,
         )
-    elif args.merge_output:
+    elif output_options.mode == OutputMode.BY_CQL:
         merge_outputs_by_cql(results, cql_inputs, output_directory)
 
+    output_paths = _summary_output_paths_for_mode(
+        results,
+        pgn_inputs,
+        cql_inputs,
+        output_directory,
+        output_options,
+    )
     summary_csv = write_summary_csv(
-        results, output_directory, pgn_inputs.root, cql_inputs.root
+        results,
+        output_directory,
+        pgn_inputs.root,
+        cql_inputs.root,
+        output_paths=output_paths,
     )
     failures = print_summary(results, output_directory, summary_csv)
 

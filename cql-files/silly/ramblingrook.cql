@@ -8,4 +8,3 @@ flipcolor {
     parent: { move from a to R }
 }
 
-comment("ramblingrook")

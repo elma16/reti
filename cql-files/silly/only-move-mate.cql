@@ -6,4 +6,3 @@ cql()
 mate
 parent: { move legal count == 1 }
 
-comment("only-move-mate")

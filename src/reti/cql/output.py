@@ -15,11 +15,36 @@ from reti.cql.preflight import count_games_in_pgn
 from reti.cql.runner import JobResult
 
 
+JobOutputKey = tuple[Path, Path, Path]
+
+
+def job_output_key(result: JobResult) -> JobOutputKey:
+    return result.pgn_path, result.cql_path, result.output_pgn
+
+
+def _format_output_path(path: Path, output_dir: Path) -> str:
+    try:
+        return str(path.relative_to(output_dir))
+    except ValueError:
+        return str(path)
+
+
+def _first_nonempty_line(*texts: str) -> str:
+    for text in texts:
+        for line in text.splitlines():
+            stripped = line.strip()
+            if stripped:
+                return stripped
+    return ""
+
+
 def write_summary_csv(
     results: list[JobResult],
     output_dir: Path,
     pgn_root: Path,
     cql_root: Path,
+    *,
+    output_paths: dict[JobOutputKey, Path] | None = None,
 ) -> Path:
     summary_path = output_dir / "summary.csv"
     with summary_path.open("w", newline="", encoding="utf-8") as f:
@@ -29,23 +54,42 @@ def write_summary_csv(
                 "pgn",
                 "cql",
                 "output_pgn",
+                "pair_output_pgn",
                 "status",
                 "match_count",
                 "returncode",
+                "duration_seconds",
+                "timed_out",
+                "missing_output",
+                "stdout_bytes",
+                "stderr_bytes",
+                "error",
             ],
         )
         writer.writeheader()
         for result in results:
+            final_output = (
+                output_paths.get(job_output_key(result), result.output_pgn)
+                if output_paths is not None
+                else result.output_pgn
+            )
             writer.writerow(
                 {
                     "pgn": format_relative(result.pgn_path, pgn_root),
                     "cql": format_relative(result.cql_path, cql_root),
-                    "output_pgn": str(result.output_pgn.relative_to(output_dir)),
+                    "output_pgn": _format_output_path(final_output, output_dir),
+                    "pair_output_pgn": _format_output_path(result.output_pgn, output_dir),
                     "status": "ok" if result.success else "error",
                     "match_count": (
                         "" if result.match_count is None else str(result.match_count)
                     ),
                     "returncode": str(result.returncode),
+                    "duration_seconds": f"{result.duration_seconds:.3f}",
+                    "timed_out": "yes" if result.timed_out else "no",
+                    "missing_output": "yes" if result.missing_output else "no",
+                    "stdout_bytes": str(len(result.stdout.encode("utf-8"))),
+                    "stderr_bytes": str(len(result.stderr.encode("utf-8"))),
+                    "error": "" if result.success else _first_nonempty_line(result.stderr, result.stdout),
                 }
             )
     return summary_path

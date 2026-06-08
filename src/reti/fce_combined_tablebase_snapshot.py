@@ -59,7 +59,7 @@ from reti.fce_snapshot import (
 
 DEFAULT_THRESHOLDS = (1, 2, 5, 10, 20)
 DEFAULT_PGN_UTILS_BIN = (
-    REPO_ROOT / "native" / "pgn-utils" / "target" / "release" / "reti-pgn-utils"
+    REPO_ROOT / "native" / "pgn-utils" / "target" / "release" / "pgn-utils"
 )
 FACT_SCHEMA_VERSION = 1
 

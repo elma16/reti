@@ -15,4 +15,3 @@ square all x in _  attackedby  k
 //    Bf6 Rg1 kh8 
 //}
 
-comment("morphymate")

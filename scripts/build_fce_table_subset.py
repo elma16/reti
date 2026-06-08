@@ -16,6 +16,7 @@ DEFAULT_OUTPUT_DIR = DEFAULT_SOURCE_DIR / "table"
 # Canonical filenames used for the curated FCE table subset.
 TABLE_TARGETS = [
     "1-4BN",
+    "1-5NNp",
     "2-0Pp",
     "2-1P",
     "3-1Np",
@@ -48,7 +49,7 @@ TABLE_TARGETS = [
 ]
 
 # Auxiliary scripts are useful for FCE parenthetical sub-counts, but they are
-# not part of the 30 canonical table rows. Keep them reproducible without
+# not part of the canonical table rows. Keep them reproducible without
 # adding them to manifest.csv, which remains the canonical-row manifest.
 TABLE_AUXILIARY_TARGETS = [
     "6-2-2RPPrConnected",

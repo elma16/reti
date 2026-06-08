@@ -16,4 +16,3 @@ cql() mate flipcolor {
   A attacks (_ attackedby k) == 1
 }
 
-comment("epaulettemate")

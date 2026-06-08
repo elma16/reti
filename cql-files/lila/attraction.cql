@@ -6,4 +6,3 @@ cql()
   : move from [kqr] to to
   : move capture [kqr]}
 
-comment("attraction")

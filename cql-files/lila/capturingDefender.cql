@@ -7,5 +7,3 @@ cql()
   D  attacks  T
   move capture D
   : not [a]  attacks  T}
-
-comment("capturingDefender")

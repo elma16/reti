@@ -8,5 +8,3 @@ cql()
   not mate
   power A - power a >= 2
   power A - power a <= 5}
-
-comment("advantage")

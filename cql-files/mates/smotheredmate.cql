@@ -3,7 +3,6 @@
   an empty square nor a white piece
 */
 cql()
-flipcolor{btm mate
+flipcolor{mate
 not k  attacks  [A_]}
 
-comment("smotheredmate")

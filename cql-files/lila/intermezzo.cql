@@ -8,4 +8,3 @@ cql()
   : check
   : move capture to}
 
-comment("intermezzo")

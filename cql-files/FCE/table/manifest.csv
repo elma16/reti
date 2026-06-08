@@ -1,5 +1,6 @@
 target,source,mode,score
 1-4BN,1-4BN,exact,1.000
+1-5NNp,1-5NNp,exact,1.000
 2-0Pp,2-0Pp,exact,1.000
 2-1P,2-AP,override,1.000
 3-1Np,3-1Np,exact,1.000

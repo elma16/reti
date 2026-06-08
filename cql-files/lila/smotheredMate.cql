@@ -5,4 +5,3 @@ cql()
 N  attacks  k
 not k  attacks  [_A]}
 
-comment("smotheredMate")

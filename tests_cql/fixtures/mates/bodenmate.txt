@@ -1,4 +1,4 @@
 # positive (should match)
-r2qk2r/pppn1ppp/8/3pp3/4n1b1/N7/PPPPPbPP/R1BQKBNR w KQkq - 0 10
-# negative (single tweak, should not match)
-r2qk2r/pppn1ppp/8/3pp3/4n1b1/N7/PPPPPbPP/R1BQKBNR b KQkq - 0 10
+2kr4/3p4/B7/8/5B2/8/8/7K b - - 0 1
+# negative (cross-pattern: K+R vs k (no bishops); should not match)
+k6R/8/1K6/8/8/8/8/8 b - - 0 1

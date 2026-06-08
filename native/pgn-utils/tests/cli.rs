@@ -7,7 +7,7 @@
 //!  2. *New surface*: smoke-test each new subcommand (`clean`, `concat`,
 //!     `dedup`, `lint`).
 //!
-//! These tests use `env!("CARGO_BIN_EXE_reti-pgn-utils")` so no extra
+//! These tests use `env!("CARGO_BIN_EXE_pgn-utils")` so no extra
 //! testing crate (assert_cmd / etc.) is needed.
 
 use std::fs;
@@ -15,7 +15,7 @@ use std::path::PathBuf;
 use std::process::{Command, Stdio};
 
 fn binary_path() -> PathBuf {
-    PathBuf::from(env!("CARGO_BIN_EXE_reti-pgn-utils"))
+    PathBuf::from(env!("CARGO_BIN_EXE_pgn-utils"))
 }
 
 fn tmpdir(label: &str) -> PathBuf {
@@ -33,6 +33,32 @@ fn run(args: &[&str]) -> (String, String, i32) {
         .stdin(Stdio::null())
         .output()
         .expect("failed to spawn binary");
+    let stdout = String::from_utf8_lossy(&output.stdout).into_owned();
+    let stderr = String::from_utf8_lossy(&output.stderr).into_owned();
+    let code = output.status.code().unwrap_or(-1);
+    (stdout, stderr, code)
+}
+
+/// Like `run`, but feeds `input` to the child's stdin. stdout/stderr are
+/// captured via pipes, so they are not TTYs — this exercises the
+/// stream-to-stdout path, not the terminal-flood guard.
+fn run_stdin(args: &[&str], input: &[u8]) -> (String, String, i32) {
+    use std::io::Write;
+    let mut child = Command::new(binary_path())
+        .args(args)
+        .env("CLICOLOR", "0")
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .expect("failed to spawn binary");
+    child
+        .stdin
+        .take()
+        .expect("stdin not piped")
+        .write_all(input)
+        .expect("failed to write stdin");
+    let output = child.wait_with_output().expect("failed to wait for binary");
     let stdout = String::from_utf8_lossy(&output.stdout).into_owned();
     let stderr = String::from_utf8_lossy(&output.stderr).into_owned();
     let code = output.status.code().unwrap_or(-1);
@@ -302,6 +328,127 @@ fn dedup_keeps_first_occurrence() {
     let written = fs::read_to_string(&output).unwrap();
     assert!(written.contains("[White \"X\"]"));
     assert!(!written.contains("[White \"Y\"]"));
+}
+
+// ---- stdin/stdout piping ---- //
+
+#[test]
+fn clean_reads_stdin_and_routes_stats_to_stderr() {
+    // `... | clean -`: cleaned PGN must go to stdout untouched; the JSON stats
+    // line must go to stderr so it can't corrupt a downstream parser.
+    let input = b"[Event \"x\"]\n[Result \"1-0\"]\n\n1. e4 {comment} (1. d4) e5 1-0\n";
+    let (stdout, stderr, code) = run_stdin(&["clean", "--no-progress", "-"], input);
+    assert_eq!(code, 0, "stderr: {stderr}");
+    assert!(stdout.contains("[Event \"x\"]"), "stdout: {stdout}");
+    assert!(!stdout.contains('{'), "comment leaked to stdout: {stdout}");
+    assert!(
+        !stdout.contains("comments_removed"),
+        "stats must not be on stdout: {stdout}"
+    );
+    assert_eq!(
+        json_field(&stderr, "comments_removed").as_deref(),
+        Some("1"),
+        "stats should be on stderr: {stderr}"
+    );
+}
+
+#[test]
+fn dedup_reads_stdin_and_routes_stats_to_stderr() {
+    let input = b"[Event \"a\"]\n\n1. e4 e5 1-0\n\n[Event \"b\"]\n\n1. e4 e5 1-0\n";
+    let (stdout, stderr, code) = run_stdin(&["dedup", "--no-progress", "-"], input);
+    assert_eq!(code, 0, "stderr: {stderr}");
+    assert!(stdout.contains("[Event \"a\"]"));
+    assert!(!stdout.contains("[Event \"b\"]"), "duplicate not dropped");
+    assert!(!stdout.contains("duplicates_removed"), "stats on stdout");
+    assert_eq!(
+        json_field(&stderr, "duplicates_removed").as_deref(),
+        Some("1")
+    );
+}
+
+#[test]
+fn concat_streams_to_stdout_when_piped() {
+    // `concat <dir>` with no -o and a non-tty stdout streams the PGN to stdout
+    // and the stats line to stderr (so the wall of text becomes a clean pipe).
+    let dir = tmpdir("concat-pipe");
+    fs::write(dir.join("a.pgn"), b"[Event \"a\"]\n\n1. e4 1-0\n").unwrap();
+    fs::write(dir.join("b.pgn"), b"[Event \"b\"]\n\n1. d4 0-1\n").unwrap();
+    let (stdout, stderr, code) = run(&["concat", "--no-progress", dir.to_str().unwrap()]);
+    assert_eq!(code, 0, "stderr: {stderr}");
+    assert!(stdout.contains("[Event \"a\"]") && stdout.contains("[Event \"b\"]"));
+    assert!(!stdout.contains("files_processed"), "stats on stdout");
+    assert_eq!(json_field(&stderr, "files_processed").as_deref(), Some("2"));
+}
+
+#[test]
+fn pipe_chain_concat_clean_dedup_roundtrips() {
+    // Emulate `concat - | clean - | dedup -` by feeding each stage's stdout
+    // into the next. The final game count proves the chain stays a clean PGN.
+    let dir = tmpdir("pipe-chain");
+    fs::write(dir.join("a.pgn"), b"[Event \"a\"]\n\n1. e4 {dup} e5 1-0\n").unwrap();
+    fs::write(dir.join("b.pgn"), b"[Event \"b\"]\n\n1. e4 e5 1-0\n").unwrap();
+
+    let (concatenated, _e, c0) = run(&["concat", "--no-progress", dir.to_str().unwrap()]);
+    assert_eq!(c0, 0);
+    let (cleaned, _e, c1) = run_stdin(&["clean", "--no-progress", "-"], concatenated.as_bytes());
+    assert_eq!(c1, 0);
+    assert!(!cleaned.contains('{'), "comment survived clean: {cleaned}");
+    let (deduped, stderr, c2) = run_stdin(&["dedup", "--no-progress", "-"], cleaned.as_bytes());
+    assert_eq!(c2, 0);
+    // Both games normalize to the same movetext, so one survives.
+    assert_eq!(json_field(&stderr, "games_written").as_deref(), Some("1"));
+    assert_eq!(deduped.matches("[Event").count(), 1, "out: {deduped}");
+}
+
+#[test]
+fn eco_tags_game_missing_eco_via_stdin() {
+    // `... | eco -` adds [ECO]/[Opening] and routes stats to stderr.
+    let input = b"[Event \"x\"]\n[Result \"1-0\"]\n\n1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 1-0\n";
+    let (stdout, stderr, code) = run_stdin(&["eco", "--no-progress", "-"], input);
+    assert_eq!(code, 0, "stderr: {stderr}");
+    assert!(
+        stdout.contains("[ECO \"C6"),
+        "expected a Ruy Lopez ECO: {stdout}"
+    );
+    assert!(
+        stdout.contains("[Opening \""),
+        "expected Opening tag: {stdout}"
+    );
+    // Movetext preserved; stats on stderr, not stdout.
+    assert!(stdout.contains("1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 1-0"));
+    assert!(
+        !stdout.contains("eco_assigned"),
+        "stats must not be on stdout"
+    );
+    assert_eq!(json_field(&stderr, "eco_assigned").as_deref(), Some("1"));
+}
+
+#[test]
+fn eco_leaves_existing_tag_then_force_overwrites() {
+    let input = b"[Event \"x\"]\n[Result \"1-0\"]\n[ECO \"Z99\"]\n\n1. e4 c5 1-0\n";
+    // Without --force: untouched.
+    let (out1, _e1, c1) = run_stdin(&["eco", "--no-progress", "-"], input);
+    assert_eq!(c1, 0);
+    assert!(
+        out1.contains("[ECO \"Z99\"]") && !out1.contains("B20"),
+        "out1: {out1}"
+    );
+    // With --force: recomputed, no duplicate ECO tag.
+    let (out2, _e2, c2) = run_stdin(&["eco", "--no-progress", "--force", "-"], input);
+    assert_eq!(c2, 0);
+    assert!(
+        out2.contains("[ECO \"B20\"]") && !out2.contains("Z99"),
+        "out2: {out2}"
+    );
+    assert_eq!(out2.matches("[ECO ").count(), 1, "duplicate ECO: {out2}");
+}
+
+#[test]
+fn lint_reads_stdin() {
+    let input = b"[Event \"x\"]\n[Site \"x\"]\n[Date \"2024.01.01\"]\n[Round \"1\"]\n[White \"a\"]\n[Black \"b\"]\n[Result \"1-0\"]\n\n1. e4 e5 1-0\n";
+    let (stdout, stderr, code) = run_stdin(&["lint", "--no-progress", "--json", "-"], input);
+    assert_eq!(code, 0, "stderr: {stderr}");
+    assert!(stdout.contains("\"games_checked\":1"), "stdout: {stdout}");
 }
 
 #[test]
@@ -689,6 +836,237 @@ fn source_totals_counts_games_per_source_file() {
     assert!(written.contains("\"online\":1"));
     assert!(written.contains("\"sourcePgn\":\"LumbrasGigaBase_OTB_2025.pgn\""));
     assert!(written.contains("\"games\":2"));
+}
+
+// ---- count ---- //
+
+#[test]
+fn count_default_is_per_file_with_grand_total() {
+    let dir = tmpdir("count-per-file");
+    let a = dir.join("a.pgn");
+    let b = dir.join("b.pgn");
+    fs::write(
+        &a,
+        b"[Event \"x\"]\n\n1. e4 1-0\n\n[Event \"y\"]\n\n1. d4 0-1\n",
+    )
+    .unwrap();
+    fs::write(&b, b"[Event \"z\"]\n\n1. c4 1/2-1/2\n").unwrap();
+
+    let (stdout, stderr, code) = run(&[
+        "count",
+        "--no-progress",
+        a.to_str().unwrap(),
+        b.to_str().unwrap(),
+    ]);
+    assert_eq!(code, 0, "stderr: {stderr}");
+    assert!(
+        stdout.contains("FILE") && stdout.contains("GAMES"),
+        "{stdout}"
+    );
+    // Per-file rows plus a grand total of 3.
+    assert!(stdout.contains("a.pgn"), "{stdout}");
+    assert!(stdout.contains("b.pgn"), "{stdout}");
+    let total = stdout
+        .lines()
+        .find(|l| l.starts_with("TOTAL"))
+        .expect("a TOTAL row");
+    assert!(total.ends_with('3'), "total row: {total:?}");
+}
+
+#[test]
+fn count_groups_by_tag_sorted_by_count() {
+    let dir = tmpdir("count-by-result");
+    let input = dir.join("g.pgn");
+    fs::write(
+        &input,
+        b"[Event \"a\"]\n[Result \"1-0\"]\n\n1. e4 1-0\n\n\
+[Event \"b\"]\n[Result \"1-0\"]\n\n1. d4 1-0\n\n\
+[Event \"c\"]\n[Result \"0-1\"]\n\n1. c4 0-1\n",
+    )
+    .unwrap();
+
+    let (stdout, stderr, code) = run(&[
+        "count",
+        "--no-progress",
+        "--by",
+        "Result",
+        input.to_str().unwrap(),
+    ]);
+    assert_eq!(code, 0, "stderr: {stderr}");
+    let lines: Vec<&str> = stdout.lines().collect();
+    assert_eq!(lines[0], "RESULT  GAMES");
+    // Largest group first: 1-0 (2) before 0-1 (1).
+    let one_zero = lines.iter().position(|l| l.starts_with("1-0")).unwrap();
+    let zero_one = lines.iter().position(|l| l.starts_with("0-1")).unwrap();
+    assert!(one_zero < zero_one, "1-0 should sort before 0-1: {stdout}");
+    assert!(lines.iter().any(|l| l == &"TOTAL       3"), "{stdout}");
+}
+
+#[test]
+fn count_top_reports_omitted_groups() {
+    let dir = tmpdir("count-top");
+    let input = dir.join("g.pgn");
+    fs::write(
+        &input,
+        b"[Event \"a\"]\n[White \"A\"]\n\n1. e4 1-0\n\n\
+[Event \"b\"]\n[White \"B\"]\n\n1. d4 0-1\n\n\
+[Event \"c\"]\n[White \"C\"]\n\n1. c4 1-0\n",
+    )
+    .unwrap();
+
+    let (stdout, _stderr, code) = run(&[
+        "count",
+        "--no-progress",
+        "--by",
+        "White",
+        "--top",
+        "1",
+        input.to_str().unwrap(),
+    ]);
+    assert_eq!(code, 0);
+    // One row shown, total still whole, omission reported (no silent cap).
+    assert!(stdout.contains("2 more groups not shown"), "{stdout}");
+    assert!(stdout.contains("TOTAL"), "{stdout}");
+}
+
+#[test]
+fn count_reads_stdin_and_cross_tabs() {
+    let input = b"[Event \"a\"]\n[Date \"2021.01.01\"]\n[Result \"1-0\"]\n\n1. e4 1-0\n\n\
+[Event \"b\"]\n[Date \"2020.01.01\"]\n[Result \"1-0\"]\n\n1. d4 1-0\n";
+    let (stdout, stderr, code) = run_stdin(
+        &[
+            "count",
+            "--no-progress",
+            "--by",
+            "year",
+            "--by",
+            "Result",
+            "--sort",
+            "key",
+            "-",
+        ],
+        input,
+    );
+    assert_eq!(code, 0, "stderr: {stderr}");
+    let lines: Vec<&str> = stdout.lines().collect();
+    // First column is widened to fit the "TOTAL" label (5 chars).
+    assert_eq!(lines[0], "YEAR   RESULT  GAMES");
+    assert!(stdout.contains("2020"), "{stdout}");
+    assert!(stdout.contains("2021"), "{stdout}");
+}
+
+// ---- set operations ---- //
+
+#[test]
+fn set_intersect_union_diff() {
+    let dir = tmpdir("set");
+    let a = dir.join("a.pgn");
+    let b = dir.join("b.pgn");
+    fs::write(
+        &a,
+        b"[Event \"a1\"]\n\n1. e4 e5 1-0\n\n[Event \"shared\"]\n\n1. d4 d5 0-1\n",
+    )
+    .unwrap();
+    fs::write(
+        &b,
+        b"[Event \"shared\"]\n\n1. d4 d5 0-1\n\n[Event \"b1\"]\n\n1. c4 c5 1/2-1/2\n",
+    )
+    .unwrap();
+
+    let out = dir.join("o.pgn");
+    let (stdout, stderr, code) = run(&[
+        "set",
+        "intersect",
+        "--no-progress",
+        a.to_str().unwrap(),
+        b.to_str().unwrap(),
+        "-o",
+        out.to_str().unwrap(),
+    ]);
+    assert_eq!(code, 0, "stderr: {stderr}");
+    assert_eq!(json_field(&stdout, "result_games").as_deref(), Some("1"));
+    let w = fs::read_to_string(&out).unwrap();
+    assert!(w.contains("[Event \"shared\"]") && !w.contains("[Event \"a1\"]"));
+
+    let (stdout, _e, _c) = run(&[
+        "set",
+        "diff",
+        "--no-progress",
+        a.to_str().unwrap(),
+        b.to_str().unwrap(),
+        "-o",
+        out.to_str().unwrap(),
+    ]);
+    assert_eq!(json_field(&stdout, "result_games").as_deref(), Some("1"));
+    let w = fs::read_to_string(&out).unwrap();
+    assert!(w.contains("[Event \"a1\"]") && !w.contains("[Event \"shared\"]"));
+
+    let (stdout, _e, _c) = run(&[
+        "set",
+        "union",
+        "--no-progress",
+        a.to_str().unwrap(),
+        b.to_str().unwrap(),
+        "-o",
+        out.to_str().unwrap(),
+    ]);
+    assert_eq!(json_field(&stdout, "result_games").as_deref(), Some("3"));
+}
+
+// ---- grep ---- //
+
+#[test]
+fn grep_player_matches_both_orderings_over_a_dir() {
+    let dir = tmpdir("grep");
+    let games = dir.join("games");
+    fs::create_dir_all(&games).unwrap();
+    fs::write(
+        games.join("a.pgn"),
+        b"[Event \"x\"]\n[White \"Carlsen, Magnus\"]\n[Black \"Nepomniachtchi, Ian\"]\n\n1. e4 e5 1-0\n",
+    )
+    .unwrap();
+    fs::write(
+        games.join("b.pgn"),
+        b"[Event \"y\"]\n[White \"Kasparov, Garry\"]\n[Black \"Karpov, Anatoly\"]\n\n1. d4 d5 0-1\n",
+    )
+    .unwrap();
+
+    let out = dir.join("found.pgn");
+    // "Magnus Carlsen" (reversed) must still match "Carlsen, Magnus".
+    let (stdout, stderr, code) = run(&[
+        "grep",
+        "--no-progress",
+        "--player",
+        "Magnus Carlsen",
+        "-o",
+        out.to_str().unwrap(),
+        games.to_str().unwrap(),
+    ]);
+    assert_eq!(code, 0, "stderr: {stderr}");
+    assert_eq!(json_field(&stdout, "matched").as_deref(), Some("1"));
+    let w = fs::read_to_string(&out).unwrap();
+    assert!(w.contains("Carlsen, Magnus") && !w.contains("Kasparov"));
+}
+
+#[test]
+fn grep_reads_stdin_and_filters_by_year_and_event() {
+    let input = b"[Event \"World Championship\"]\n[Date \"2021.12.10\"]\n[White \"A\"]\n\n1. e4 e5 1-0\n\n[Event \"Club Night\"]\n[Date \"2005.01.01\"]\n[White \"B\"]\n\n1. d4 d5 0-1\n";
+    let (stdout, stderr, code) = run_stdin(
+        &[
+            "grep",
+            "--no-progress",
+            "--event",
+            "championship",
+            "--year-min",
+            "2020",
+            "-",
+        ],
+        input,
+    );
+    assert_eq!(code, 0, "stderr: {stderr}");
+    assert!(stdout.contains("[Event \"World Championship\"]"));
+    assert!(!stdout.contains("Club Night"));
+    assert_eq!(json_field(&stderr, "matched").as_deref(), Some("1"));
 }
 
 #[test]

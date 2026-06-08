@@ -6,4 +6,3 @@ flipcolor (P == 2 and p == 0 and doubledpawns == 2 )
 
 [Aa] == 4
 
-comment("77PP")

@@ -8,4 +8,3 @@ cql()
   ray orthogonal (X Y Z) or ray diagonal (X Y Z)
 }
 
-comment("xRayAttack")

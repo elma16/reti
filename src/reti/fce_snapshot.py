@@ -85,6 +85,7 @@ TABLEBASE_WDL_INTEGER_FIELDS = tuple(
 FCE_REFERENCE_SOURCE_URL = "https://en.wikipedia.org/wiki/Chess_endgame#Frequency_table"
 FCE_REFERENCE_ROWS = (
     {"stem": "1-4BN", "quantity": "283 (62 draws)", "quantitySort": 283, "percentage": 0.02},
+    {"stem": "1-5NNp", "quantity": "not listed", "quantitySort": 0, "percentage": 0.0},
     {"stem": "2-0Pp", "quantity": "48,465", "quantitySort": 48465, "percentage": 2.87},
     {"stem": "2-1P", "quantity": "3,920", "quantitySort": 3920, "percentage": 0.23},
     {"stem": "3-1Np", "quantity": "15,512", "quantitySort": 15512, "percentage": 0.92},
@@ -3371,7 +3372,7 @@ def parse_build_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--examples-jsonl",
         default=None,
-        help="Optional sampled reti-pgn-utils sample-fens JSONL to embed.",
+        help="Optional sampled pgn-utils sample-fens JSONL to embed.",
     )
     parser.add_argument(
         "--hash-source-pgns",

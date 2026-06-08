@@ -18,7 +18,7 @@ use crate::concat::expand_inputs;
 use crate::progress::ProgressReporter;
 
 const USAGE: &str = "\
-usage: reti-pgn-utils source-totals [options] INPUT_PGN_OR_DIR...
+usage: pgn-utils source-totals [options] INPUT_PGN_OR_DIR...
 
 options:
   -o, --output PATH       write JSON to PATH; use '-' or omit for stdout

@@ -15,4 +15,3 @@ P  attacks  N}
 //    Re8 Nf6 [PB]e5
 //}
 
-comment("hookmate")

@@ -2,5 +2,3 @@
 
 cql()
  flipcolor {pin from [QRB] through a}
-
-comment("pin")

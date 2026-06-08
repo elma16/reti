@@ -1,17 +1,13 @@
-// Searches for the bodenmate checkmate pattern.
-
-
+// Boden's mate: two bishops on criss-crossing diagonals deliver
+// checkmate to a king whose flight squares are blocked by its own
+// pieces (typically a rook plus a pawn).
 
 cql()
-flipcolor{btm mate
-B  attacks  k
 
-square all x in _  attackedby  k
-       B  attacks  x}
-
-// Example pattern instance:
-// cql() mate flipcolor shift flip {
-//     kc8 rd8 pd7 Ba6 Bf4
-// }
-
-comment("bodenmate")
+flipcolor {
+    mate
+    B == 2
+    B attacks k
+    square all x in _ attackedby k
+        B attacks x                      // every empty flight square attacked by a bishop
+}

@@ -1,19 +1,17 @@
-// anastasia's mate 
-
-// a knight and rook team up to trap the opposing king between the side of the board on one side and a friendly piece on the other.
+// Anastasia's mate: knight and rook team up to trap the opposing king
+// against the edge of the board. The rook delivers the check (often
+// from behind a friendly piece via x-ray); the knight covers the
+// flight squares on the open side; exactly one own piece blocks the
+// remaining flight on the same rank/file as the rook.
 
 cql()
-flipcolor{btm mate
-R  attacks  k
-_  attackedby  k == 4
 
-
-square all x in _  attackedby  k
-       (R  attacks  x) or (N  attacks  x)}
-
-
-//cql() mate flipcolor shift flip {
-//   Ne7 pg7 Rh5 kh7
-//}
-
-comment("anastasiamate")
+flipcolor {
+    mate
+    R attacks k
+    N >= 1                                  // knight is part of the trap
+    # (. attackedby k) == 5                 // king on the edge (not corner)
+    # ([a] & . attackedby k) == 1           // exactly one friendly blocker
+    # (R attacks (_ attackedby k)) >= 1     // rook covers at least one flight
+    # (N attacks (_ attackedby k)) >= 1     // knight covers at least one flight
+}

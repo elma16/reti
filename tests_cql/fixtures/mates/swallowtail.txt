@@ -1,4 +1,4 @@
 # positive (should match)
-Q2nk2r/6bp/p7/1q3p2/2KP4/2P1P2N/P4PPP/5B1R w k - 1 25
-# negative (single tweak, should not match)
-Q2nk2r/6bp/p7/1q3p2/2KP4/2P1P2N/P4PPP/5B1R b k - 1 25
+8/8/3p1p2/4k3/4Q3/4K3/8/8 b - - 0 1
+# negative (cross-pattern: dovetail - queen diagonally adjacent; should not match)
+8/8/4p3/3pk3/5QK1/8/8/8 b - - 0 1

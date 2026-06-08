@@ -8,4 +8,3 @@ cql()
   not mate
   power A - power a >= 6}
 
-comment("crushing")

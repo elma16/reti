@@ -15,7 +15,7 @@ use crate::cli;
 use crate::progress::ProgressReporter;
 
 const USAGE: &str = "\
-usage: reti-pgn-utils fce-syzygy-eval [options]
+usage: pgn-utils fce-syzygy-eval [options]
 
 options:
   --db PATH               SQLite DB containing pending evaluations

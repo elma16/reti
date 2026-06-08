@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CQL Incidence Dashboard</title>
+  <script>
+    try {
+      const theme = localStorage.getItem("cql-site-theme");
+      if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme;
+    } catch (error) {}
+  </script>
+  <link rel="stylesheet" href="cql-site.css">
+</head>
+<body>
+<main>
+  <header class="page-head">
+    <div class="header-main">
+      <div>
+        <p class="eyebrow">Annotated PGN analysis</p>
+        <h1 id="page-title">CQL Incidence Dashboard</h1>
+        <p class="byline" id="run-meta"></p>
+      </div>
+      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle light and dark mode">
+        <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.8 6.8 0 0 0 9.8 9.8z"></path></svg>
+        <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>
+      </button>
+    </div>
+  </header>
+
+  <section class="toolbar" aria-label="Dashboard controls">
+    <div class="control-group"><strong>Corpus</strong> <span class="seg" id="view-controls"></span></div>
+    <div class="control-group search-group"><strong>Marker filter</strong> <input id="pattern-search" class="search" type="search" autocomplete="off"></div>
+    <label class="check-control"><input id="hide-generic-pairs" type="checkbox"> Hide selected generic marker in pairs</label>
+  </section>
+
+  <section class="metrics" id="metrics" aria-label="Run metrics"></section>
+
+  <section class="section" aria-labelledby="markers-title">
+    <div class="section-head">
+      <h2 id="markers-title">Markers</h2>
+      <p id="markers-note"></p>
+    </div>
+    <div class="table-wrap">
+      <table id="pattern-table">
+        <thead></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="section two-col" aria-labelledby="features-title">
+    <div>
+      <div class="section-head">
+        <h2 id="features-title">ECO Bases</h2>
+        <p id="eco-note"></p>
+      </div>
+      <div class="table-wrap compact">
+        <table id="eco-table">
+          <thead></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div class="section-head">
+        <h2 id="ratings-title">Rating Bands</h2>
+        <p id="rating-note"></p>
+      </div>
+      <div class="table-wrap compact">
+        <table id="rating-table">
+          <thead></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="section two-col" aria-labelledby="sources-title">
+    <div>
+      <div class="section-head">
+        <h2 id="sources-title">Sources</h2>
+        <p id="sources-note"></p>
+      </div>
+      <div class="table-wrap compact">
+        <table id="source-table">
+          <thead></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div class="section-head">
+        <h2 id="pairs-title">Co-Occurrence</h2>
+        <p id="pairs-note"></p>
+      </div>
+      <div class="table-wrap compact">
+        <table id="pair-table">
+          <thead></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>
+<script src="cql-data.js"></script>
+<script src="cql-samples.js"></script>
+<script src="cql-site.js"></script>
+</body>
+</html>

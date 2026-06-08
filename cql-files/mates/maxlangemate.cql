@@ -1,14 +1,13 @@
-/*seems exactly the same as greco's mate*/
+// Max Lange's mate: queen + bishop. Bishop defends the queen; queen
+// is adjacent to the king and delivers the check. Geometrically very
+// similar to Damiano's-bishop mate - the two are effectively the same
+// motif under different names.
 
 cql()
-flipcolor{btm mate
-Q  attacks  k
 
-square all x in _  attackedby  k
-       (B  attacks  x) or (Q  attacks  x)}
-
-//cql() mate flipcolor shift flip {
-//    Bf7 Qg8 kh7
-//}
-
-comment("maxlangemate")
+flipcolor {
+    mate
+    Q attacks k
+    k attacks Q
+    B attacks Q
+}

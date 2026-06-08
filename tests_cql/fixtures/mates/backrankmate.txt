@@ -1,4 +1,4 @@
 # positive (should match)
-2R4k/5Q1p/8/4Np2/3P4/8/b4PPP/6K1 b - - 2 41
-# negative (single tweak, should not match)
-2R4k/5Q1p/8/4Np2/3P4/8/b4PPP/6K1 w - - 2 41
+5R1k/6pp/8/8/8/8/8/K7 b - - 0 1
+# negative (cross-pattern: K+R vs k bare (no own-piece shield); should not match)
+k6R/8/1K6/8/8/8/8/8 b - - 0 1

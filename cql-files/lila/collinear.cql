@@ -8,4 +8,3 @@ cql()
   move from X
   : ray orthogonal (X Y) or ray diagonal (X Y)}
 
-comment("collinear")

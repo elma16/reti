@@ -8,4 +8,3 @@ cql()
 square all x in _  attackedby  k
        B  attacks  x}
 
-comment("doubleBishopMate")

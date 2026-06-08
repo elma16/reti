@@ -7,4 +7,3 @@ flipcolor (R == 1 and B == 1 and r == 1)
 
 [Aa] == 5
 
-comment("94_96RBr")

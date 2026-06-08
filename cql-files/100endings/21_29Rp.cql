@@ -5,5 +5,3 @@ cql()
 flipcolor (R == 1 and p == 1) 
 
 [Aa] == 4
-
-comment("21_29Rp")

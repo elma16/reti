@@ -3,4 +3,3 @@
 cql()
  flipcolor {(A & ~(move to . previous))  attacks  k}
 
-comment("discoveredAttack")

@@ -5,4 +5,3 @@ cql() mate flipcolor shift flip {
   _ attackedby k == 5 and A attacks (_ attackedby k) == 1
 }
 
-comment("dovetailMate")

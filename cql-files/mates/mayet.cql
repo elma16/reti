@@ -13,4 +13,3 @@ _  attackedby  k == 3}
 //    kg8 Rh8 Bb2 
 //}
 
-comment("mayet")

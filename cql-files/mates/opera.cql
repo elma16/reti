@@ -15,5 +15,3 @@ B attacks R
 
 square all x in _  attackedby  k
        (B  attacks  x) or (R  attacks  x)}
-
-comment("opera")

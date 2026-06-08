@@ -6,4 +6,3 @@ or {
   btm move capture to f2 Ke1
 }
 
-comment("attackingF2F7")

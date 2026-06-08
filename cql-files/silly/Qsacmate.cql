@@ -14,4 +14,3 @@ line quiet
   --> move from A to [Aa_]
   --> mate}
 
-comment("Qsacmate")

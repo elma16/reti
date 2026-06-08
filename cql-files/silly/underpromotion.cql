@@ -3,8 +3,5 @@
 
 cql(quiet)
 
-flipcolor {
-    move promote [RBN]
-}
+move promote [RBNrbn]
 
-comment("underpromotion")

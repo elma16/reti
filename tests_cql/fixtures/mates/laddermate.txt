@@ -1,4 +1,4 @@
 # positive (should match)
-3R1k2/R7/p7/B1p5/4Pr2/8/5PPP/6K1 b - - 1 37
-# negative (single tweak, should not match)
-3R1k2/R7/p7/B1p5/4Pr2/8/5PPP/6K1 w - - 1 37
+R7/R6k/8/6K1/8/8/8/8 b - - 0 1
+# negative (cross-pattern: K+R vs k (only one major); should not match)
+k6R/8/1K6/8/8/8/8/8 b - - 0 1

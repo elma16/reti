@@ -3,4 +3,3 @@
 cql()
 move castle
 
-comment("castling")

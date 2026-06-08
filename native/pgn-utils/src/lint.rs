@@ -11,7 +11,6 @@
 //! `lint` is read-only by design; use `clean` to fix.
 
 use std::ffi::OsString;
-use std::fs::{self, File};
 use std::io::{self, BufRead, BufReader, Write};
 use std::path::{Path, PathBuf};
 
@@ -94,11 +93,10 @@ fn escape_json_string(s: &str) -> String {
 }
 
 pub fn run_lint(input_path: &Path, json: bool, show_progress: bool) -> io::Result<LintReport> {
-    let total_bytes = fs::metadata(input_path)?.len();
-    let progress = ProgressReporter::bytes(total_bytes, "lint", show_progress);
+    let (raw_reader, len) = crate::output::open_input(input_path)?;
+    let progress = ProgressReporter::maybe_bytes(len, "lint", show_progress);
 
-    let file = File::open(input_path)?;
-    let reader = BufReader::new(progress.wrap(file));
+    let reader = BufReader::new(progress.wrap(raw_reader));
 
     let report = lint_stream(reader)?;
 
@@ -398,7 +396,7 @@ fn check_move_legality(game: &Game, normalized: &[u8]) -> Option<String> {
 pub fn run_subcommand(args: &[OsString]) -> Result<i32, String> {
     let parsed = crate::cli::parse(args, &[], &[]).map_err(|e| e.to_string())?;
     if parsed.positionals.len() != 1 {
-        return Err("lint: expected exactly one input path".to_string());
+        return Err("lint: expected exactly one input path (a file or - for stdin)".to_string());
     }
     let input: PathBuf = parsed.positionals[0].clone();
     let report = run_lint(&input, parsed.global.json, !parsed.global.no_progress)

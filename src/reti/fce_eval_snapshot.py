@@ -523,6 +523,12 @@ def classify_material_side(ending: str, board: chess.Board) -> MaterialPerspecti
             "bishop+knight side",
             lambda own, opp: own["B"] >= 1 and own["N"] >= 1 and nonking(opp) == 0,
         )
+    if ending == "1-5NNp":
+        return select_material_side(
+            board,
+            "two-knights side",
+            lambda own, opp: own["N"] >= 2 and opp["P"] >= 1,
+        )
     if ending == "2-1P":
         return select_material_side(
             board,

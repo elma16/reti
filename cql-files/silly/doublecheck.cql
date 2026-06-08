@@ -7,4 +7,3 @@ flipcolor {
     (A attacks k) >= 2
 }
 
-comment("doublecheck")

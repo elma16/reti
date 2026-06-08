@@ -8,4 +8,3 @@ cql()
   move from V
   : not ray orthogonal (E V) and not ray diagonal (E V)}
 
-comment("clearance")

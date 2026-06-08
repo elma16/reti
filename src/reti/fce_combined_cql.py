@@ -296,7 +296,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--canonical-only",
         action="store_true",
-        help="Include only the 30 canonical FCE table rows.",
+        help="Include only the canonical FCE table rows.",
     )
     parser.add_argument(
         "--include-duplicate-aliases",

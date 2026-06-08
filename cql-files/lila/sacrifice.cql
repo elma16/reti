@@ -7,4 +7,3 @@ cql()
     -- power a - power A >= 3 {2,}
 }
 
-comment("sacrifice")

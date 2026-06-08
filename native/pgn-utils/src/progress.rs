@@ -36,6 +36,31 @@ impl ProgressReporter {
         Self { bar }
     }
 
+    /// Create a byte-oriented reporter for a stream of unknown length (e.g.
+    /// stdin). Shows bytes processed and a spinner instead of a percentage bar.
+    pub fn bytes_spinner(label: &str, enabled: bool) -> Self {
+        let bar = if !enabled || !io::stderr().is_terminal() {
+            ProgressBar::with_draw_target(None, ProgressDrawTarget::hidden())
+        } else {
+            let bar = ProgressBar::new_spinner();
+            bar.set_style(
+                ProgressStyle::with_template("{msg} {spinner} {bytes} ({bytes_per_sec})").unwrap(),
+            );
+            bar.set_message(label.to_string());
+            bar
+        };
+        Self { bar }
+    }
+
+    /// Byte reporter that adapts to a known total (measured bar) or an unknown
+    /// one (spinner). Convenience for callers that may read a file or stdin.
+    pub fn maybe_bytes(total: Option<u64>, label: &str, enabled: bool) -> Self {
+        match total {
+            Some(total) => Self::bytes(total, label, enabled),
+            None => Self::bytes_spinner(label, enabled),
+        }
+    }
+
     /// Create a count-oriented reporter (e.g. games or files).
     pub fn items(total: u64, label: &str, enabled: bool) -> Self {
         let bar = if !enabled || !io::stderr().is_terminal() {
@@ -63,6 +88,14 @@ impl ProgressReporter {
 
     pub fn inc(&self, n: u64) {
         self.bar.inc(n);
+    }
+
+    /// Redraw the bar on a timer so it stays alive during a blocking step that
+    /// doesn't advance it (e.g. the `grep` ripgrep prefilter). No-op on a
+    /// hidden bar.
+    pub fn enable_steady_tick(&self) {
+        self.bar
+            .enable_steady_tick(std::time::Duration::from_millis(120));
     }
 
     pub fn finish(&self, msg: &str) {

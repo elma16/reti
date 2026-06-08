@@ -22,7 +22,7 @@ use crate::concat::expand_inputs;
 use crate::progress::ProgressReporter;
 
 const USAGE: &str = "\
-usage: reti-pgn-utils fce-markers [options] INPUT_PGN_OR_DIR...
+usage: pgn-utils fce-markers [options] INPUT_PGN_OR_DIR...
 
 options:
   -o, --output PATH       write JSONL to PATH; use '-' or omit for stdout

@@ -3,5 +3,3 @@
 cql()
  flipcolor {wtm
   move from P to [a-h]6-8}
-
-comment("advancedPawn")

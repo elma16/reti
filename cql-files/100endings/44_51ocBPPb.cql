@@ -14,4 +14,3 @@ flipcolor(light B == 1 and
 
 [Aa] == 6
 
-comment("44_51ocBPPb")

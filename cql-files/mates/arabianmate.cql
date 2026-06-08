@@ -4,7 +4,8 @@
 // and to deliver checkmate while the knight sits two squares away diagonally from the king to prevent escape on the square next to the king and to protect the rook.
 
 cql()
-flipcolor{btm mate
+flipcolor{
+mate
 R  attacks  k
 k  attacks  R
 N  attacks  R
@@ -15,4 +16,3 @@ _  attackedby  k == 2}
 //    Nf6 Rh7 kh8
 //}
 
-comment("arabianmate")

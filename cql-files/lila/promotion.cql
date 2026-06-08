@@ -3,4 +3,3 @@
 cql()
 move promote [QRBN]
 
-comment("promotion")

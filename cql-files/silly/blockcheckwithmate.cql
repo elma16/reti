@@ -9,4 +9,3 @@ flipcolor {
       --> mate
 }
 
-comment("blockcheckwithmate")

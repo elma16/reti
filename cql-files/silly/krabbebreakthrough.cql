@@ -4,6 +4,11 @@
 
 cql()
 
-flip flipcolor { Pf3 Pg4 Ph4 ph5 pg6-7 }
-
-comment("krabbebreakthrough")
+[QqRrBbNn] == 0
+flip flipcolor { 
+    btm
+    Pf3 Pg4 Ph4 
+    pe5 ph5 pg6 
+    pf2-7 == 0
+    ke6
+    }

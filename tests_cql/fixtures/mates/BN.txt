@@ -1,4 +1,4 @@
 # positive (should match)
-8/8/8/8/8/5bkn/8/7K w - - 92 103
-# negative (single tweak, should not match)
-8/8/8/8/8/5bkn/8/7K b - - 92 103
+k1N5/1BK5/8/8/8/8/8/8 b - - 0 1
+# negative (cross-pattern: K+B+B vs k (wrong material); should not match)
+7k/5KB1/8/8/8/8/2B5/8 b - - 0 1

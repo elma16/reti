@@ -31,7 +31,7 @@ cargo build --release --manifest-path reti-site/Cargo.toml
 If the source-total denominator JSON does not already exist, create it once:
 
 ```bash
-native/pgn-utils/target/release/reti-pgn-utils source-totals \
+native/pgn-utils/target/release/pgn-utils source-totals \
   --force \
   -o /Volumes/2025archive/FCE-table/source-totals/lumbras-source-totals-2026-05-15.json \
   /Volumes/2025archive/lumbra-gigabase
@@ -151,7 +151,7 @@ SQLite.
 FCE_STEMS="1-4BN,2-0Pp,2-1P,3-1Np,3-2NN,4-1Bp,4-2scBB,4-3ocBB,5-0BN,6-1-0RP,6-2-0Rr,6-2-1RPr,6-2-2RPPr,6-2-2RPPrConnected,6-3RRrr,7-1RN,7-2RB,8-1RNr,8-1RNrNoPawns,8-2RBr,8-2RBrNoPawns,8-3RAra,9-1Qp,9-2Qq,9-3QPq,10-1Qa,10-2Qr,10-2QrNoPawns,10-3Qaa,10-4Qra,10-5Qrr,10-6Qaaa,10-7QAq,10-7-1Qbrr,10-7-1QbrrNoPawns"
 
 run_timed "build opening distribution counts" \
-  native/pgn-utils/target/release/reti-pgn-utils fce-combined-openings \
+  native/pgn-utils/target/release/pgn-utils fce-combined-openings \
     --relative-to "$RUN_DIR" \
     --known-stems "$FCE_STEMS" \
     --thresholds 1,2,5,10,20 \
@@ -187,7 +187,7 @@ The manual commands below are only needed if you intentionally want to rebuild
 the examples for an existing snapshot without rebuilding the database:
 
 ```bash
-native/pgn-utils/target/release/reti-pgn-utils fce-combined-samples \
+native/pgn-utils/target/release/pgn-utils fce-combined-samples \
   --relative-to /Users/elliottmacneil/Desktop/FCEtable \
   --known-stems 1-4BN,2-0Pp,2-1P,3-1Np,3-2NN,4-1Bp,4-2scBB,4-3ocBB,5-0BN,6-1-0RP,6-2-0Rr,6-2-1RPr,6-2-2RPPr,6-2-2RPPrConnected,6-3RRrr,7-1RN,7-2RB,8-1RNr,8-1RNrNoPawns,8-2RBr,8-2RBrNoPawns,8-3RAra,9-1Qp,9-2Qq,9-3QPq,10-1Qa,10-2Qr,10-2QrNoPawns,10-3Qaa,10-4Qra,10-5Qrr,10-6Qaaa,10-7QAq,10-7-1Qbrr,10-7-1QbrrNoPawns \
   --thresholds 1,2,5,10,20 \

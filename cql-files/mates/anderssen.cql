@@ -1,15 +1,13 @@
-// anderssen's mate
-
-//  the rook or queen is supported by a diagonally attacking piece such as a pawn or bishop as it checkmates the opposing king along the eighth rank. 
+// Anderssen's mate: a rook or queen checkmates the opposing king along
+// the back rank (8th rank for white attacker), supported by a
+// diagonally attacking piece - typically a pawn or bishop.
 
 cql()
-flipcolor{btm mate
-R  attacks  k
-k  attacks  R}
 
-
-//cql() mate flipcolor shift flip {
-//    Kf6 pg7 kg8 Rh8
-//}
-
-comment("anderssen")
+flipcolor {
+    mate
+    k & a-h8                             // black king on rank 8
+    [RQ] attacks k                       // rook or queen checks
+    k attacks [RQ]                       // attacker adjacent to king
+    [PB] attacks [RQ]                    // pawn or bishop supports
+}

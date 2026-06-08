@@ -8,4 +8,3 @@ cql()
   move from A to D
   : not D  attacks  T}
 
-comment("deflection")

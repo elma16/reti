@@ -5,5 +5,3 @@ cql()
 flipcolor flip (R == 1 and P[b5-7] == 1 and r == 1) 
 
 [Aa] == 5
-
-comment("55RPr")

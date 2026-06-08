@@ -28,7 +28,8 @@ class TestFceCombinedCql(unittest.TestCase):
         stems = [entry.stem for entry in entries]
 
         self.assertEqual(stems[0], "1-4BN")
-        self.assertEqual(stems[1], "2-1P")
+        self.assertEqual(stems[1], "1-5NNp")
+        self.assertLess(stems.index("1-5NNp"), stems.index("2-1P"))
         self.assertIn("6-2-2RPPrConnected", stems)
         self.assertIn("8-1RNrNoPawns", stems)
         self.assertIn("8-2RBrNoPawns", stems)
@@ -56,14 +57,19 @@ class TestFceCombinedCql(unittest.TestCase):
 
     def test_render_combined_cql_uses_one_preamble_and_marker_comments(self) -> None:
         entries, _ = select_entries(self.cql_table_dir, include_auxiliary=False)
-        text = render_combined_cql(entries[:2])
+        text = render_combined_cql(entries[:3])
 
         self.assertEqual(text.count("cql("), 1)
         self.assertIn("cql(quiet)", text)
         self.assertIn('comment("1-4BN")', text)
+        self.assertIn('comment("1-5NNp")', text)
         self.assertIn('comment("2-1P")', text)
         self.assertLess(
             text.index('"1-4BN"'),
+            text.index('"1-5NNp"'),
+        )
+        self.assertLess(
+            text.index('"1-5NNp"'),
             text.index('"2-1P"'),
         )
         self.assertIn("\n    or\n", text)

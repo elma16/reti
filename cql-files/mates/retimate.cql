@@ -1,7 +1,7 @@
 
 
 //cql()
-//flipcolor{btm mate
+//flipcolor{mate
 //B -> k
 //k -> B
 //R -> B
@@ -14,4 +14,3 @@ cql() mate flipcolor shift flip {
     Bd8 Rd1-7 kc7
 }
 
-comment("retimate")

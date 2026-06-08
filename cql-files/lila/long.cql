@@ -4,4 +4,3 @@ cql()
 wtm
 line --> . --> . --> . --> . --> terminal
 
-comment("long")

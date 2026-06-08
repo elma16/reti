@@ -8,4 +8,3 @@ N  attacks  R
 k  attacks  N
 P  attacks  N}
 
-comment("hookMate")

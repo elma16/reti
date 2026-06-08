@@ -6,4 +6,3 @@ cql()
   #[Aa] >= 18
   check}
 
-comment("queensideAttack")

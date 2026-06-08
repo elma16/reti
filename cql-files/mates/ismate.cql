@@ -2,5 +2,3 @@
 cql()
 
 mate
-
-comment("ismate")

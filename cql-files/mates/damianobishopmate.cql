@@ -3,9 +3,9 @@
 
 
 cql()
-flipcolor{btm mate
+flipcolor{
+mate
 Q  attacks  k
 k  attacks  Q
 B  attacks  Q}
 
-comment("damianobishopmate")

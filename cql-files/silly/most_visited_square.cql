@@ -10,4 +10,3 @@ square $sq in [Aa_] {
     line --> (move to $sq or move from $sq) {3 200}
 }
 
-comment("most_visited_square")

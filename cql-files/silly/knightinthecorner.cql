@@ -10,4 +10,3 @@ flip flipcolor (move from N to a1) and (move from N to _)
 // what about the "dumb square"?
 //flip flipcolor move from N to b2
 
-comment("knightinthecorner")

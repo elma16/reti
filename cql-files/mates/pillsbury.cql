@@ -14,4 +14,3 @@ _ attackedby k == 2
 square all x in _  attackedby  k
        (B  attacks  x) or (R  attacks  x)}
 
-comment("pillsbury")

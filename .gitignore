@@ -14,8 +14,8 @@ output/
 cql-bin/
 src/reti.egg-info/
 build/
-native/**/target/
-reti-site/target/
+# Rust build output (cargo) for every project in the repo, at any depth.
+target/
 data/
 tests_cql/.generated/
 

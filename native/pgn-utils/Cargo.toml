@@ -1,14 +1,14 @@
 [package]
-name = "reti-pgn-utils"
+name = "pgn-utils"
 version = "0.2.0"
 edition = "2021"
 
 [lib]
-name = "reti_pgn_utils"
+name = "pgn_utils"
 path = "src/lib.rs"
 
 [[bin]]
-name = "reti-pgn-utils"
+name = "pgn-utils"
 path = "src/main.rs"
 
 [dependencies]

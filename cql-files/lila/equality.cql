@@ -4,4 +4,3 @@
 cql()
 result "1/2-1/2"
 
-comment("equality")

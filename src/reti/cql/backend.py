@@ -29,6 +29,24 @@ def resolve_cql_binary(cql_binary: str) -> Path | None:
     return resolved
 
 
+def infer_backend_name(binary_path: Path) -> str:
+    """Infer a backend from the executable name when the user does not choose."""
+    name = binary_path.name.lower()
+    if "cqli" in name:
+        return "cqli"
+    return "cql6"
+
+
+def create_cql_backend(binary_path: Path, backend_name: str = "auto") -> "CqlBackend":
+    """Build a backend wrapper for a resolved CQL executable."""
+    selected = infer_backend_name(binary_path) if backend_name == "auto" else backend_name
+    if selected == "cql6":
+        return Cql6Backend(binary_path)
+    if selected == "cqli":
+        return CqliBackend(binary_path)
+    raise ValueError(f"unsupported CQL backend: {backend_name}")
+
+
 class CqlBackend(ABC):
     """A CQL-like engine that takes a PGN + script and writes matched games."""
 
@@ -80,6 +98,8 @@ class Cql6Backend(CqlBackend):
             str(pgn_path),
             "-o",
             str(output_path),
+            "-matchstring",
+            script_path.stem,
         ]
         if threads != "auto":
             command.extend(["-threads", str(threads)])
@@ -107,3 +127,7 @@ class Cql6Backend(CqlBackend):
             ]
         )
         return command
+
+
+class CqliBackend(Cql6Backend):
+    """CQLi currently accepts the same conservative argv shape as CQL 6.x."""

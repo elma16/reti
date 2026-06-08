@@ -4,7 +4,8 @@
 
 
 cql()
-flipcolor{btm mate
+flipcolor{
+mate
 N  attacks  k
 _  attackedby  k == 2
 
@@ -17,4 +18,3 @@ square all x in _  attackedby  k
 //   Ne7 Bc3 kg8
 //}
 
-comment("suffocationmate")

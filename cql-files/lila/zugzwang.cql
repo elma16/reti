@@ -6,5 +6,3 @@ cql()
  flipcolor {btm
   move count legal <= 3
   not check}
-
-comment("zugzwang")

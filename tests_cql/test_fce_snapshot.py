@@ -431,7 +431,8 @@ class TestFceSnapshot(unittest.TestCase):
             payload["rows"][0]["tablebaseWdl"]["resultCrosstab"]["aligned"]["count"],
             6,
         )
-        self.assertIsNone(payload["rows"][2]["tablebaseWdl"])
+        rows_by_stem = {row["stem"]: row for row in payload["rows"]}
+        self.assertIsNone(rows_by_stem["2-1P"]["tablebaseWdl"])
         self.assertEqual(
             [row["stem"] for row in payload["rows"]],
             [ending.stem for ending in FCE_CATALOG.endings],

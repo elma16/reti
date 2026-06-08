@@ -8,5 +8,3 @@ cql()
   move from [Aa] to between(D T)
   : not D  attacks  T
 }
-
-comment("interference")

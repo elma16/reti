@@ -12,7 +12,15 @@ The pieces:
 - :mod:`reti.cql.cli` — argument parsing + the ``main`` orchestrator
 """
 
-from reti.cql.backend import Cql6Backend, CqlBackend, resolve_cql_binary
+from reti.cql.backend import (
+    Cql6Backend,
+    CqlBackend,
+    CqliBackend,
+    create_cql_backend,
+    infer_backend_name,
+    resolve_cql_binary,
+)
+from reti.cql.cli import ExecutionOptions, OutputMode, OutputOptions, PreflightOptions
 from reti.cql.output import merge_outputs_by_cql, write_summary_csv
 from reti.cql.preflight import (
     PgnPreflightResult,
@@ -40,11 +48,18 @@ from reti.cql.runner import (
 __all__ = [
     "Cql6Backend",
     "CqlBackend",
+    "CqliBackend",
+    "ExecutionOptions",
     "JobResult",
     "JobSpec",
+    "OutputMode",
+    "OutputOptions",
     "PgnPreflightResult",
+    "PreflightOptions",
     "build_job_specs",
     "count_games_in_pgn",
+    "create_cql_backend",
+    "infer_backend_name",
     "inspect_pgn_text_compatibility",
     "issues_from_fast_stats",
     "merge_outputs_by_cql",

@@ -1,6 +1,11 @@
 //! `dedup` subcommand: drop duplicate games by normalized movetext.
 //!
-//! Streams the input file game-by-game (no whole-file buffering), hashes the
+//! The input may be a file or `-` for stdin, and the output goes to a file
+//! (`-o PATH`), to forced stdout (`-o -`), or — when stdout is piped — to
+//! stdout, so it slots into a pipeline like
+//! `pgn-utils concat . | pgn-utils dedup - -o unique.pgn`.
+//!
+//! Streams the input game-by-game (no whole-file buffering), hashes the
 //! normalized movetext (move numbers / comments / variations / NAGs / result
 //! tokens stripped, whitespace collapsed) with xxh3-64, and emits each game
 //! only on first occurrence. The hash table holds 8 bytes per unique game,
@@ -12,8 +17,7 @@
 
 use std::collections::HashSet;
 use std::ffi::OsString;
-use std::fs::{self, File};
-use std::io::{self, BufReader, BufWriter, Write};
+use std::io::{self, BufReader, Write};
 use std::path::{Path, PathBuf};
 
 use xxhash_rust::xxh3::xxh3_64;
@@ -37,26 +41,28 @@ impl DedupStats {
     }
 }
 
+/// Run a dedup. Returns the stats and whether the stats line should be printed
+/// to stderr (true when the data stream went to stdout). `input_path` may be a
+/// file or `-` for stdin.
 pub fn run_dedup(
     input_path: &Path,
     output_path: Option<&Path>,
     show_progress: bool,
-) -> io::Result<DedupStats> {
-    let total_bytes = fs::metadata(input_path)?.len();
-    let progress = ProgressReporter::bytes(total_bytes, "dedup", show_progress);
+) -> io::Result<(DedupStats, bool)> {
+    // Resolve the destination first so the terminal-flood guard fires before
+    // we start consuming the input (which may be stdin).
+    let sink = crate::output::open_output(output_path, "dedup")?;
+    let stats_to_stderr = sink.stats_to_stderr;
+    let mut writer = sink.writer;
 
-    let file = File::open(input_path)?;
-    let reader = BufReader::new(progress.wrap(file));
-
-    let mut writer: Box<dyn Write> = match output_path {
-        Some(p) => Box::new(BufWriter::new(File::create(p)?)),
-        None => Box::new(BufWriter::new(io::stdout().lock())),
-    };
+    let (raw_reader, len) = crate::output::open_input(input_path)?;
+    let progress = ProgressReporter::maybe_bytes(len, "dedup", show_progress);
+    let reader = BufReader::new(progress.wrap(raw_reader));
 
     let stats = dedup_stream(reader, &mut writer)?;
     writer.flush()?;
     progress.finish("dedup done");
-    Ok(stats)
+    Ok((stats, stats_to_stderr))
 }
 
 /// Read games from `reader`, write unique games to `writer`. Pulled out of
@@ -101,12 +107,12 @@ pub fn run_subcommand(args: &[OsString]) -> Result<(), String> {
         .or_else(|| parsed.get_kv("o"))
         .map(PathBuf::from);
     if parsed.positionals.len() != 1 {
-        return Err("dedup: expected exactly one input path".to_string());
+        return Err("dedup: expected exactly one input path (a file or - for stdin)".to_string());
     }
     let input = &parsed.positionals[0];
-    let stats = run_dedup(input, output.as_deref(), !parsed.global.no_progress)
+    let (stats, stats_to_stderr) = run_dedup(input, output.as_deref(), !parsed.global.no_progress)
         .map_err(|e| format!("dedup failed: {e}"))?;
-    println!("{}", stats.to_json());
+    crate::output::print_stats(&stats.to_json(), stats_to_stderr);
     Ok(())
 }
 

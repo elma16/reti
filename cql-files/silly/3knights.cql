@@ -5,4 +5,3 @@ cql()
 
 flipcolor N == 3
 
-comment("3knights")

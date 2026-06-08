@@ -5,5 +5,3 @@ cql()
   k[g-h]8
   #[Aa] >= 20
   check}
-
-comment("kingsideAttack")

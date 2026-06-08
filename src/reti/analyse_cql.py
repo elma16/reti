@@ -10,8 +10,19 @@ from __future__ import annotations
 import subprocess  # re-exported so tests can patch reti.analyse_cql.subprocess.run
 from pathlib import Path
 
-from reti.cql.backend import Cql6Backend, CqlBackend, resolve_cql_binary
+from reti.cql.backend import (
+    Cql6Backend,
+    CqlBackend,
+    CqliBackend,
+    create_cql_backend,
+    infer_backend_name,
+    resolve_cql_binary,
+)
 from reti.cql.cli import (
+    ExecutionOptions,
+    OutputMode,
+    OutputOptions,
+    PreflightOptions,
     main,
     parse_args,
     print_summary,
@@ -60,19 +71,26 @@ from reti.common.subprocess_helpers import describe_returncode
 __all__ = [
     "Cql6Backend",
     "CqlBackend",
+    "CqliBackend",
+    "ExecutionOptions",
     "InputCollection",
     "JobResult",
     "JobSpec",
+    "OutputMode",
+    "OutputOptions",
     "PgnPreflightResult",
+    "PreflightOptions",
     "build_job_specs",
     "build_output_path",
     "count_games_in_pgn",
+    "create_cql_backend",
     "describe_returncode",
     "discover_input_files",
     "first_nonempty_line",
     "format_progress_label",
     "format_relative",
     "inspect_pgn_text_compatibility",
+    "infer_backend_name",
     "issues_from_fast_stats",
     "main",
     "make_terminal_safe",
@@ -133,6 +151,7 @@ def run_cql_job(
     output_pgn: Path,
     *,
     cql_threads: str | int = "auto",
+    timeout_seconds: float | None = None,
 ) -> JobResult:
     """Legacy entrypoint accepting a ``Path``; new code should pass a ``CqlBackend``."""
     return _run_cql_job(
@@ -142,6 +161,7 @@ def run_cql_job(
         cql_path,
         output_pgn,
         cql_threads=cql_threads,
+        timeout_seconds=timeout_seconds,
     )
 
 
@@ -152,6 +172,7 @@ def run_job_matrix(
     jobs: str | int,
     cql_threads: str | int,
     game_progress: bool = False,
+    timeout_seconds: float | None = None,
 ) -> list[JobResult]:
     return _run_job_matrix(
         _as_backend(cql_bin_path),
@@ -159,6 +180,7 @@ def run_job_matrix(
         jobs=jobs,
         cql_threads=cql_threads,
         game_progress=game_progress,
+        timeout_seconds=timeout_seconds,
     )
 
 

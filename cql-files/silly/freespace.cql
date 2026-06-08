@@ -10,4 +10,3 @@ freespaceBlack = {#_ attackedby k}
 
 comment ("w:" freespaceWhite "b:" freespaceBlack)
 
-comment("freespace")

@@ -3,5 +3,3 @@
 cql()
 wtm
 line --> . --> . --> mate
-
-comment("mateIn2")

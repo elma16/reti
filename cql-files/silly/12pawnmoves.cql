@@ -1,29 +1,3 @@
-// Searches for the 12pawnmoves chess motif.
+// search for largest number of consecutive pawn moves by one side
 
 cql()
-
-line --> move to _ from [Pp]
-     --> move to _ from _
-     --> move to _ from [Pp]
-     --> move to _ from _
-     --> move to _ from [Pp]
-     --> move to _ from _
-     --> move to _ from [Pp]
-     --> move to _ from _
-     --> move to _ from [Pp]
-     --> move to _ from _
-     --> move to _ from [Pp]
-     --> move to _ from _
-     --> move to _ from [Pp]
-     --> move to _ from _
-     --> move to _ from [Pp]
-     --> move to _ from _
-     --> move to _ from [Pp]
-     --> move to _ from _
-     --> move to _ from [Pp]
-     --> move to _ from _
-     --> move to _ from [Pp]
-     --> move to _ from _
-     --> move to _ from [Pp]
-
-comment("12pawnmoves")

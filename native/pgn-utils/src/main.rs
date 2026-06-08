@@ -2,9 +2,9 @@
 //!
 //! Two argument shapes are accepted:
 //!
-//!   subcommand form:  `reti-pgn-utils <clean|concat|dedup|lint> ...`
-//!   legacy form:      `reti-pgn-utils [--preserve-markup] INPUT OUTPUT`
-//!                     `reti-pgn-utils --inspect INPUT`
+//!   subcommand form:  `pgn-utils <clean|concat|dedup|lint> ...`
+//!   legacy form:      `pgn-utils [--preserve-markup] INPUT OUTPUT`
+//!                     `pgn-utils --inspect INPUT`
 //!
 //! The legacy form is what the Python wrapper at
 //! `src/reti/pgn_utils.py` invokes; preserving it byte-for-byte means
@@ -18,22 +18,26 @@ use std::env;
 use std::ffi::OsString;
 use std::process::ExitCode;
 
-use reti_pgn_utils::{
-    annotated, clean, concat, dedup, fce_combined_markers, fce_markers, fce_syzygy, lint,
-    source_totals,
+use pgn_utils::{
+    annotated, clean, concat, count, dedup, eco, fce_combined_markers, fce_markers, fce_syzygy,
+    lint, search, set_ops, source_totals,
 };
 
 const USAGE: &str = "\
-usage: reti-pgn-utils <SUBCOMMAND> [options]
-       reti-pgn-utils [--preserve-markup] INPUT_PGN OUTPUT_PGN
-       reti-pgn-utils --inspect INPUT_PGN
+usage: pgn-utils <SUBCOMMAND> [options]
+       pgn-utils [--preserve-markup] INPUT_PGN OUTPUT_PGN
+       pgn-utils --inspect INPUT_PGN
 
 subcommands:
   annotated-pgn
           export marker positions from annotated PGNs using shakmaty replay
   clean   rewrite a PGN file (strips markup, normalizes whitespace, etc.)
   concat  concatenate one or more PGN files / directories into one
+  count   count games and break them down by header/derived fields (table)
   dedup   drop duplicate games by normalized movetext
+  eco     label games with ECO + Opening tags (position-based classification)
+  grep    find games whose header fields match a query (player/event/year/tag)
+  set     set ops on two PGN sources: intersect | union | diff
   fce-combined-markers
           export facts from combined FCE {stem}-marked PGNs
   fce-combined-openings
@@ -69,7 +73,11 @@ fn dispatch(args: &[OsString]) -> Result<i32, String> {
         Some("annotated-pgn") => annotated::run_subcommand(&args[1..]).map(|_| 0),
         Some("clean") => clean::run_subcommand(&args[1..]).map(|_| 0),
         Some("concat") => concat::run_subcommand(&args[1..]).map(|_| 0),
+        Some("count") => count::run_subcommand(&args[1..]).map(|_| 0),
         Some("dedup") => dedup::run_subcommand(&args[1..]).map(|_| 0),
+        Some("eco") => eco::run_subcommand(&args[1..]).map(|_| 0),
+        Some("grep") => search::run_subcommand(&args[1..]).map(|_| 0),
+        Some("set") => set_ops::run_subcommand(&args[1..]).map(|_| 0),
         Some("fce-combined-markers") => fce_combined_markers::run_subcommand(&args[1..]).map(|_| 0),
         Some("fce-combined-openings") => {
             fce_combined_markers::run_openings_subcommand(&args[1..]).map(|_| 0)
@@ -90,8 +98,8 @@ fn dispatch(args: &[OsString]) -> Result<i32, String> {
 }
 
 /// Legacy form, preserved exactly for the Python wrapper:
-///   reti-pgn-utils [--preserve-markup] INPUT OUTPUT
-///   reti-pgn-utils --inspect INPUT
+///   pgn-utils [--preserve-markup] INPUT OUTPUT
+///   pgn-utils --inspect INPUT
 fn run_legacy(args: &[OsString]) -> Result<i32, String> {
     use std::path::PathBuf;
 

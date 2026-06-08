@@ -20,7 +20,7 @@ use crate::concat::expand_inputs;
 use crate::progress::ProgressReporter;
 
 const USAGE: &str = "\
-usage: reti-pgn-utils annotated-pgn [options] INPUT_PGN_OR_DIR...
+usage: pgn-utils annotated-pgn [options] INPUT_PGN_OR_DIR...
 
 options:
   -o, --output PATH       write JSONL games to PATH (required)
@@ -537,11 +537,20 @@ mod tests {
     use std::time::{SystemTime, UNIX_EPOCH};
 
     fn unique_temp_dir() -> PathBuf {
+        // A bare nanosecond timestamp can repeat when two tests start within the
+        // same clock tick, so two parallel tests would share (and clobber) one
+        // dir. Mix in a per-process atomic counter to guarantee uniqueness.
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static COUNTER: AtomicUsize = AtomicUsize::new(0);
         let suffix = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap()
             .as_nanos();
-        let dir = std::env::temp_dir().join(format!("reti-annotated-test-{suffix}"));
+        let seq = COUNTER.fetch_add(1, Ordering::Relaxed);
+        let dir = std::env::temp_dir().join(format!(
+            "reti-annotated-test-{}-{suffix}-{seq}",
+            std::process::id()
+        ));
         fs::create_dir_all(&dir).unwrap();
         dir
     }
@@ -585,11 +594,7 @@ mod tests {
         let dir = unique_temp_dir();
         let pgn = dir.join("bad.pgn");
         let out = dir.join("out.jsonl");
-        fs::write(
-            &pgn,
-            "[Event \"Bad\"]\n[Result \"*\"]\n\n1. Ke2 {CQL} *\n",
-        )
-        .unwrap();
+        fs::write(&pgn, "[Event \"Bad\"]\n[Result \"*\"]\n\n1. Ke2 {CQL} *\n").unwrap();
 
         let opts = AnnotatedOptions {
             inputs: vec![pgn],

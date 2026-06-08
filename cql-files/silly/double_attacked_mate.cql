@@ -11,5 +11,3 @@ flipcolor {
         parent: (a attacks $dest) >= 2
     }
 }
-
-comment("double_attacked_mate")

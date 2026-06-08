@@ -19,7 +19,7 @@ This creates `cql-files/FCE/table/` and writes
 `cql-files/FCE/table/manifest.csv`.
 
 Most table scripts are copied by exact filename. A few are normalized from the
-broader corpus to match the 30-row markdown table in [README.md](../README.md):
+broader corpus to match the markdown table in [README.md](../README.md):
 
 - `2-1P.cql <- 2-AP.cql`
 - `5-0BN.cql <- 5-0Bn.cql`
@@ -105,7 +105,7 @@ python scripts/build_fce_combined_marker_cql.py --force
 
 By default this writes `cql-files/FCE/combined/fce-table-markers.cql` with:
 
-- the 30 canonical FCE table rows
+- the canonical FCE table rows
 - non-duplicate auxiliary sub-counts, such as no-pawn `8.1`/`8.2`/`10.2`
   and connected-pawn `6.2 A2`
 - duplicate alias scripts omitted, so `8-1RNr` and `8-1RNrPp` do not both

@@ -859,7 +859,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         type=Path,
         help=(
             "Reusable denominator artifact from "
-            "`reti-pgn-utils source-totals`; avoids rereading source PGNs."
+            "`pgn-utils source-totals`; avoids rereading source PGNs."
         ),
     )
     parser.add_argument("--hash-source-pgns", action="store_true")

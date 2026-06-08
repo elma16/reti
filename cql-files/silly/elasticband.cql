@@ -5,11 +5,11 @@
 cql()
 
 flipcolor {
-    pin from b through N to B
-    line
-      --> move from N capture a
-      --> move from b capture B
-      --> move from N capture b
+    piece $p in [bq] {
+        pin from $p through N to B
+        line
+          --> move from N capture a
+          --> move from $p capture B
+          --> move from N capture $p
+    }
 }
-
-comment("elasticband")

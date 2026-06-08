@@ -1,10 +1,11 @@
-// Searches for the KNN checkmate pattern.
-
-
+// Two-knight endgame mate: K+N+N vs bare K. Cannot be forced in
+// general, but mate positions exist with the bare king in a corner.
 
 cql()
-flipcolor{btm mate
-N == 2
-[Aa] == 4}
 
-comment("KNN")
+flipcolor {
+    mate
+    [Aa] == 4                            // only the four pieces on board
+    N == 2
+    # (. attackedby k) == 3              // bare king in a corner
+}

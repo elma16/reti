@@ -6,4 +6,3 @@ piece X in [NBRQP]
   move from X
   : X  attacks  [kqrbn] >= 2}
 
-comment("fork")

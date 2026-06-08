@@ -6,4 +6,3 @@ cql()
   not [a]  attacks  T
   move capture T}
 
-comment("hangingPiece")

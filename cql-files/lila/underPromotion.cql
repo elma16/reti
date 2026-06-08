@@ -2,5 +2,3 @@
 
 cql()
 move promote [RBN]
-
-comment("underPromotion")

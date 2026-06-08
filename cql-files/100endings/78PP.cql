@@ -5,5 +5,3 @@ cql()
 flipcolor (P == 2 and isolatedpawns == 2)
 
 [Aa] == 4
-
-comment("78PP")

@@ -1,4 +1,4 @@
 # positive (should match)
-rnR1Qb1r/pp1kn1pp/3pp3/3N4/4P3/4B3/Pq3PPP/4KB1R b K - 2 13
-# negative (single tweak, should not match)
-rnR1Qb1r/pp1kn1pp/3pp3/3N4/4P3/4B3/Pq3PPP/4KB1R w K - 2 13
+3R4/4kb2/3Q4/8/8/8/8/K7 b - - 0 1
+# negative (cross-pattern: epaulette mate (different pattern); should not match)
+5rkr/8/6Q1/8/8/8/8/K7 b - - 0 1

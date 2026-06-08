@@ -11,4 +11,3 @@ cql()
   ray diagonal (Q k [qrbn])
 }
 
-comment("skewer")

@@ -11,7 +11,7 @@ the command line.
 
 - `cql-files/`: the main script collections, including the FCE material
 - `src/reti/pgn_cli.py`: one-time in-place PGN repair and normalization before CQL runs
-- `src/reti/pgn_utils.py`: fast lexical PGN repair / utility wrapper around the native `reti-pgn-utils` binary
+- `src/reti/pgn_utils.py`: fast lexical PGN repair / utility wrapper around the native `pgn-utils` binary
 - `src/reti/analyse_cql.py`: batch CLI runner for `pgn|dir x cql|dir` matrix execution
 - `src/reti/export_cql_positions.py`: exports `{CQL}`-annotated PGN positions to an evaluated CSV
 - `src/reti/fce_sankey.py`: core logic for building an interactive FCE transition Sankey
@@ -56,8 +56,9 @@ and either a single CQL script or a directory of CQL scripts. It runs the full
 cross-product and writes one output PGN per pair plus a `summary.csv`. During
 preflight, if a PGN contains text-level incompatibilities that older CQL builds
 dislike, the runner uses a sanitized temporary copy for that run and leaves the
-original PGN untouched. By default the preflight stays cheap; deeper PGN parser
-checks and the up-front CQL smoke test are both opt-in flags. The runner now
+original PGN untouched. By default the preflight stays cheap; use
+`--preflight strict`, `--preflight smoke`, or `--preflight strict-smoke` for
+deeper PGN parser checks and the up-front CQL smoke test. The runner now
 defaults to sequential job execution so CQL can use its own internal threading
 without process-level oversubscription.
 
@@ -157,6 +158,7 @@ https://en.wikipedia.org/wiki/Chess_endgame#Frequency_table
 | ID | Ending | Quantity | Percentage |
 |---|---|---|---|
 | 1.4 | Bishop + Knight vs King | 283 (62 draws) | 0.02 |
+| 1.5 | Two Knights vs Pawn | not listed | 0.00 |
 | 2 | Pawn Endings | 48,465 | 2.87 |
 |  | King + Pawn vs King | 3,920 | 0.23 |
 | 3.1 | Knight vs Pawns | 15,512 | 0.92 |

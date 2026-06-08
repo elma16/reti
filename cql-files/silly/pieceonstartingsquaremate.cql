@@ -14,4 +14,3 @@ square StartSquare in a-h1 {
     parent: move from A to StartSquare
     }
 
-comment("pieceonstartingsquaremate")

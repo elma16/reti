@@ -11,4 +11,3 @@ square all x in _  attackedby  k
 // if you wanted to sort by which has more pieces
 //sort power a
 
-comment("greco")

@@ -1,16 +1,12 @@
-// blind swine mate
-
-// The blind swine mate pattern's name is attributed to Polish master Dawid Janowski who referred to doubled rooks on a player's 7th rank as "swine"
+// Blind-swine mate: doubled rooks on the seventh rank deliver
+// checkmate to a king on the back rank. The name (Janowski) refers
+// to two connected rooks on the opponent's 7th.
 
 cql()
-flipcolor{btm mate
-R  attacks  k
-k  attacks  R
-R  attacks  R
-_  attackedby  k == 2}
 
-//cql() mate flipcolor shift flip {
-//    rf8 kg8 Rg7 Rh7
-//}
-
-comment("blindswinemate")
+flipcolor {
+    mate
+    k & a-h8                             // black king on rank 8
+    R[a-h7] == 2                         // both white rooks on rank 7
+    R attacks k                          // a rook delivers check
+}

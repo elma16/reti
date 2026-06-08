@@ -213,7 +213,7 @@ def smoke_test_pgn_with_cql(
         smoke_output.unlink()
 
     process = subprocess.run(
-        backend.build_run_command(
+        backend.build_smoke_command(
             pgn_path,
             smoke_script,
             smoke_output,

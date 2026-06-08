@@ -203,7 +203,7 @@ fn parse_build(args: Vec<OsString>) -> SiteResult<BuildConfig> {
     let mut work_dir = None;
     let mut output_dir = None;
     let mut title = None;
-    let mut pgn_utils_bin = PathBuf::from("native/pgn-utils/target/release/reti-pgn-utils");
+    let mut pgn_utils_bin = PathBuf::from("native/pgn-utils/target/release/pgn-utils");
     let mut opening_catalog_csv = Some(PathBuf::from("data/openings/lumbras_eco_codes.csv"));
     let mut thresholds = vec![1, 2, 5, 10, 20];
     let mut sample_size = 32usize;

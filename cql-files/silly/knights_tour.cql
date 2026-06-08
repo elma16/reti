@@ -7,9 +7,6 @@ cql(quiet)
 flipcolor {
     piece $n in N {
         sort "knight tour length (moves)"
-        line
-          --> move from $n {6 63}
+        line --> (move from $n --> .) {6,63}
     }
 }
-
-comment("knights_tour")

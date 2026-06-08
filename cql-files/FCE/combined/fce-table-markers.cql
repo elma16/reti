@@ -14,6 +14,14 @@ cql(quiet)
     }
     or
     {
+        // 1-5NNp: Two Knights vs Pawn (canonical)
+        flipcolor (N == 2 and p == 1)
+
+        [Aa] == 5
+        comment("1-5NNp")
+    }
+    or
+    {
         // 2-1P: King + Pawn vs King (canonical; also marks 2-0Pp)
         flipcolor (P == 1)
 

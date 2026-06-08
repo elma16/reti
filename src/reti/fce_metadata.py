@@ -21,6 +21,7 @@ CHAPTERS = {
 
 _ENDING_ROWS: list[tuple[str, str, str, str]] = [
     ("1-4BN", "1.4", "Bishop + Knight vs King", "1"),
+    ("1-5NNp", "1.5", "Two Knights vs Pawn", "1"),
     ("2-0Pp", "2", "Pawn Endings", "2"),
     ("2-1P", "", "King + Pawn vs King", "2"),
     ("3-1Np", "3.1", "Knight vs Pawns", "3"),
@@ -55,6 +56,7 @@ _ENDING_ROWS: list[tuple[str, str, str, str]] = [
 # Explicit overlap resolution for same-ply matches. Children precede broad parents.
 SPECIFICITY_ORDER = [
     "1-4BN",
+    "1-5NNp",
     "2-1P",
     "2-0Pp",
     "3-1Np",

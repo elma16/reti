@@ -7,6 +7,7 @@ import concurrent.futures
 import os
 import subprocess
 import sys
+import time
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -33,6 +34,9 @@ class JobResult:
     returncode: int
     stdout: str
     stderr: str
+    duration_seconds: float = 0.0
+    timed_out: bool = False
+    missing_output: bool = False
 
 
 @dataclass(frozen=True)
@@ -158,8 +162,24 @@ def run_cql_job(
     output_pgn: Path,
     *,
     cql_threads: str | int = "auto",
+    timeout_seconds: float | None = None,
 ) -> JobResult:
     output_pgn.parent.mkdir(parents=True, exist_ok=True)
+    if output_pgn.exists():
+        try:
+            output_pgn.unlink()
+        except OSError as exc:
+            return JobResult(
+                pgn_path=source_pgn_path,
+                cql_path=cql_path,
+                output_pgn=output_pgn,
+                success=False,
+                match_count=None,
+                returncode=1,
+                stdout="",
+                stderr=f"could not remove existing output before run: {exc}",
+            )
+
     command = backend.build_run_command(
         runtime_pgn_path,
         cql_path,
@@ -167,6 +187,7 @@ def run_cql_job(
         threads=cql_threads,
     )
 
+    started = time.monotonic()
     try:
         process = subprocess.run(
             command,
@@ -174,8 +195,34 @@ def run_cql_job(
             text=True,
             encoding="utf-8",
             errors="replace",
+            timeout=timeout_seconds,
+        )
+        duration_seconds = time.monotonic() - started
+    except subprocess.TimeoutExpired as exc:
+        duration_seconds = time.monotonic() - started
+        stdout = exc.stdout
+        stderr = exc.stderr
+        if isinstance(stdout, bytes):
+            stdout = stdout.decode("utf-8", errors="replace")
+        if isinstance(stderr, bytes):
+            stderr = stderr.decode("utf-8", errors="replace")
+        message = f"CQL job timed out after {timeout_seconds:g} second(s)"
+        if stderr:
+            message = f"{message}\n{stderr}"
+        return JobResult(
+            pgn_path=source_pgn_path,
+            cql_path=cql_path,
+            output_pgn=output_pgn,
+            success=False,
+            match_count=None,
+            returncode=124,
+            stdout=stdout or "",
+            stderr=message,
+            duration_seconds=duration_seconds,
+            timed_out=True,
         )
     except FileNotFoundError as exc:
+        duration_seconds = time.monotonic() - started
         return JobResult(
             pgn_path=source_pgn_path,
             cql_path=cql_path,
@@ -185,8 +232,10 @@ def run_cql_job(
             returncode=127,
             stdout="",
             stderr=str(exc),
+            duration_seconds=duration_seconds,
         )
     except Exception as exc:
+        duration_seconds = time.monotonic() - started
         return JobResult(
             pgn_path=source_pgn_path,
             cql_path=cql_path,
@@ -196,6 +245,7 @@ def run_cql_job(
             returncode=1,
             stdout="",
             stderr=str(exc),
+            duration_seconds=duration_seconds,
         )
 
     if process.returncode != 0:
@@ -208,6 +258,21 @@ def run_cql_job(
             returncode=process.returncode,
             stdout=process.stdout,
             stderr=process.stderr,
+            duration_seconds=duration_seconds,
+        )
+
+    if not output_pgn.exists():
+        return JobResult(
+            pgn_path=source_pgn_path,
+            cql_path=cql_path,
+            output_pgn=output_pgn,
+            success=False,
+            match_count=None,
+            returncode=process.returncode,
+            stdout=process.stdout,
+            stderr="CQL exited successfully but did not create the expected output PGN",
+            duration_seconds=duration_seconds,
+            missing_output=True,
         )
 
     match_count = count_games_in_pgn(output_pgn)
@@ -220,6 +285,7 @@ def run_cql_job(
         returncode=process.returncode,
         stdout=process.stdout,
         stderr=process.stderr,
+        duration_seconds=duration_seconds,
     )
 
 
@@ -241,6 +307,7 @@ def run_job_matrix(
     jobs: str | int,
     cql_threads: str | int,
     game_progress: bool = False,
+    timeout_seconds: float | None = None,
 ) -> list[JobResult]:
     total_jobs = len(job_specs)
     worker_count = resolve_worker_count(jobs, total_jobs)
@@ -299,6 +366,7 @@ def run_job_matrix(
                 job_spec.cql_path,
                 job_spec.output_pgn,
                 cql_threads=effective_cql_threads,
+                timeout_seconds=timeout_seconds,
             )
             _on_job_done(job_spec, result)
 
@@ -316,6 +384,7 @@ def run_job_matrix(
                 job_spec.cql_path,
                 job_spec.output_pgn,
                 cql_threads=effective_cql_threads,
+                timeout_seconds=timeout_seconds,
             ): job_spec
             for job_spec in job_specs
         }

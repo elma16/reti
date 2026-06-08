@@ -7,4 +7,3 @@ flipcolor {
     mate
 }
 
-comment("doublecheckANDmate")

@@ -6,4 +6,3 @@ cql()
 
 flip flipcolor move from N to a-h8
 
-comment("knightontherim")

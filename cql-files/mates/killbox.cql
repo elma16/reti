@@ -13,4 +13,3 @@ Q  attacks  R}
 //    ka5 Ra6 Qc4
 //}
 
-comment("killbox")

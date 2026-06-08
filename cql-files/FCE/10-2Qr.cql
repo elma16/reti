@@ -4,4 +4,3 @@ cql()
 
 flipcolor (Q == 1 and r == 1 and [qRBbNnPp] == 0)
 
-comment("10-2Qr")

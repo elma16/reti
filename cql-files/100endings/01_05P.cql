@@ -5,5 +5,3 @@ cql()
 flipcolor (P == 1)
 
 [Aa] == 3
-
-comment("01_05P")

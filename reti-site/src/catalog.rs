@@ -78,6 +78,7 @@ pub const CHAPTERS: &[Chapter] = &[
 
 pub const ENDINGS: &[Ending] = &[
     ending("1-4BN", "1.4", "Bishop + Knight vs King", "1"),
+    ending("1-5NNp", "1.5", "Two Knights vs Pawn", "1"),
     ending("2-0Pp", "2", "Pawn Endings", "2"),
     ending("2-1P", "", "King + Pawn vs King", "2"),
     ending("3-1Np", "3.1", "Knight vs Pawns", "3"),
@@ -198,8 +199,9 @@ mod tests {
     use super::*;
 
     #[test]
-    fn catalog_has_30_canonical_rows() {
-        assert_eq!(ENDINGS.len(), 30);
+    fn catalog_has_31_canonical_rows() {
+        assert_eq!(ENDINGS.len(), 31);
+        assert!(known_stems().contains("1-5NNp"));
         assert!(known_stems().contains("10-7-1QbrrNoPawns"));
     }
 }

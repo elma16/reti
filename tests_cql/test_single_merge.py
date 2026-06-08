@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 
 from reti.common.pgn_discovery import InputCollection
+from reti.cql.output import job_output_key, write_summary_csv
 from reti.cql.runner import JobResult
 import reti.cql.single_merge as single_merge_module
 from reti.cql.single_merge import merge_single_output
@@ -477,3 +478,45 @@ def test_single_output_and_merge_output_are_mutually_exclusive_via_cli() -> None
                 "--merge-output",
             ]
         )
+
+
+def test_summary_can_point_at_retained_merged_output(tmp_path: Path) -> None:
+    pgn_root = tmp_path / "pgns"
+    cql_root = tmp_path / "cql"
+    out_dir = tmp_path / "out"
+    pgn_root.mkdir()
+    cql_root.mkdir()
+    out_dir.mkdir()
+
+    source_pgn = pgn_root / "games.pgn"
+    cql_path = cql_root / "marker.cql"
+    pair_output = out_dir / "games" / "marker.pgn"
+    merged_output = out_dir / "games.merged.pgn"
+    source_pgn.write_text('[Event "x"]\n\n*\n', encoding="utf-8")
+    cql_path.write_text("cql() true\n", encoding="utf-8")
+    pair_output.parent.mkdir()
+    pair_output.write_text('[Event "x"]\n\n*\n', encoding="utf-8")
+    merged_output.write_text('[Event "x"]\n\n*\n', encoding="utf-8")
+
+    result = JobResult(
+        pgn_path=source_pgn,
+        cql_path=cql_path,
+        output_pgn=pair_output,
+        success=True,
+        match_count=1,
+        returncode=0,
+        stdout="",
+        stderr="",
+    )
+
+    summary = write_summary_csv(
+        [result],
+        out_dir,
+        pgn_root,
+        cql_root,
+        output_paths={job_output_key(result): merged_output},
+    )
+    text = summary.read_text(encoding="utf-8")
+
+    assert "games.merged.pgn" in text
+    assert "games/marker.pgn" in text

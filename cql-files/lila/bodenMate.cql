@@ -8,4 +8,3 @@ B  attacks  k
 square all x in _  attackedby  k
        B  attacks  x}
 
-comment("bodenMate")

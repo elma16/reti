@@ -13,7 +13,7 @@ from reti.pgn_utils import find_pgn_utils_binary
 
 pytestmark = pytest.mark.skipif(
     find_pgn_utils_binary() is None,
-    reason="native reti-pgn-utils binary is not built",
+    reason="native pgn-utils binary is not built",
 )
 
 

@@ -1,0 +1,15 @@
+[Event "rook_homerun_strict positive"]
+[Site "tests_cql"]
+[SetUp "1"]
+[FEN "4k3/8/8/8/8/8/4K3/3R4 w - - 0 1"]
+[Result "*"]
+
+1. Ra1 Kf8 2. Rh1 Kg8 3. Rh8 Kf7 4. Ra8 Ke7 *
+
+[Event "rook_homerun_strict negative (own-side king move between corner visits)"]
+[Site "tests_cql"]
+[SetUp "1"]
+[FEN "4k3/8/8/8/8/8/4K3/3R4 w - - 0 1"]
+[Result "*"]
+
+1. Ra1 Kf8 2. Kd3 Kf7 3. Kc3 Kg6 4. Rh1 Kf6 5. Rh8 Kg5 6. Ra8 Kf4 *

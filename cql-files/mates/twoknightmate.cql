@@ -3,8 +3,8 @@
 
 
 cql()
-flipcolor{btm mate
+flipcolor{
+mate
 N  attacks  k
 N == 2}
 
-comment("twoknightmate")

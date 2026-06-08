@@ -7,4 +7,3 @@ cql()
   move legal from T == 0
   move capture T}
 
-comment("trappedPiece")

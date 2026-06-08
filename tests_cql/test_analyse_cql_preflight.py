@@ -73,10 +73,62 @@ class TestAnalyseCqlPreflight(unittest.TestCase):
         self.assertTrue(args.strict_pgn_parse)
         self.assertFalse(args.smoke_test_pgns)
 
+    def test_parse_args_accepts_consolidated_preflight_mode(self):
+        args = analyse_cql.parse_args(
+            [
+                "--pgn",
+                "games",
+                "--cql-bin",
+                "cql",
+                "--scripts",
+                "filters",
+                "--preflight",
+                "strict-smoke",
+            ]
+        )
+        self.assertTrue(args.strict_pgn_parse)
+        self.assertTrue(args.smoke_test_pgns)
+
+    def test_parse_args_rejects_overlapping_preflight_options(self):
+        with self.assertRaises(SystemExit):
+            analyse_cql.parse_args(
+                [
+                    "--pgn",
+                    "games",
+                    "--cql-bin",
+                    "cql",
+                    "--scripts",
+                    "filters",
+                    "--skip-pgn-preflight",
+                    "--smoke-test-pgns",
+                ]
+            )
+
+    def test_parse_args_accepts_consolidated_output_mode(self):
+        args = analyse_cql.parse_args(
+            [
+                "--pgn",
+                "games",
+                "--cql-bin",
+                "cql",
+                "--scripts",
+                "filters",
+                "--output-mode",
+                "single",
+                "--include-unmatched",
+            ]
+        )
+        self.assertEqual(args.output_mode, "single")
+        self.assertTrue(args.include_unmatched)
+
     def test_describe_returncode_for_signal(self):
         description = analyse_cql.describe_returncode(-6)
         self.assertIn("signal 6", description)
         self.assertIn("SIGABRT", description)
+
+    def test_backend_auto_detection_distinguishes_cqli_name(self):
+        self.assertEqual(analyse_cql.infer_backend_name(Path("/tmp/cql")), "cql6")
+        self.assertEqual(analyse_cql.infer_backend_name(Path("/tmp/cqli-arm64")), "cqli")
 
     def test_text_validation_rejects_utf8_bom(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -156,15 +208,8 @@ class TestAnalyseCqlPreflight(unittest.TestCase):
         self.assertEqual(progress.kwargs["unit"], "B")
         self.assertEqual(progress.updates, [small_size, large_size])
 
-    @mock.patch("reti.analyse_cql.subprocess.run")
+    @mock.patch("reti.cql.runner.subprocess.run")
     def test_run_cql_job_uses_explicit_cql_threads(self, run_mock):
-        run_mock.return_value = subprocess.CompletedProcess(
-            args=[],
-            returncode=0,
-            stdout="",
-            stderr="",
-        )
-
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
             pgn = root / "db.pgn"
@@ -172,7 +217,17 @@ class TestAnalyseCqlPreflight(unittest.TestCase):
             out = root / "out.pgn"
             pgn.write_text('[Event "x"]\n\n1. e4 e5 *\n', encoding="utf-8")
             cql.write_text("cql() check\n", encoding="utf-8")
-            out.write_text('[Event "x"]\n\n1. e4 e5 *\n', encoding="utf-8")
+
+            def fake_run(command, **_: object):
+                out.write_text('[Event "x"]\n\n1. e4 e5 *\n', encoding="utf-8")
+                return subprocess.CompletedProcess(
+                    args=command,
+                    returncode=0,
+                    stdout="",
+                    stderr="",
+                )
+
+            run_mock.side_effect = fake_run
 
             result = analyse_cql.run_cql_job(
                 Path("/fake/cql"),
@@ -185,25 +240,24 @@ class TestAnalyseCqlPreflight(unittest.TestCase):
 
         self.assertTrue(result.success)
         run_args = run_mock.call_args.args[0]
-        self.assertEqual(run_args[:6], [
-            "/fake/cql",
-            "-i",
-            str(pgn),
-            "-o",
-            str(out),
-            "-threads",
-        ])
-        self.assertEqual(run_args[6], "1")
-
-    @mock.patch("reti.analyse_cql.subprocess.run")
-    def test_run_cql_job_leaves_cql_threads_implicit_in_auto_mode(self, run_mock):
-        run_mock.return_value = subprocess.CompletedProcess(
-            args=[],
-            returncode=0,
-            stdout="",
-            stderr="",
+        self.assertEqual(
+            run_args,
+            [
+                "/fake/cql",
+                "-i",
+                str(pgn),
+                "-o",
+                str(out),
+                "-matchstring",
+                "filter",
+                "-threads",
+                "1",
+                str(cql),
+            ],
         )
 
+    @mock.patch("reti.cql.runner.subprocess.run")
+    def test_run_cql_job_leaves_cql_threads_implicit_in_auto_mode(self, run_mock):
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
             pgn = root / "db.pgn"
@@ -211,7 +265,17 @@ class TestAnalyseCqlPreflight(unittest.TestCase):
             out = root / "out.pgn"
             pgn.write_text('[Event "x"]\n\n1. e4 e5 *\n', encoding="utf-8")
             cql.write_text("cql() check\n", encoding="utf-8")
-            out.write_text('[Event "x"]\n\n1. e4 e5 *\n', encoding="utf-8")
+
+            def fake_run(command, **_: object):
+                out.write_text('[Event "x"]\n\n1. e4 e5 *\n', encoding="utf-8")
+                return subprocess.CompletedProcess(
+                    args=command,
+                    returncode=0,
+                    stdout="",
+                    stderr="",
+                )
+
+            run_mock.side_effect = fake_run
 
             result = analyse_cql.run_cql_job(
                 Path("/fake/cql"),
@@ -225,7 +289,39 @@ class TestAnalyseCqlPreflight(unittest.TestCase):
         run_args = run_mock.call_args.args[0]
         self.assertNotIn("-threads", run_args)
 
-    @mock.patch("reti.analyse_cql.subprocess.run")
+    @mock.patch("reti.cql.runner.subprocess.run")
+    def test_run_cql_job_removes_stale_output_and_fails_when_output_missing(self, run_mock):
+        run_mock.return_value = subprocess.CompletedProcess(
+            args=[],
+            returncode=0,
+            stdout="",
+            stderr="",
+        )
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            pgn = root / "db.pgn"
+            cql = root / "filter.cql"
+            out = root / "out.pgn"
+            pgn.write_text('[Event "x"]\n\n1. e4 e5 *\n', encoding="utf-8")
+            cql.write_text("cql() check\n", encoding="utf-8")
+            out.write_text('[Event "stale"]\n\n*\n', encoding="utf-8")
+
+            result = analyse_cql.run_cql_job(
+                Path("/fake/cql"),
+                pgn,
+                pgn,
+                cql,
+                out,
+            )
+
+            self.assertFalse(out.exists())
+
+        self.assertFalse(result.success)
+        self.assertTrue(result.missing_output)
+        self.assertIn("did not create", result.stderr)
+
+    @mock.patch("reti.cql.preflight.subprocess.run")
     def test_preflight_skips_python_parse_by_default(self, run_mock):
         run_mock.return_value = subprocess.CompletedProcess(
             args=[],
@@ -254,8 +350,11 @@ class TestAnalyseCqlPreflight(unittest.TestCase):
 
         self.assertEqual(len(results), 1)
         self.assertTrue(results[0].success)
+        run_args = run_mock.call_args.args[0]
+        self.assertIn("-input", run_args)
+        self.assertIn("-output", run_args)
 
-    @mock.patch("reti.analyse_cql.subprocess.run")
+    @mock.patch("reti.cql.preflight.subprocess.run")
     def test_preflight_reports_cql_signal_abort(self, run_mock):
         run_mock.return_value = subprocess.CompletedProcess(
             args=[],
@@ -281,7 +380,7 @@ class TestAnalyseCqlPreflight(unittest.TestCase):
         self.assertFalse(results[0].success)
         self.assertIn("SIGABRT", results[0].message)
 
-    @mock.patch("reti.analyse_cql.subprocess.run")
+    @mock.patch("reti.cql.preflight.subprocess.run")
     def test_preflight_uses_sanitized_temp_copy_without_touching_original(self, run_mock):
         run_mock.return_value = subprocess.CompletedProcess(
             args=[],

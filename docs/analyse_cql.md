@@ -21,17 +21,32 @@ Arguments:
 
 - `--pgn PGN_INPUT`: a `.pgn` file or a directory containing `.pgn` files
 - `--cql-bin CQL_BINARY`: a path to the `cql` executable, or an executable name on `PATH`
+- `--backend auto|cql6|cqli`: command-line backend wrapper, default `auto`
 - `--scripts CQL_INPUT`: a `.cql` file or a directory containing `.cql` files
 - `--jobs JOBS`: number of CQL subprocesses to run in parallel, default `1`
 - `--cql-threads THREADS`: thread count per CQL process, or `auto`
+- `--timeout SECONDS`: optional timeout for each CQL subprocess
+- `--preflight standard|skip|strict|smoke|strict-smoke`: PGN preflight policy
+- `--output-mode pairs|by-cql|single`: final PGN layout
 - `-o OUTPUT_DIR`: directory where result PGNs and `summary.csv` are written
 
 Optional flags:
 
 - `--keep-output`: when `-o` is omitted, keep the temporary output directory
-- `--skip-pgn-preflight`: skip the initial PGN validation pass
-- `--smoke-test-pgns`: run one cheap CQL smoke query per PGN during preflight
-- `--strict-pgn-parse`: run a full Rust/shakmaty PGN lint pass during preflight
+- `--game-progress`: show progress by games instead of jobs
+- `--include-unmatched`: with `--output-mode single`, include games that matched no script
+
+Older option names still work:
+
+- `--skip-pgn-preflight` is equivalent to `--preflight skip`
+- `--smoke-test-pgns` is equivalent to `--preflight smoke`
+- `--strict-pgn-parse` is equivalent to `--preflight strict`
+- `--merge-output` is equivalent to `--output-mode by-cql`
+- `--single-output` is equivalent to `--output-mode single`
+
+Overlapping forms are rejected. For example, `--skip-pgn-preflight` cannot be
+combined with `--smoke-test-pgns`, and `--output-mode single` cannot be combined
+with `--merge-output`.
 
 Legacy positional syntax still works for now, but the explicit flag form above
 is the intended interface.
@@ -56,7 +71,8 @@ Threading model:
 
 ## Output layout
 
-The runner writes one output PGN per `(input PGN, input CQL)` pair.
+By default, `--output-mode pairs` writes one output PGN per `(input PGN, input
+CQL)` pair.
 
 The output path is deterministic:
 
@@ -82,6 +98,13 @@ This layout avoids filename collisions when:
 
 If an output file already exists, the runner overwrites it.
 
+Other output modes:
+
+- `--output-mode by-cql`: after all jobs finish, merge successful per-pair PGNs
+  into one retained PGN per CQL script
+- `--output-mode single`: after all jobs finish, merge successful per-pair PGNs
+  into one retained PGN per source PGN
+
 ## Summary file
 
 The runner also writes `OUTPUT_DIR/summary.csv`.
@@ -91,10 +114,19 @@ Columns:
 - `pgn`: input PGN path relative to the PGN root you supplied
 - `cql`: input CQL path relative to the CQL root you supplied
 - `output_pgn`: output PGN path relative to `OUTPUT_DIR`
+- `pair_output_pgn`: original per-pair output path relative to `OUTPUT_DIR`
 - `status`: `ok` or `error`
 - `match_count`: number of matched games for successful jobs
 - `returncode`: process exit code from `cql`
+- `duration_seconds`: wall-clock job duration
+- `timed_out`: `yes` when `--timeout` killed the job
+- `missing_output`: `yes` when CQL exited successfully without creating the output file
+- `stdout_bytes`, `stderr_bytes`: captured output sizes
+- `error`: first non-empty stderr/stdout line for failed jobs
 
+In `pairs` mode, `output_pgn` and `pair_output_pgn` point at the same file. In a
+merge mode, `output_pgn` points at the retained merged PGN, while
+`pair_output_pgn` records the original per-pair path that was folded into it.
 This is the easiest way to inspect a large batch run without opening every
 result PGN.
 
@@ -108,17 +140,14 @@ Before the full matrix run, the runner does a PGN preflight by default:
   original file untouched
 - by default it does not run a full Rust/shakmaty legality pass or a CQL smoke test,
   so startup stays cheap on large databases
-- `--strict-pgn-parse` enables the full Rust/shakmaty legality check
-- `--smoke-test-pgns` enables one cheap CQL smoke query per PGN so CQL-level
+- `--preflight strict` enables the full Rust/shakmaty legality check
+- `--preflight smoke` enables one cheap CQL smoke query per PGN so CQL-level
   crashes caused by the PGN itself show up before the `PGN x CQL`
   cross-product starts
+- `--preflight strict-smoke` enables both checks
 
-For each job, the runner prints:
-
-- the current job number
-- the PGN/CQL pair being run
-- the output path
-- either the matched-game count or the failure return code
+During the matrix run, the runner shows a `tqdm` progress bar. Failures are
+printed with the PGN/CQL pair and return-code detail.
 
 At the end it prints totals for successful and failed jobs.
 
@@ -202,8 +231,11 @@ python src/reti/analyse_cql.py \
   exists only for the current run; the source PGN on disk is not modified.
 - If you want to normalize a problematic PGN once and then reuse that repaired
   file for future analyses, run `src/reti/pgn_cli.py` first.
-- If you want to rerun the same batch and compare outputs, use a fresh output
-  directory rather than sharing one between experiments.
+- If you rerun into the same output directory, each per-pair output is removed
+  before its CQL job starts. This prevents stale matches from being counted when
+  a job exits successfully without producing a new output file.
+- If you want to compare outputs between experiments, use a fresh output
+  directory per experiment.
 - Negative subprocess return codes mean CQL was terminated by a signal. For
   example, `-6` is reported as `SIGABRT`.
 - If you keep a private local CQL binary under `bins/`, you can pass that path

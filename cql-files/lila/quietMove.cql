@@ -7,4 +7,3 @@ cql()
   : not move capture [Aa]
   : not A  attacks  [qrbn]}
 
-comment("quietMove")

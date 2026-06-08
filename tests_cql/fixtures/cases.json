@@ -405,6 +405,9 @@
     },
     "lila-bodenMate": {
       "fen": "lila/bodenMate.txt"
+    },
+    "silly-rook_homerun_strict": {
+      "pgn": "silly/rook_homerun_strict.pgn"
     }
   },
   "cases": [
@@ -1265,6 +1268,12 @@
       "dataset": "lila-bodenMate",
       "expected": 1,
       "id": "cql-files/lila/bodenMate.cql: CQL-verified + / -"
+    },
+    {
+      "cql": "cql-files/silly/rook_homerun_strict.cql",
+      "dataset": "silly-rook_homerun_strict",
+      "expected": 1,
+      "id": "silly rook_homerun_strict: + / -"
     }
   ]
 }

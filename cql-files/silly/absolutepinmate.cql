@@ -15,4 +15,3 @@ flipcolor {
              }
 }
 
-comment("absolutepinmate")
