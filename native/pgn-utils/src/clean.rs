@@ -467,6 +467,11 @@ pub fn reflow_pgn(bytes: &[u8]) -> Vec<u8> {
     let mut out: Vec<u8> = Vec::with_capacity(bytes.len());
     let mut state = State::Start;
     let mut col = 0usize;
+    // Whether the current game has already emitted a movetext token. A black
+    // move-number indicator (`12...`) is only required as the very first
+    // movetext token of a game (black to move from the start position);
+    // anywhere else it stood in for stripped commentary and is now redundant.
+    let mut seen_move_token = false;
 
     for raw_line in bytes.split(|&b| b == b'\n') {
         // Drop a trailing CR so CRLF-terminated input reflows cleanly.
@@ -485,11 +490,23 @@ pub fn reflow_pgn(bytes: &[u8]) -> Vec<u8> {
             let is_event = trimmed.starts_with(b"[Event ") || trimmed.starts_with(b"[Event\t");
             match state {
                 // New game after the previous game's movetext: end the line and
-                // leave one blank separator.
-                State::Movetext => out.extend_from_slice(b"\n\n"),
+                // leave one blank separator. This transition (movetext -> header)
+                // is the *only* way a fresh game can begin carrying a stale
+                // `seen_move_token`, so re-arm here rather than keying off
+                // `[Event ` — games whose header block doesn't lead with `[Event `
+                // would otherwise lose a load-bearing leading `1...`.
+                State::Movetext => {
+                    out.extend_from_slice(b"\n\n");
+                    seen_move_token = false;
+                }
                 // A new game right after a headers-only game: one blank line so
-                // the two header blocks don't run together.
-                State::Headers if is_event => out.push(b'\n'),
+                // the two header blocks don't run together. (A headers-only game
+                // emits no movetext, so `seen_move_token` is already false here;
+                // resetting is just belt-and-braces.)
+                State::Headers if is_event => {
+                    out.push(b'\n');
+                    seen_move_token = false;
+                }
                 _ => {}
             }
             out.extend_from_slice(trimmed);
@@ -504,8 +521,29 @@ pub fn reflow_pgn(bytes: &[u8]) -> Vec<u8> {
                 col = 0;
             }
             for token in trimmed.split(|&b| b == b' ' || b == b'\t') {
-                if !token.is_empty() {
-                    emit_movetext_token(&mut out, &mut col, token);
+                if token.is_empty() {
+                    continue;
+                }
+                match black_move_number_suffix(token) {
+                    // A redundant black move-number indicator (commentary that
+                    // forced it has been stripped). Drop the `12...` prefix; if a
+                    // SAN was glued onto it (`12...Nf6`), keep just the SAN.
+                    Some(san) if seen_move_token => {
+                        if !san.is_empty() {
+                            emit_movetext_token(&mut out, &mut col, san);
+                        }
+                    }
+                    // Either an ordinary token, or a leading black indicator that
+                    // is genuinely needed (first move, black to play) — keep as-is.
+                    _ => {
+                        emit_movetext_token(&mut out, &mut col, token);
+                        // A NAG (`$N`) annotates the *previous* move, so it never
+                        // stands in for one; don't let a leading NAG consume the
+                        // first-token slot and strip a load-bearing `1...`.
+                        if token.first() != Some(&b'$') {
+                            seen_move_token = true;
+                        }
+                    }
                 }
             }
             state = State::Movetext;
@@ -536,6 +574,33 @@ fn emit_movetext_token(out: &mut Vec<u8>, col: &mut usize, token: &[u8]) {
         out.extend_from_slice(token);
         *col = token.len();
     }
+}
+
+/// Classify `token` as a black move-number indicator and return the SAN, if
+/// any, glued directly onto it.
+///
+///   * `"12..."`    -> `Some(b"")`     (bare indicator)
+///   * `"12...Nf6"` -> `Some(b"Nf6")`  (indicator with the move attached)
+///   * anything else (white number `"12."`, result `"1/2-1/2"`, SAN, NAG) ->
+///     `None`
+///
+/// A match requires one or more leading ASCII digits followed by exactly three
+/// dots. Two dots (`"12.."`) or four (`"12...."`) are malformed move numbers, so
+/// they're left untouched rather than guessed at.
+fn black_move_number_suffix(token: &[u8]) -> Option<&[u8]> {
+    let mut digits = 0;
+    while digits < token.len() && token[digits].is_ascii_digit() {
+        digits += 1;
+    }
+    if digits == 0 || token.len() < digits + 3 || &token[digits..digits + 3] != b"..." {
+        return None;
+    }
+    let rest = &token[digits + 3..];
+    // A fourth dot means this isn't a `N...` indicator; don't touch it.
+    if rest.first() == Some(&b'.') {
+        return None;
+    }
+    Some(rest)
 }
 
 /// Trim leading/trailing ASCII spaces and tabs from a byte slice.
@@ -797,6 +862,113 @@ mod tests {
             "game separator wrong: {s:?}"
         );
         assert!(!s.contains("\n\n\n"), "triple newline present: {s:?}");
+    }
+
+    #[test]
+    fn drops_redundant_black_move_numbers_after_stripping_comments() {
+        // The lichess-broadcast shape: every move trails an [%eval]/[%clk]
+        // comment, so the source spells out a black move-number indicator before
+        // each black move. Once the comments are gone those indicators are
+        // redundant and must not survive.
+        let pgn = "[Event \"x\"]\n\n\
+                   1. d4 { [%eval 0.2] } 1... Nf6 { [%eval 0.2] } 2. c4 \
+                   { [%eval 0.2] } 2... e6 { [%eval 0.2] } 1/2-1/2\n";
+        let (out, _stats) = rewrite_to_vec(pgn, false).unwrap();
+        let s = String::from_utf8(out).unwrap();
+        assert!(
+            s.contains("1. d4 Nf6 2. c4 e6 1/2-1/2"),
+            "redundant black move numbers not dropped: {s:?}"
+        );
+        assert!(!s.contains("..."), "ellipsis leaked: {s:?}");
+    }
+
+    #[test]
+    fn keeps_leading_black_move_number_when_black_starts() {
+        // A game that begins with black to move (e.g. set up from a FEN) genuinely
+        // needs its leading `1...`; it is the one indicator that is load-bearing.
+        let pgn = "[Event \"x\"]\n[FEN \"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b\"]\n\n\
+                   1... e5 { c } 2. Nf3 { c } 2... Nc6 1/2-1/2\n";
+        let (out, _stats) = rewrite_to_vec(pgn, false).unwrap();
+        let s = String::from_utf8(out).unwrap();
+        assert!(
+            s.contains("1... e5 2. Nf3 Nc6 1/2-1/2"),
+            "leading black indicator wrongly dropped or trailing one kept: {s:?}"
+        );
+    }
+
+    #[test]
+    fn resets_black_move_number_state_per_game() {
+        // The first-token exception must re-arm for every game: game two also
+        // starts with black to move and must keep its own `1...`.
+        let pgn = "[Event \"a\"]\n\n1. e4 {c} 1... e5 1-0\n\n\
+                   [Event \"b\"]\n\n1... c5 {c} 2. Nf3 {c} 2... d6 0-1\n";
+        let (out, _stats) = rewrite_to_vec(pgn, false).unwrap();
+        let s = String::from_utf8(out).unwrap();
+        assert!(s.contains("1. e4 e5 1-0"), "game a not normalized: {s:?}");
+        assert!(
+            s.contains("1... c5 2. Nf3 d6 0-1"),
+            "game b leading indicator wrongly dropped: {s:?}"
+        );
+    }
+
+    #[test]
+    fn rearms_leading_indicator_for_event_less_game() {
+        // A second game whose header block does not lead with `[Event ` must
+        // still re-arm the leading-indicator exception: the reset keys off the
+        // movetext->header boundary, not the `[Event ` tag.
+        let pgn = "[Event \"a\"]\n\n1. e4 {c} 1... e5 1-0\n\n\
+                   [White \"x\"]\n[FEN \"8/8/8/8/8/8/8/8 b - - 0 1\"]\n\n1... c5 {c} 2. Nf3 0-1\n";
+        let (out, _stats) = rewrite_to_vec(pgn, false).unwrap();
+        let s = String::from_utf8(out).unwrap();
+        assert!(s.contains("1. e4 e5 1-0"), "game a not normalized: {s:?}");
+        assert!(
+            s.contains("1... c5 2. Nf3 0-1"),
+            "event-less game lost its load-bearing leading 1...: {s:?}"
+        );
+    }
+
+    #[test]
+    fn keeps_leading_indicator_preceded_by_nag() {
+        // A NAG before the first move must not consume the first-token slot and
+        // cause the genuinely-leading black indicator to be dropped.
+        let pgn = "[Event \"x\"]\n[FEN \"8/8/8/8/8/8/8/8 b - - 0 1\"]\n\n\
+                   $10 { white is better } 1... e5 { c } 2. Nf3 { c } 2... Nc6 1-0\n";
+        let (out, _stats) = rewrite_to_vec(pgn, false).unwrap();
+        let s = String::from_utf8(out).unwrap();
+        assert!(
+            s.contains("$10 1... e5 2. Nf3 Nc6 1-0"),
+            "leading indicator dropped after a NAG: {s:?}"
+        );
+    }
+
+    #[test]
+    fn drops_redundant_black_number_glued_to_san() {
+        // Some producers write the indicator without a trailing space
+        // (`5...Bxc5`). The redundant prefix is stripped but the move is kept.
+        let pgn = "[Event \"x\"]\n\n1. e4 {c} 1...e5 {c} 2. Nf3 {c} 2...Nc6 1-0\n";
+        let (out, _stats) = rewrite_to_vec(pgn, false).unwrap();
+        let s = String::from_utf8(out).unwrap();
+        assert!(
+            s.contains("1. e4 e5 2. Nf3 Nc6 1-0"),
+            "glued black indicator not handled: {s:?}"
+        );
+        assert!(!s.contains("..."), "ellipsis leaked: {s:?}");
+    }
+
+    #[test]
+    fn black_move_number_suffix_classifies_tokens() {
+        assert_eq!(black_move_number_suffix(b"1..."), Some(&b""[..]));
+        assert_eq!(black_move_number_suffix(b"35..."), Some(&b""[..]));
+        assert_eq!(black_move_number_suffix(b"35...Be8"), Some(&b"Be8"[..]));
+        // White move numbers, results, SAN, NAGs, and malformed dot-runs: no match.
+        assert_eq!(black_move_number_suffix(b"35."), None);
+        assert_eq!(black_move_number_suffix(b"1-0"), None);
+        assert_eq!(black_move_number_suffix(b"1/2-1/2"), None);
+        assert_eq!(black_move_number_suffix(b"Nf6"), None);
+        assert_eq!(black_move_number_suffix(b"$1"), None);
+        assert_eq!(black_move_number_suffix(b"..."), None);
+        assert_eq!(black_move_number_suffix(b"12.."), None);
+        assert_eq!(black_move_number_suffix(b"12...."), None);
     }
 
     #[test]
